@@ -1,0 +1,29 @@
+# =============================================================================
+# Dockerfile de DESENVOLVIMENTO
+# =============================================================================
+# Objetivo: ambiente de desenvolvimento com hot-reload via Spring DevTools.
+# O código-fonte é montado como volume — alterações em .java relançam a app.
+#
+# Como usar:
+#   docker compose -f docker/docker-compose.dev.yml up
+#
+# ATENÇÃO: Esta imagem contém o JDK completo e ferramentas de build.
+#          NUNCA use em produção.
+# =============================================================================
+
+FROM maven:3.9.9-eclipse-temurin-21 AS dev
+
+WORKDIR /app
+
+# Copiar apenas o pom.xml primeiro para aproveitar o cache de dependências.
+# Se o pom.xml não mudar, o Docker reutiliza a camada de "mvn dependency:go-offline".
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# O restante do código-fonte é montado via volume no docker-compose.
+# Isso permite hot-reload sem reconstruir a imagem.
+
+EXPOSE 8080
+
+# Spring DevTools requer o argumento -Dspring-boot.run.fork=false para funcionar em container
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-Dspring.profiles.active=dev"]

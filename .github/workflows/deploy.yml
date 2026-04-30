@@ -1,0 +1,382 @@
+# =============================================================================
+# GitHub Actions — Build, Segurança e Deploy
+# =============================================================================
+#
+# Este workflow executa em 3 etapas sequenciais (jobs):
+#
+#   [1] test-and-sast  →  [2] build-and-push  →  [3] deploy
+#
+# Etapa 1 — Testes e SAST:
+#   Compila o projeto, roda os testes, executa análise estática de segurança
+#   (SpotBugs+FindSecBugs, OWASP Dependency Check, Semgrep, Trivy FS).
+#   O build FALHA se encontrar vulnerabilidades críticas. Só avança se tudo passar.
+#
+# Etapa 2 — Build e Push da imagem Docker:
+#   Constrói a imagem de produção (multi-stage), escaneia com Trivy e faz push
+#   para o GitHub Container Registry (GHCR). A imagem só é publicada se o
+#   scan não encontrar vulnerabilidades HIGH/CRITICAL com correção disponível.
+#
+# Etapa 3 — Deploy no servidor:
+#   Via SSH, baixa a nova imagem e reinicia apenas o container da aplicação
+#   (o banco de dados permanece em execução). Verifica a saúde da aplicação
+#   após o deploy.
+#
+# -----------------------------------------------------------------------------
+# SECRETS necessários (configure em Settings → Secrets and variables → Actions):
+#
+#   SSH_DEPLOY_KEY  → chave SSH privada do usuário "ghactions" no servidor
+#                     (gerada com: ssh-keygen -t ed25519 -C "ghactions-deploy")
+#                     Adicione a chave PÚBLICA em ~/.ssh/authorized_keys no servidor.
+#
+#   NVD_API_KEY     → (opcional, mas recomendado) chave da API do NVD para
+#                     acelerar o download do banco de CVEs do OWASP Dependency Check.
+#                     Gratuita em: https://nvd.nist.gov/developers/request-an-api-key
+#
+# CONFIGURAÇÃO no servidor (fazer uma vez):
+#   1. Criar usuário: sudo adduser ghactions && sudo usermod -aG docker ghactions
+#   2. Criar diretório: mkdir -p /home/ghactions/mercado/docker
+#   3. Criar o arquivo .env: cp .env.example /home/ghactions/mercado/.env
+#      e preencher DATABASE_USERNAME e DATABASE_PASSWORD com valores reais.
+#   4. Subir o banco na primeira vez:
+#      cd /home/ghactions/mercado
+#      docker compose -f docker/docker-compose.prod.yml up -d postgres
+# =============================================================================
+
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # Permite disparar o workflow manualmente pelo GitHub
+
+# Variáveis de ambiente globais (disponíveis em todos os jobs)
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}   # ex.: usuario/mercado → ghcr.io/usuario/mercado
+
+jobs:
+
+  # ============================================================================
+  # JOB 1 — Compilação, testes e análise de segurança (SAST)
+  # Objetivo: garantir qualidade e segurança do código ANTES de criar a imagem.
+  # Princípio: "shift left security" — detectar problemas o mais cedo possível.
+  # ============================================================================
+  test-and-sast:
+    name: Testes e SAST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Configura o JDK 21 (Temurin = Eclipse Adoptium) e ativa cache do Maven.
+      # O cache é baseado no hash do pom.xml — se não mudar, usa o cache salvo.
+      # Isso reduz o tempo de build de ~5min para ~1min em execuções subsequentes.
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # ── Compilação e testes ────────────────────────────────────────────────
+      # mvn verify: compila, roda testes unitários e de integração (Testcontainers),
+      # e gera o relatório de cobertura JaCoCo.
+      # Os testes de integração usam Testcontainers, que sobe um PostgreSQL real
+      # automaticamente no Docker do runner do GitHub Actions.
+      - name: Compilar e rodar testes
+        run: mvn verify -B
+        # -B: modo batch (sem cores, saída adequada para CI)
+
+      # ── SAST 1: SpotBugs + FindSecBugs ────────────────────────────────────
+      # SpotBugs analisa o BYTECODE compilado (arquivos .class).
+      # FindSecBugs é um plugin que adiciona ~400 regras de segurança ao SpotBugs.
+      # Detecta: SQL Injection, XSS, Path Traversal, criptografia fraca, etc.
+      #
+      # SAST 2: OWASP Dependency Check
+      # Cruza as dependências do projeto com o banco de CVEs do NVD (NIST).
+      # Falha o build se encontrar dependência com CVSS >= 7.0 (HIGH/CRITICAL).
+      # A NVD_API_KEY acelera o download do banco de CVEs (~minutos vs ~horas sem key).
+      - name: SpotBugs + FindSecBugs + OWASP Dependency Check
+        run: |
+          mvn verify -Psecurity -DskipTests -B \
+            -Dowasp.nvd.apiKey=${{ secrets.NVD_API_KEY || '' }}
+        # O perfil "security" está definido no pom.xml e ativa esses dois plugins.
+        # -DskipTests: testes já rodaram no passo anterior, não precisa rodar de novo.
+
+      # ── SAST 3: Semgrep ───────────────────────────────────────────────────
+      # Analisa o CÓDIGO-FONTE com regras baseadas em padrões.
+      # Complementa o SpotBugs (que analisa bytecode) — cada ferramenta detecta
+      # classes diferentes de vulnerabilidades.
+      # p/java: conjunto de regras mantido pela comunidade para Java/Spring.
+      - name: Semgrep — análise estática de código-fonte
+        run: |
+          pip install semgrep --quiet
+          semgrep --config p/java \
+                  --severity ERROR \
+                  --error \
+                  --exclude 'target/' \
+                  src/
+
+      # ── SAST 4: Trivy (filesystem) ────────────────────────────────────────
+      # Escaneia o projeto em busca de vulnerabilidades nas bibliotecas Maven
+      # (lê o pom.xml e os JARs em target/) e por segredos vazados no código.
+      - name: Trivy — scan de dependências e segredos
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true    # Ignora vulns sem correção disponível ainda
+          vuln-type: library
+          scanners: vuln,secret   # Verifica vulnerabilidades E segredos no código
+
+      # ── Relatório de dependências desatualizadas ───────────────────────────
+      # Apenas informativo: exibe dependências com versões mais novas disponíveis.
+      # continue-on-error: true → não bloqueia o pipeline, só gera o log.
+      - name: Verificar dependências desatualizadas (relatório)
+        run: mvn versions:display-dependency-updates -Pversions -B
+        continue-on-error: true
+
+      # ── Upload de artefatos (disponíveis na aba "Artifacts" do workflow) ───
+      # Relatórios ficam disponíveis por 15 dias para análise posterior.
+      - name: Upload — Cobertura JaCoCo
+        uses: actions/upload-artifact@v4
+        if: always()    # Faz upload mesmo se o build falhou (para análise do erro)
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+          retention-days: 15
+
+      - name: Upload — OWASP Dependency Check
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-report
+          path: |
+            target/dependency-check-report.html
+            target/dependency-check-report.json
+          retention-days: 15
+
+      - name: Upload — SpotBugs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spotbugs-report
+          path: target/spotbugsXml.xml
+          retention-days: 15
+
+  # ============================================================================
+  # JOB 2 — Build da imagem Docker de produção, scan Trivy e push para GHCR
+  #
+  # O GHCR (GitHub Container Registry) hospeda as imagens Docker de forma
+  # integrada ao repositório. A imagem fica em: ghcr.io/USUARIO/REPOSITORIO:TAG
+  #
+  # Sequência:
+  #   1. Build da imagem localmente (sem push) usando o Dockerfile multi-stage
+  #   2. Scan Trivy na imagem construída
+  #   3. Se limpa, faz push para o GHCR com duas tags: sha-COMMIT e latest
+  # ============================================================================
+  build-and-push:
+    name: Build e push da imagem
+    runs-on: ubuntu-latest
+    needs: test-and-sast      # Só executa se o Job 1 passar
+
+    permissions:
+      contents: read
+      packages: write          # Necessário para fazer push de imagens no GHCR
+
+    outputs:
+      image-tags: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN é gerado automaticamente pelo Actions — não precisa configurar
+
+      # Gera as tags da imagem automaticamente:
+      #   sha-a1b2c3d  → identifica exatamente qual commit gerou esta imagem
+      #   latest       → aponta sempre para o build mais recente da branch main
+      - name: Extrair metadados (tags e labels OCI)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # Buildx habilita o BuildKit, que suporta cache avançado (type=gha).
+      # O cache é salvo no Actions Cache entre execuções, acelerando builds.
+      - name: Configurar Docker Buildx (BuildKit)
+        uses: docker/setup-buildx-action@v3
+
+      # Constrói a imagem localmente (load: true = carrega no daemon local, sem push).
+      # Usa o Dockerfile multi-stage de produção em docker/Dockerfile.
+      # cache-from/cache-to: reutiliza camadas do build anterior (muito mais rápido).
+      - name: Build da imagem (sem push — para scan Trivy)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          tags: mercado:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Escaneia a imagem construída antes de publicar.
+      # exit-code: '1' → falha o job se encontrar HIGH/CRITICAL (com correção disponível).
+      # ignore-unfixed: true → não falha por vulns sem patch ainda — apenas as que têm solução.
+      - name: Trivy — scan de vulnerabilidades na imagem Docker
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: mercado:scan
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+
+      # Push para o GHCR apenas após o Trivy passar.
+      # O cache BuildKit torna este segundo build quase instantâneo (camadas reutilizadas).
+      - name: Build e push para o GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # JOB 3 — Deploy no servidor via SSH
+  #
+  # Executa no servidor dsc.rodrigor.com com o usuário "ghactions".
+  # O que acontece:
+  #   1. Copia o docker-compose.prod.yml atualizado para o servidor
+  #   2. Autentica no GHCR e baixa a nova imagem
+  #   3. Reinicia APENAS o container da aplicação (banco permanece intacto)
+  #   4. Verifica a saúde da aplicação com retry
+  #   5. Remove imagens Docker antigas para economizar espaço
+  #
+  # "environment: production" permite configurar proteção no GitHub:
+  #   Settings → Environments → production → Required reviewers
+  #   (exige aprovação manual antes de fazer deploy em produção)
+  # ============================================================================
+  deploy:
+    name: Deploy em produção
+    runs-on: ubuntu-latest
+    needs: build-and-push    # Só executa se a imagem foi publicada com sucesso
+    environment: production
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Copia o docker-compose.prod.yml para o servidor a cada deploy.
+      # Garante que o servidor sempre tem a versão mais recente do arquivo,
+      # incluindo mudanças de variáveis de ambiente, healthchecks, redes, etc.
+      - name: Copiar docker-compose.prod.yml para o servidor
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: dsc.rodrigor.com
+          username: ghactions
+          key: ${{ secrets.SSH_DEPLOY_KEY }}
+          source: docker/docker-compose.prod.yml
+          target: /home/ghactions/mercado/
+
+      # Script de deploy executado no servidor via SSH.
+      # envs: passa variáveis de ambiente do Actions para o script remoto.
+      # script_stop: true → para imediatamente se qualquer comando falhar (set -e).
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          IMAGE_FULL: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        with:
+          host: dsc.rodrigor.com
+          username: ghactions
+          key: ${{ secrets.SSH_DEPLOY_KEY }}
+          envs: GHCR_TOKEN,GHCR_USER,IMAGE_FULL
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_DIR="/home/ghactions/mercado"
+            COMPOSE_FILE="$DEPLOY_DIR/docker/docker-compose.prod.yml"
+
+            echo "======================================================"
+            echo " Deploy iniciado: $(date)"
+            echo " Imagem: $IMAGE_FULL"
+            echo "======================================================"
+
+            # ── 1. Autenticar no GHCR ──────────────────────────────────────
+            # GITHUB_TOKEN (passado como GHCR_TOKEN) tem permissão de leitura
+            # de pacotes e é válido durante a execução deste workflow.
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            echo "✓ Autenticado no GHCR"
+
+            # ── 2. Baixar a nova imagem ────────────────────────────────────
+            docker pull "$IMAGE_FULL"
+            echo "✓ Imagem baixada: $IMAGE_FULL"
+
+            # ── 3. Atualizar a referência da imagem no .env ────────────────
+            # O docker-compose.prod.yml usa ${APP_IMAGE} — mantemos o .env atualizado
+            # para facilitar operações manuais futuras no servidor.
+            cd "$DEPLOY_DIR"
+            if grep -q "^APP_IMAGE=" .env 2>/dev/null; then
+              sed -i "s|^APP_IMAGE=.*|APP_IMAGE=$IMAGE_FULL|" .env
+            else
+              echo "APP_IMAGE=$IMAGE_FULL" >> .env
+            fi
+            echo "✓ .env atualizado com APP_IMAGE=$IMAGE_FULL"
+
+            # ── 4. Reiniciar APENAS o container da aplicação ──────────────
+            # --no-deps:         NÃO reinicia o postgres (banco seguro, dados preservados)
+            # --force-recreate:  garante que o container seja recriado com a nova imagem
+            #                    (sem --force-recreate, o Compose pode reutilizar o container antigo)
+            echo "Reiniciando container da aplicação..."
+            docker compose -f "$COMPOSE_FILE" up -d \
+              --no-deps \
+              --force-recreate \
+              app
+            echo "✓ Container reiniciado"
+
+            # ── 5. Verificar saúde da aplicação com retry ─────────────────
+            # O Spring Boot leva ~15-30s para inicializar.
+            # Tentamos até 18 vezes (a cada 5s = 90s máximo).
+            # O endpoint /actuator/health retorna 200 quando a aplicação está pronta.
+            echo "Aguardando a aplicação ficar saudável (máx. 90s)..."
+            for i in $(seq 1 18); do
+              if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
+                echo "✓ Aplicação saudável! ($(( i * 5 ))s)"
+                break
+              fi
+              if [ "$i" -eq 18 ]; then
+                echo "✗ ERRO: aplicação não ficou saudável após 90 segundos"
+                echo "--- Últimas 80 linhas do log da aplicação ---"
+                docker logs mercado-app-prod --tail 80
+                exit 1
+              fi
+              echo "  aguardando... ($i/18, $(( i * 5 ))s)"
+              sleep 5
+            done
+
+            # ── 6. Limpar imagens antigas ──────────────────────────────────
+            # Remove imagens sem tag (dangling images) que ficam após cada deploy.
+            docker image prune -f > /dev/null
+            echo "✓ Imagens antigas removidas"
+
+            echo "======================================================"
+            echo " Deploy concluído com sucesso: $(date)"
+            echo "======================================================"

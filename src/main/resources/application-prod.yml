@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # Em produção, as credenciais vêm de variáveis de ambiente — NUNCA hardcode!
+    # Configure no sistema operacional, Docker, Kubernetes secrets, etc.
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+    br.ufpb.dsc.mercado: INFO

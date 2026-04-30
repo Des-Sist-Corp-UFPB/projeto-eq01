@@ -1,0 +1,19 @@
+spring:
+  jpa:
+    hibernate:
+      # validate: o Hibernate verifica o schema mas não modifica nada.
+      # O Flyway cria as tabelas via migrações antes dos testes iniciarem.
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    # Testcontainers + @ServiceConnection configura automaticamente a URL do banco.
+    # O Flyway executa as migrações no container PostgreSQL antes dos testes.
+    locations: classpath:db/migration
+
+logging:
+  level:
+    br.ufpb.dsc.mercado: DEBUG

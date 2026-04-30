@@ -1,0 +1,97 @@
+# =============================================================================
+# Docker Compose — PRODUÇÃO
+# =============================================================================
+#
+# Em produção, a imagem Docker é construída pelo GitHub Actions e publicada
+# no GHCR (GitHub Container Registry). Este arquivo usa a imagem pré-construída
+# em vez de buildar no servidor — mais seguro, rápido e rastreável.
+#
+# CONFIGURAÇÃO — arquivo .env na raiz do projeto no servidor:
+#
+#   APP_IMAGE=ghcr.io/usuario/mercado:latest   ← atualizado automaticamente pelo CI/CD
+#   DATABASE_URL=jdbc:postgresql://postgres:5432/mercado_prod
+#   DATABASE_USERNAME=mercado
+#   DATABASE_PASSWORD=<senha-forte-aqui>
+#
+# PRIMEIRA EXECUÇÃO (banco de dados):
+#   docker compose -f docker/docker-compose.prod.yml up -d postgres
+#   # Aguardar o banco inicializar (~10s) e depois subir a aplicação:
+#   docker compose -f docker/docker-compose.prod.yml up -d app
+#
+# ATUALIZAÇÕES subsequentes (feitas automaticamente pelo GitHub Actions):
+#   APP_IMAGE=ghcr.io/usuario/mercado:latest \
+#   docker compose -f docker/docker-compose.prod.yml up -d --no-deps --force-recreate app
+#
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Banco de dados PostgreSQL
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercado-postgres-prod
+    environment:
+      POSTGRES_DB: mercado_prod
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      # Volume nomeado — persiste os dados mesmo se o container for recriado.
+      # NUNCA use bind mount (./data:...) em produção — dificulta backups e permissões.
+      - postgres-prod-data:/var/lib/postgresql/data
+    # Em produção, NÃO exponha o banco diretamente para o host.
+    # O container da aplicação acessa via rede interna (mercado-net).
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d mercado_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mercado-net
+
+  # ---------------------------------------------------------------------------
+  # Aplicação Spring Boot
+  #
+  # Usa a imagem pré-construída pelo CI/CD (GitHub Actions).
+  # A variável APP_IMAGE é atualizada automaticamente no .env a cada deploy.
+  # ---------------------------------------------------------------------------
+  app:
+    # ${APP_IMAGE} é definida no .env e atualizada pelo script de deploy.
+    # Exemplo: ghcr.io/usuario/mercado:latest
+    # O CI/CD também usa tags com commit hash (ghcr.io/usuario/mercado:sha-a1b2c3d)
+    # para rastreabilidade — aqui usamos :latest que aponta para o build mais recente.
+    image: ${APP_IMAGE}
+    container_name: mercado-app-prod
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/mercado_prod}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Healthcheck via Spring Actuator — o Docker considera o container saudável
+    # somente quando a aplicação estiver pronta para receber requisições.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s    # Spring Boot precisa de até 60s para inicializar
+    restart: unless-stopped
+    networks:
+      - mercado-net
+
+volumes:
+  # Volume nomeado — gerenciado pelo Docker, persistente entre deploys
+  postgres-prod-data:
+
+networks:
+  mercado-net:
+    driver: bridge

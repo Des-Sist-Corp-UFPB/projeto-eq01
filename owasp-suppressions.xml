@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Supressões do OWASP Dependency-Check.
+
+  Uso: mvn verify -Psecurity
+
+  REGRAS OBRIGATÓRIAS PARA CADA SUPRESSÃO:
+  1. <notes>: descrever por que é um falso positivo OU por que o risco foi aceito.
+  2. Incluir a data de revisão e quem aprovou.
+  3. Incluir um prazo para revisão (ex.: revisar na próxima atualização da dependência).
+  4. NUNCA suprimir CVEs críticos sem aprovação explícita.
+
+  Documentação: https://jeremylong.github.io/DependencyCheck/general/suppression.html
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <!--
+      Exemplo de supressão documentada (descomentada quando necessário):
+
+    <suppress>
+        <notes><![CDATA[
+            CVE-XXXX-YYYY: Falso positivo.
+            Esta CVE afeta a funcionalidade X da biblioteca Y nas versões A.B até C.D.
+            Nossa aplicação não utiliza a funcionalidade X, portanto não está vulnerável.
+
+            Evidência: [link para análise ou issue tracker]
+            Revisado em: 2025-01-01
+            Aprovado por: Prof. Rodrigo Rebouças
+            Revisar em: quando a biblioteca Y lançar nova versão
+        ]]></notes>
+        <cve>CVE-XXXX-YYYY</cve>
+    </suppress>
+    -->
+
+</suppressions>

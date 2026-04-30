@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mercado_dev
+    username: mercado
+    password: mercado123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # validate: o Hibernate verifica se o schema do banco bate com as entidades,
+      # mas NÃO modifica nada. O Flyway é responsável por criar/alterar as tabelas.
+      # NUNCA use create-drop em produção — apaga todos os dados!
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    # Localização dos scripts de migração SQL
+    locations: classpath:db/migration
+
+logging:
+  level:
+    br.ufpb.dsc.mercado: DEBUG
+    org.springframework.web: DEBUG

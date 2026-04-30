@@ -1,0 +1,106 @@
+# =============================================================================
+# Docker Compose — DESENVOLVIMENTO
+# =============================================================================
+# Sobe o ambiente completo de desenvolvimento com:
+#   - app:      Aplicação Spring Boot com hot-reload
+#   - postgres: Banco de dados PostgreSQL 16
+#   - adminer:  Interface web para inspecionar o banco (http://localhost:8888)
+#   - trivy:    Scanner de vulnerabilidades (roda uma vez e sai)
+#
+# Como usar:
+#   docker compose -f docker/docker-compose.dev.yml up
+#   docker compose -f docker/docker-compose.dev.yml up --build  # forçar rebuild
+#
+# Para rodar só o banco:
+#   docker compose -f docker/docker-compose.dev.yml up postgres adminer
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Banco de dados PostgreSQL
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercado-postgres-dev
+    environment:
+      POSTGRES_DB: mercado_dev
+      POSTGRES_USER: mercado
+      POSTGRES_PASSWORD: mercado123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercado -d mercado_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mercado-net
+
+  # ---------------------------------------------------------------------------
+  # Aplicação Spring Boot (hot-reload)
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: mercado-app-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mercado_dev
+      SPRING_DATASOURCE_USERNAME: mercado
+      SPRING_DATASOURCE_PASSWORD: mercado123
+    ports:
+      - "8080:8080"
+    volumes:
+      # Monta o código-fonte para hot-reload
+      - ../src:/app/src
+      # Persistir dependências Maven (evita re-download a cada restart)
+      - maven-cache:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mercado-net
+
+  # ---------------------------------------------------------------------------
+  # Adminer: interface web para o banco de dados
+  # Acesse: http://localhost:8888
+  # Servidor: postgres | Banco: mercado_dev | Usuário: mercado | Senha: mercado123
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:latest
+    container_name: mercado-adminer
+    ports:
+      - "8888:8080"
+    depends_on:
+      - postgres
+    networks:
+      - mercado-net
+
+  # ---------------------------------------------------------------------------
+  # Trivy: scanner de vulnerabilidades (roda e sai — profile: scan)
+  # Uso: docker compose -f docker/docker-compose.dev.yml --profile scan up trivy
+  # ---------------------------------------------------------------------------
+  trivy:
+    image: aquasec/trivy:latest
+    container_name: mercado-trivy
+    profiles:
+      - scan
+    volumes:
+      - ..:/project:ro
+      - trivy-cache:/root/.cache/trivy
+    command: fs /project --severity HIGH,CRITICAL --exit-code 1
+    networks:
+      - mercado-net
+
+volumes:
+  postgres-dev-data:
+  maven-cache:
+  trivy-cache:
+
+networks:
+  mercado-net:
+    driver: bridge

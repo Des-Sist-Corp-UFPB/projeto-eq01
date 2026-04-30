@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: mercado
+  profiles:
+    active: dev
+
+# Actuator - monitoramento da aplicação
+# Acesse: http://localhost:8080/actuator/health
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expõe apenas os endpoints necessários (não exponha todos em produção!)
+        include: health,info,metrics
+  endpoint:
+    health:
+      # Detalhes do health só são exibidos para usuários autenticados
+      show-details: when-authorized

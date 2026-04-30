@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+  Layout base da aplicação — todas as páginas estendem este template.
+
+  Thymeleaf Layout:
+  - th:fragment="layout(content)" define que esta página é um layout reutilizável.
+  - As páginas filhas usam th:replace="~{layout :: layout(~{::main})}" para herdar este layout.
+  - O conteúdo específico de cada página é injetado onde aparece th:replace="${content}".
+
+  Webjars:
+  - Bootstrap e HTMX são servidos pelo Spring como recursos estáticos via /webjars/**
+  - O webjars-locator-core resolve automaticamente a versão correta nas URLs
+-->
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${titulo != null ? titulo + ' — Mercado DSC' : 'Mercado DSC'}">Mercado DSC</title>
+
+    <!--
+      Bootstrap CSS via WebJars.
+      O webjars-locator-core permite omitir a versão na URL — o Spring a resolve automaticamente.
+      Sem o locator, precisaríamos: /webjars/bootstrap/5.3.3/css/bootstrap.min.css
+    -->
+    <link rel="stylesheet"
+          th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+
+    <!-- Estilo customizado mínimo -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        /* Indicador de carregamento HTMX */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR — Barra de navegação principal
+     ============================================================ -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <!-- Marca / Logo -->
+        <a class="navbar-brand" th:href="@{/produtos}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                 class="bi bi-shop me-2" viewBox="0 0 16 16">
+                <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm6-5a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1z"/>
+            </svg>
+            Mercado DSC
+        </a>
+
+        <!-- Botão hamburger para mobile -->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Links de navegação -->
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <!--
+                      th:classappend adiciona a classe "active" dinamicamente se a URL atual
+                      começa com /produtos — indica visualmente a página atual.
+                    -->
+                    <a class="nav-link"
+                       th:classappend="${requestURI != null and requestURI.startsWith('/produtos')} ? 'active'"
+                       th:href="@{/produtos}">
+                        Produtos
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Área do usuário logado (direita da navbar) -->
+            <ul class="navbar-nav">
+                <!--
+                  sec:authorize="isAuthenticated()" — dialeto do Thymeleaf Security.
+                  Este bloco só é renderizado se o usuário estiver autenticado.
+                  Requer a dependência: thymeleaf-extras-springsecurity6
+                -->
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle" href="#"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                             fill="currentColor" class="bi bi-person-circle me-1" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                        <!--
+                          sec:authentication="name" exibe o username do usuário autenticado.
+                          Outros valores disponíveis: principal, authorities, details
+                        -->
+                        <span sec:authentication="name">Usuário</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <!--
+                              Formulário de logout — POST é obrigatório pelo Spring Security (proteção CSRF).
+                              O Spring Security intercepta POST /logout e invalida a sessão.
+                            -->
+                            <form th:action="@{/logout}" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                         fill="currentColor" class="bi bi-box-arrow-right me-1" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                                    </svg>
+                                    Sair
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ============================================================
+     CONTEÚDO PRINCIPAL — injetado pelas páginas filhas
+     ============================================================ -->
+<main class="container">
+    <!--
+      th:replace="${content}" injeta o conteúdo específico de cada página.
+      O Thymeleaf substitui este elemento pelo bloco <main> da página filha.
+    -->
+    <th:block th:replace="${content}">
+        <!-- Conteúdo padrão (não deve aparecer se usado corretamente) -->
+    </th:block>
+</main>
+
+<!-- ============================================================
+     RODAPÉ
+     ============================================================ -->
+<footer class="bg-light border-top mt-5 py-3">
+    <div class="container text-center text-muted small">
+        <p class="mb-0">
+            DSC — Desenvolvimento de Sistemas Corporativos |
+            Prof. Rodrigo Rebouças | UFPB Campus IV
+        </p>
+    </div>
+</footer>
+
+<!-- ============================================================
+     SCRIPTS — ao final do body para não bloquear o carregamento
+     ============================================================ -->
+
+<!--
+  Bootstrap JS (Bundle com Popper.js incluído) via WebJars.
+  Necessário para: modais, dropdowns, collapse (navbar mobile), etc.
+-->
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!--
+  HTMX via WebJars.
+  HTMX adiciona comportamento AJAX a elementos HTML via atributos hx-*.
+  Sem escrever nenhum JavaScript, você consegue:
+  - hx-get, hx-post, hx-put, hx-delete: fazer requisições HTTP
+  - hx-target: onde inserir a resposta
+  - hx-swap: como substituir o conteúdo (innerHTML, outerHTML, beforeend, etc.)
+  - hx-trigger: quando disparar a requisição (click, keyup, etc.)
+-->
+<script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+
+<!--
+  Container do modal — usado pelo HTMX para injetar o modal de formulário.
+  O HTMX carrega o HTML do modal aqui e, após injetar, o Bootstrap o exibe.
+-->
+<div id="modal-container"></div>
+
+<!--
+  Script para abrir o modal automaticamente após o HTMX injetá-lo no DOM.
+  htmx:afterSwap é disparado após o HTMX substituir o conteúdo.
+-->
+<script>
+    // Abre o modal Bootstrap após o HTMX injetar o HTML no #modal-container
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'modal-container') {
+            const modalEl = document.getElementById('produtoModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
