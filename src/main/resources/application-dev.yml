@@ -23,3 +23,7 @@ logging:
   level:
     br.ufpb.dsc.mercado: DEBUG
     org.springframework.web: DEBUG
+
+springdoc:
+  swagger-ui:
+    enabled: false

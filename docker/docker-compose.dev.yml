@@ -43,6 +43,7 @@ services:
   # Aplicação Spring Boot (hot-reload)
   # ---------------------------------------------------------------------------
   app:
+    image: mercado-app-dev:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
