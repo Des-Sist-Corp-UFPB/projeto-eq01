@@ -22,8 +22,7 @@
         <java.version>21</java.version>
         <!-- Versões de dependências -->
         <testcontainers.version>1.20.4</testcontainers.version>
-        <webjars-bootstrap.version>5.3.3</webjars-bootstrap.version>
-        <webjars-htmx.version>2.0.4</webjars-htmx.version>
+        <lombok.version>1.18.38</lombok.version>
         <!-- Versões de plugins SAST/qualidade -->
         <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
         <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
@@ -37,17 +36,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <!-- === TEMPLATES: Thymeleaf === -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <!-- Integração do Thymeleaf com Spring Security (dialeto extras) -->
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
         <!-- === SEGURANÇA === -->
@@ -88,20 +76,19 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- === FRONTEND: Bootstrap + HTMX via WebJars === -->
+        <!-- === UTILITARIOS === -->
         <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator-core</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
         </dependency>
+
+        <!-- === DOCUMENTACAO DA API === -->
         <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>bootstrap</artifactId>
-            <version>${webjars-bootstrap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>htmx.org</artifactId>
-            <version>${webjars-htmx.version}</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.17</version>
         </dependency>
 
         <!-- === DEV TOOLS (apenas desenvolvimento) === -->
@@ -149,6 +136,28 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo: cobertura de código -->
