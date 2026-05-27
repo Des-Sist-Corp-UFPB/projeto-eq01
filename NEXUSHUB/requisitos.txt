@@ -1,0 +1,91 @@
+========================================================================
+             NEXUS HUB - REQUISITOS DE INSTALAÇÃO E CONFIGURAÇÃO
+========================================================================
+
+Este arquivo contém tudo o que você precisa instalar e configurar no seu
+sistema operacional (Linux) para rodar o backend (Spring Boot) e os
+frontends (Angular e Next.js) do NEXUS HUB localmente.
+
+Como o Docker não está instalado na sua máquina, fornecemos abaixo os passos
+para instalar todas as ferramentas diretamente no seu sistema operacional.
+
+------------------------------------------------------------------------
+1. FERRAMENTAS NECESSÁRIAS (PRÉ-REQUISITOS)
+------------------------------------------------------------------------
+
+* Java Development Kit (JDK) 21  -> Para rodar o Backend Spring Boot.
+* Apache Maven (v3.6+)          -> Para gerenciar dependências e compilar o Backend.
+* Node.js (v18+ ou v20+) & npm  -> Para rodar os Frontends (Angular e Next.js).
+* PostgreSQL                    -> Banco de dados principal para persistência de dados.
+
+------------------------------------------------------------------------
+2. INSTALAÇÃO PASSO A PASSO (UBUNTU / DEBIAN / POP!_OS)
+------------------------------------------------------------------------
+
+Abra o seu terminal e execute os comandos abaixo para instalar as ferramentas:
+
+a) Atualizar a lista de pacotes:
+   $ sudo apt update
+
+b) Instalar o JDK 21:
+   $ sudo apt install openjdk-21-jdk -y
+   # Para verificar a instalação:
+   $ java -version
+
+c) Instalar o Maven:
+   $ sudo apt install maven -y
+   # Para verificar a instalação:
+   $ mvn -version
+
+d) Instalar o Node.js e npm:
+   $ sudo apt install nodejs npm -y
+   # Para garantir que as versões estão corretas, recomendamos o 'n' ou nvm:
+   $ sudo npm install -g n
+   $ sudo n lts
+   # Para verificar a instalação:
+   $ node -version
+   $ npm -version
+
+e) Instalar o PostgreSQL diretamente no sistema:
+   $ sudo apt install postgresql postgresql-contrib -y
+   # Para verificar se o serviço do PostgreSQL está ativo:
+   $ sudo systemctl status postgresql
+
+------------------------------------------------------------------------
+3. CONFIGURAÇÃO DO BANCO DE DADOS (POSTGRESQL LOCAL)
+------------------------------------------------------------------------
+
+Após instalar o PostgreSQL, você precisa criar o banco de dados 'nexushub'
+e configurar a senha do usuário padrão 'postgres' para bater com as
+configurações do backend (usuário: postgres, senha: postgres).
+
+Execute no seu terminal:
+
+a) Entrar no terminal de controle do Postgres como administrador:
+   $ sudo -u postgres psql
+
+b) Alterar a senha do usuário padrão 'postgres' para 'postgres':
+   postgres=# ALTER USER postgres PASSWORD 'postgres';
+
+c) Criar o banco de dados da aplicação:
+   postgres=# CREATE DATABASE nexushub;
+
+d) Sair do console do Postgres:
+   postgres=# \q
+
+Pronto! O banco de dados está criado e pronto para aceitar conexões locais na porta 5432.
+
+------------------------------------------------------------------------
+4. (OPCIONAL) SE PREFERIR INSTALAR O DOCKER
+------------------------------------------------------------------------
+
+Caso você queira rodar o Postgres em um container em vez de instalar no host:
+
+$ sudo apt install docker.io -y
+$ sudo systemctl start docker
+$ sudo systemctl enable docker
+$ sudo usermod -aG docker $USER
+# Reinicie a sessão/terminal e depois execute:
+$ docker run --name nexushub-db -e POSTGRES_DB=nexushub -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+
+========================================================================

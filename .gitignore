@@ -1,0 +1,76 @@
+# =========================================================================
+#                         NEXUS HUB - GITIGNORE
+# =========================================================================
+
+# -------------------------------------------------------------------------
+# 1. COMPILADOS E BUILDS DE SISTEMA (Java / Maven)
+# -------------------------------------------------------------------------
+**/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# -------------------------------------------------------------------------
+# 2. DEPENDÊNCIAS E COMPILADOS DO FRONTEND (Angular / Node.js)
+# -------------------------------------------------------------------------
+**/node_modules/
+node_modules/
+**/dist/
+dist/
+**/.angular/
+.angular/
+.angular/cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+*.log
+
+# -------------------------------------------------------------------------
+# 3. DADOS SENSÍVEIS, CREDENCIAIS E BANCOS DE DADOS
+# -------------------------------------------------------------------------
+# Arquivos de ambiente e chaves secretas
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+
+# Configurações de banco locais e properties sensíveis
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
+*.db
+*.sqlite
+*.sqlite3
+
+# -------------------------------------------------------------------------
+# 4. CONFIGURAÇÕES DE IDE E EDITORES DE CÓDIGO
+# -------------------------------------------------------------------------
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/settings.json
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini

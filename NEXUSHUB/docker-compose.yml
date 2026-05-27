@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nexushub-db
+    environment:
+      - POSTGRES_DB=nexushub
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexushub-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexushub-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/nexushub
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - db
+    networks:
+      - nexushub-network
+
+  frontend:
+    build:
+      context: ./view-angular
+      dockerfile: Dockerfile
+    container_name: nexushub-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - nexushub-network
+
+volumes:
+  postgres_data:
+
+networks:
+  nexushub-network:
+    driver: bridge

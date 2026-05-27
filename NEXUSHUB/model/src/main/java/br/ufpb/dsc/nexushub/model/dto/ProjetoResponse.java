@@ -5,21 +5,44 @@ import java.time.LocalDateTime;
 
 public record ProjetoResponse(
         Long id,
-        String titulo,
-        String descricao,
+        String nome,
+        String resumo,
+        String objetivos,
         String categoria,
-        String responsavel,
+        String tipo,
+        String tags,
+        String visibilidade,
+        String grupoPertencente,
+        String autor,
+        Integer curtidas,
+        Integer quantidadeMembros,
+        String imagemCardUrl,
+        String imagemLandingUrl,
+        Integer xpDistribuido,
         String status,
         Integer pontos,
         LocalDateTime criadoEm
 ) {
     public static ProjetoResponse from(Projeto projeto) {
+        if (projeto == null) {
+            return null;
+        }
         return new ProjetoResponse(
                 projeto.getId(),
-                projeto.getTitulo(),
-                projeto.getDescricao(),
+                projeto.getNome(),
+                projeto.getResumo(),
+                projeto.getObjetivos(),
                 projeto.getCategoria(),
-                projeto.getResponsavel(),
+                projeto.getTipo(),
+                projeto.getTags(),
+                projeto.getVisibilidade(),
+                projeto.getGrupoPertencente(),
+                projeto.getAutor(),
+                projeto.getCurtidas(),
+                projeto.getQuantidadeMembros(),
+                projeto.getImagemCardUrl(),
+                projeto.getImagemLandingUrl(),
+                projeto.getXpDistribuido(),
                 projeto.getStatus(),
                 projeto.getPontos(),
                 projeto.getCriadoEm()

@@ -1,0 +1,69 @@
+<div class="app-layout">
+  
+  <!-- Glassmorphism Navigation Header -->
+  <header class="main-header animate-fade-in">
+    <div class="header-container">
+      
+      <!-- Brand Logo -->
+      <div class="brand" routerLink="/">
+        <span class="logo-circle">N</span>
+        <h1>NEXUS <span>HUB</span></h1>
+      </div>
+
+      <!-- Main Navigation Menu Links -->
+      <nav class="main-nav">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          Projetos
+        </a>
+        <a routerLink="/grupos" routerLinkActive="active" class="nav-link">
+          Grupos
+        </a>
+        <a routerLink="/perfil" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn()">
+          Meu Perfil
+        </a>
+      </nav>
+
+      <!-- Action / Session Buttons -->
+      <div class="header-actions">
+        <!-- Logged Out state -->
+        <ng-container *ngIf="!isLoggedIn()">
+          <button class="btn btn-secondary" routerLink="/login">Entrar</button>
+          <button class="btn btn-primary" routerLink="/cadastro">Cadastrar-se</button>
+        </ng-container>
+
+        <!-- Logged In state -->
+        <ng-container *ngIf="isLoggedIn() && currentUser()">
+          <div class="user-greeting" routerLink="/perfil">
+            <span class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</span>
+            <span class="greeting-text">Olá, <strong>{{ currentUser()?.nome?.split(' ')?.at(0) }}</strong></span>
+          </div>
+          
+          <button class="btn btn-secondary logout-btn" (click)="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="logout-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+          </button>
+        </ng-container>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Router Pages Outlet -->
+  <main class="page-container">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Premium Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>&copy; 2026 NEXUS HUB. Desenvolvido para a UFPB.</p>
+      <div class="footer-links">
+        <a href="#">Sobre a plataforma</a>
+        <a href="#">Termos de uso</a>
+        <a href="#">Contato</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
