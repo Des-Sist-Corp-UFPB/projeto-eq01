@@ -69,14 +69,47 @@ public class DataSeeder implements CommandLineRunner {
             grupoRepository.save(new Grupo(
                     "Laboratorio de Inovacao e Ideias",
                     "Grupo pioneiro focado em desenvolver solucoes tecnologicas para o campus.",
-                    "Inovacao",
-                    "Rodrigo Silva"
+                    "Institucional",
+                    "Rodrigo Silva",
+                    "Aberto",
+                    "#1e3a8a",
+                    "💡"
             ));
             grupoRepository.save(new Grupo(
                     "Núcleo de Robotica Aplicada",
                     "Equipe focada no ensino de mecatronica e automacao.",
-                    "Robotica",
-                    "Kassio Leite"
+                    "Institucional",
+                    "Kassio Leite",
+                    "Restrito",
+                    "#0f766e",
+                    "🤖"
+            ));
+            grupoRepository.save(new Grupo(
+                    "DEV UFPB - Comunidade de Devs",
+                    "Espaço para desenvolvedores da universidade compartilharem projetos e dicas.",
+                    "Comunidade",
+                    "Rodrigo Silva",
+                    "Aberto",
+                    "#4338ca",
+                    "💻"
+            ));
+            grupoRepository.save(new Grupo(
+                    "Grupo de Corrida Campus I",
+                    "Grupo de corrida e saúde integrando estudantes e servidores da UFPB.",
+                    "Comunidade",
+                    "Kassio Leite",
+                    "Aberto",
+                    "#b91c1c",
+                    "🏃"
+            ));
+            grupoRepository.save(new Grupo(
+                    "Parceiros do Ecossistema - ACME Corp",
+                    "Parcerias externas trazendo projetos do mercado e mentorias de carreira.",
+                    "Externo",
+                    "Rodrigo Silva",
+                    "Restrito",
+                    "#b45309",
+                    "🏢"
             ));
         }
 

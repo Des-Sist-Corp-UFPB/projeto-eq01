@@ -6,6 +6,7 @@ import { EsqueciSenhaPageComponent } from './pages/esqueci-senha.page';
 import { PerfilPageComponent } from './pages/perfil.page';
 import { ProjetoDetalhePageComponent } from './pages/projeto-detalhe.page';
 import { GruposPageComponent } from './pages/grupos.page';
+import { GrupoDetalhePageComponent } from './pages/grupo-detalhe.page';
 
 export const routes: Routes = [
   { path: '', component: DashboardPageComponent },
@@ -15,5 +16,6 @@ export const routes: Routes = [
   { path: 'perfil', component: PerfilPageComponent },
   { path: 'projetos/:id', component: ProjetoDetalhePageComponent },
   { path: 'grupos', component: GruposPageComponent },
+  { path: 'grupos/:id', component: GrupoDetalhePageComponent },
   { path: '**', redirectTo: '' }
 ];

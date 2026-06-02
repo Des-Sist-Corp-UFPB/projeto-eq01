@@ -47,6 +47,28 @@ import { ProjectCardComponent } from '../components/project-card';
             <p class="hero-desc">
               Participe de grupos de pesquisa, projetos de extensão, monitorias e desafios da comunidade. Transforme sua jornada acadêmica e ganhe reconhecimento!
             </p>
+            
+            <div class="project-actions-row">
+              <div class="search-container">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+                </svg>
+                <input 
+                  type="text" 
+                  placeholder="Buscar projetos por nome, resumo, tags ou autor..." 
+                  [ngModel]="searchQuery()" 
+                  (ngModelChange)="searchQuery.set($event)"
+                  class="search-input"
+                />
+              </div>
+              
+              <button class="btn-create-proj" (click)="openCreateModal()" *ngIf="isLoggedIn()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="plus-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Criar Novo Projeto
+              </button>
+            </div>
           </div>
         </section>
 
@@ -166,6 +188,65 @@ import { ProjectCardComponent } from '../components/project-card';
       color: var(--color-muted);
       max-width: 650px;
       line-height: 1.6;
+    }
+    .project-actions-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .search-container {
+      position: relative;
+      flex-grow: 1;
+      max-width: 500px;
+      min-width: 280px;
+    }
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-muted);
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+      background: white;
+    }
+    .search-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(31, 122, 224, 0.1);
+    }
+    .btn-create-proj {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius-md);
+      padding: 12px 24px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-create-proj:hover {
+      background: #1765c2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(31, 122, 224, 0.2);
+    }
+    .plus-icon {
+      width: 16px;
+      height: 16px;
     }
     .section-header {
       margin-bottom: 20px;

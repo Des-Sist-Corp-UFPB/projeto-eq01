@@ -8,6 +8,9 @@ export interface Grupo {
   descricao: string;
   area?: string;
   responsavel?: string;
+  tipo?: string;
+  cor?: string;
+  logo?: string;
 }
 
 @Injectable({
@@ -19,5 +22,17 @@ export class GrupoService {
 
   listar(): Observable<Grupo[]> {
     return this.http.get<Grupo[]>(this.apiUrl);
+  }
+
+  obterPorId(id: number): Observable<Grupo> {
+    return this.http.get<Grupo>(`${this.apiUrl}/${id}`);
+  }
+
+  criar(grupo: Grupo): Observable<Grupo> {
+    return this.http.post<Grupo>(this.apiUrl, grupo);
+  }
+
+  deletar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

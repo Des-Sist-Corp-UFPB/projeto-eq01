@@ -73,10 +73,12 @@ import { ProjectService, ProjetoRequest } from '../services/project.service';
                 <div class="form-group col">
                   <label for="tipo">Tipo de Projeto *</label>
                   <select id="tipo" name="tipo" [(ngModel)]="formModel.tipo" required>
-                    <option value="Interno">Interno</option>
+                    <option value="Desenvolvimento">Desenvolvimento</option>
+                    <option value="Testes">Testes</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Gestão">Gestão</option>
                     <option value="Pesquisa">Pesquisa</option>
                     <option value="Extensão">Extensão</option>
-                    <option value="Empresa">Empresa</option>
                     <option value="Outros">Outros</option>
                   </select>
                 </div>
@@ -524,7 +526,7 @@ export class NewProjectModalComponent {
     resumo: '',
     objetivos: '',
     categoria: '',
-    tipo: 'Extensão',
+    tipo: 'Desenvolvimento',
     tags: '',
     visibilidade: 'PUBLICO_ABERTO',
     grupoPertencente: 'Laboratorio de Inovacao e Ideias',

@@ -21,6 +21,10 @@ public class Grupo {
 
     private String area;
     private String responsavel;
+    private String tipo;
+    private String cor;
+    @jakarta.persistence.Column(columnDefinition = "TEXT")
+    private String logo;
 
     protected Grupo() {
     }
@@ -30,6 +34,19 @@ public class Grupo {
         this.descricao = descricao;
         this.area = area;
         this.responsavel = responsavel;
+        this.tipo = "Aberto";
+        this.cor = "#1e3a8a";
+        this.logo = "🏫";
+    }
+
+    public Grupo(String nome, String descricao, String area, String responsavel, String tipo, String cor, String logo) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.area = area;
+        this.responsavel = responsavel;
+        this.tipo = tipo;
+        this.cor = cor;
+        this.logo = logo;
     }
 
     public Long getId() {
@@ -50,5 +67,29 @@ public class Grupo {
 
     public String getResponsavel() {
         return responsavel;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getCor() {
+        return cor;
+    }
+
+    public void setCor(String cor) {
+        this.cor = cor;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 }
