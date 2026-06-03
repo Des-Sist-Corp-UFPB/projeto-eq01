@@ -6,7 +6,7 @@ Esta estrutura segue MVC de forma explicita:
 
 - `model`: modulo Java com entidades, DTOs, repositorios e regras de negocio.
 - `controller`: modulo Spring Boot responsavel por expor a API REST.
-- `view`: aplicacao Next.js responsavel pela interface do usuario.
+- `view-angular`: aplicacao Angular responsavel pela interface do usuario.
 
 ## Estrutura
 
@@ -14,7 +14,7 @@ Esta estrutura segue MVC de forma explicita:
 NEXUSHUB
 ├── model
 ├── controller
-└── view
+└── view-angular
 ```
 
 ## Backend Spring
@@ -37,21 +37,21 @@ Endpoints iniciais:
 - `GET /api/grupos`
 - `GET /api/oportunidades`
 
-## Frontend Next
+## Frontend Angular
 
-A interface fica em `view`.
+A interface fica em `view-angular`.
 
 Para rodar:
 
 ```bash
-cd view
+cd view-angular
 npm install
-npm run dev
+npm run start
 ```
 
 URL local:
 
-- `http://localhost:3000`
+- `http://localhost:4200`
 
 ## Proposta do produto
 

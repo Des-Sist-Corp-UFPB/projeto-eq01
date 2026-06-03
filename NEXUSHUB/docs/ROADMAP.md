@@ -6,7 +6,7 @@
 - API inicial de projetos.
 - API inicial de grupos.
 - API inicial de oportunidades.
-- Tela inicial em Next.js.
+- Tela inicial em Angular.
 
 ## Fase 2: Usuarios
 
