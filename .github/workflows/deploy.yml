@@ -75,34 +75,6 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-      - name: Prepare remote compose files
-        shell: bash
-        env:
-          IMAGE_NAME: ${{ steps.image.outputs.name }}
-          APP_PORT: ${{ secrets.APP_PORT }}
-          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          mkdir -p .deploy
-          cp ./NEXUSHUB/docker-compose.yml .deploy/docker-compose.yml
-          cat > .deploy/.env <<EOF
-          IMAGE_NAME=$IMAGE_NAME
-          APP_PORT=$APP_PORT
-          SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
-          SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
-          SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD
-          EOF
-
-      - name: Overwrite server default compose files
-        shell: bash
-        env:
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-        run: |
-          scp -i ~/.ssh/deploy_key -o "User=$SSH_USERNAME" .deploy/docker-compose.yml "$DEPLOY_HOST:docker-compose.yml"
-          scp -i ~/.ssh/deploy_key -o "User=$SSH_USERNAME" .deploy/.env "$DEPLOY_HOST:.env"
-
       - name: Deploy on server
         shell: bash
         env:
@@ -115,23 +87,28 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           GHCR_TOKEN: ${{ github.token }}
         run: |
-          ssh -T -o RequestTTY=no -i ~/.ssh/deploy_key -l "$SSH_USERNAME" "$DEPLOY_HOST" \
-            "IMAGE_NAME='$IMAGE_NAME' APP_PORT='$APP_PORT' SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' SPRING_DATASOURCE_USERNAME='$SPRING_DATASOURCE_USERNAME' SPRING_DATASOURCE_PASSWORD='$DB_PASSWORD' GHCR_TOKEN='$GHCR_TOKEN' GHCR_USER='${{ github.actor }}' bash -se" <<'EOF'
-          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -l "$SSH_USERNAME" "$DEPLOY_HOST" <<EOF
+          set -eu
+          mkdir -p ~/nexushub
+          cd ~/nexushub
 
-          DEPLOY_DIR="$HOME"
-          COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml"
-          ENV_FILE="$DEPLOY_DIR/.env"
+          cat > docker-compose.yml <<COMPOSE
+          services:
+            backend:
+              image: ${IMAGE_NAME}
+              container_name: eq01-nexushub-backend
+              restart: unless-stopped
+              ports:
+                - "127.0.0.1:${APP_PORT}:8080"
+              environment:
+                SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+                SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+                SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+                SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+                SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+          COMPOSE
 
-          cat > "$ENV_FILE" <<ENV
-          IMAGE_NAME=$IMAGE_NAME
-          APP_PORT=$APP_PORT
-          SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
-          SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
-          SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
-          ENV
-
-          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-          docker pull "$IMAGE_NAME"
-          docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" -p eq01 up -d --no-deps --force-recreate backend
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker compose pull
+          docker compose up -d --remove-orphans
           EOF
