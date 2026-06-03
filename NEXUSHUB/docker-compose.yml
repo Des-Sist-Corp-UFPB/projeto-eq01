@@ -11,10 +11,3 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-
-  frontend:
-    image: ${FRONTEND_IMAGE}
-    container_name: eq01-nexushub-frontend
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8102:80"
