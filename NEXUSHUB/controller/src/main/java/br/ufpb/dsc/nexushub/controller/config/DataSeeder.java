@@ -113,6 +113,32 @@ public class DataSeeder implements CommandLineRunner {
             ));
         }
 
+        // Garantir o grupo Ayty
+        if (grupoRepository.findAll().stream().noneMatch(g -> g.getNome().equalsIgnoreCase("Ayty"))) {
+            grupoRepository.save(new Grupo(
+                    "Ayty",
+                    "Grupo de pesquisa e desenvolvimento focado em inovacao tecnologica, engenharia de software e parcerias com o mercado.",
+                    "Institucional",
+                    "Rodrigo Silva",
+                    "Aberto",
+                    "#059669",
+                    "🌱"
+            ));
+        }
+
+        // Garantir o grupo NEO Ethical Hackers
+        if (grupoRepository.findAll().stream().noneMatch(g -> g.getNome().equalsIgnoreCase("NEO Ethical Hackers"))) {
+            grupoRepository.save(new Grupo(
+                    "NEO Ethical Hackers",
+                    "Comunidade de estudantes interessados em seguranca da informacao, testes de intrusao, CTFs e praticas de defesa cibernetica.",
+                    "Comunidade",
+                    "John Wesley",
+                    "Aberto",
+                    "#7c3aed",
+                    "🛡️"
+            ));
+        }
+
         // 3. Popular Oportunidades
         if (oportunidadeRepository.count() == 0) {
             oportunidadeRepository.save(new Oportunidade(
@@ -124,14 +150,35 @@ public class DataSeeder implements CommandLineRunner {
             ));
         }
 
+        if (oportunidadeRepository.findAll().stream().noneMatch(o -> o.getTitulo().contains("Phoebus"))) {
+            oportunidadeRepository.save(new Oportunidade(
+                    "Desenvolvedor Backend (Phoebus)",
+                    "Vaga para atuar no desenvolvimento da API de pagamentos Phoebus utilizando Spring Boot.",
+                    "Bolsista",
+                    "rodrigo@nexushub.com",
+                    LocalDate.now().plusDays(15)
+            ));
+        }
+
+        if (oportunidadeRepository.findAll().stream().noneMatch(o -> o.getTitulo().contains("Viva Moveis"))) {
+            oportunidadeRepository.save(new Oportunidade(
+                    "Designer UI/UX (Viva Moveis)",
+                    "Vaga voluntaria para construcao de interfaces de modelagem 3D e prototipagem no projeto Viva Moveis.",
+                    "Voluntariado",
+                    "rodrigo@nexushub.com",
+                    LocalDate.now().plusDays(25)
+            ));
+        }
+
+        // Imagens mockadas usando imagens funcionais de alta qualidade relacionadas a tecnologia
+        String techImg1 = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&auto=format&fit=crop";
+        String techImg2 = "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop";
+        String techImg3 = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&auto=format&fit=crop";
+        String techImg4 = "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=500&auto=format&fit=crop";
+        String techImg5 = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&auto=format&fit=crop";
+
         // 4. Popular Projetos Completos e Ricos em Detalhes
         if (projetoRepository.count() == 0) {
-            // Imagens mockadas usando imagens funcionais de alta qualidade relacionadas a tecnologia
-            String techImg1 = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&auto=format&fit=crop";
-            String techImg2 = "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop";
-            String techImg3 = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&auto=format&fit=crop";
-            String techImg4 = "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=500&auto=format&fit=crop";
-            String techImg5 = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&auto=format&fit=crop";
             
             // Projeto 1: Mapa de Projetos Acadêmicos (Hot, Recent, Colab)
             projetoRepository.save(new Projeto(
@@ -221,6 +268,65 @@ public class DataSeeder implements CommandLineRunner {
                     techImg5,
                     techImg5,
                     450 // XP
+            ));
+        }
+
+        // Garantir os projetos do Ayty
+        if (projetoRepository.findAll().stream().noneMatch(p -> p.getNome().equalsIgnoreCase("Phoebus"))) {
+            projetoRepository.save(new Projeto(
+                    "Phoebus",
+                    "Plataforma de integracao e inteligencia voltada para facilitacao de processos de pagamento e conciliacao financeira.",
+                    "Desenvolver soluções inovadoras de intermediação financeira e automação de pagamentos.",
+                    "Inovacao",
+                    "Interno",
+                    "Java, Spring Boot, React, PostgreSQL",
+                    "PUBLICO_ABERTO",
+                    "Ayty",
+                    "Rodrigo Silva",
+                    18,
+                    4,
+                    techImg1,
+                    techImg1,
+                    300
+            ));
+        }
+
+        if (projetoRepository.findAll().stream().noneMatch(p -> p.getNome().equalsIgnoreCase("Viva Moveis"))) {
+            projetoRepository.save(new Projeto(
+                    "Viva Moveis",
+                    "Sistema inteligente de design e gerenciamento de inventario de moveis corporativos integrando realidade aumentada.",
+                    "Otimizar a alocação e visualização tridimensional de layout para móveis corporativos sustentáveis.",
+                    "Extensao",
+                    "Extensão",
+                    "TypeScript, Angular, NestJS, MongoDB",
+                    "PUBLICO_ABERTO",
+                    "Ayty",
+                    "Rodrigo Silva",
+                    22,
+                    6,
+                    techImg3,
+                    techImg3,
+                    450
+            ));
+        }
+
+        // Garantir os projetos do NEO Ethical Hackers
+        if (projetoRepository.findAll().stream().noneMatch(p -> p.getNome().equalsIgnoreCase("Desafio CTF Nexus"))) {
+            projetoRepository.save(new Projeto(
+                    "Desafio CTF Nexus",
+                    "Plataforma gamificada para competicoes e simulacoes realistas de seguranca defensiva e testes de invasao.",
+                    "Estimular o aprendizado de tecnicas de seguranca cibernetica e formar equipes capacitadas para hacking etico.",
+                    "Pesquisa",
+                    "Interno",
+                    "Seguranca, Pentest, CTF, RedTeam",
+                    "PUBLICO_ABERTO",
+                    "NEO Ethical Hackers",
+                    "John Wesley",
+                    25,
+                    8,
+                    techImg2,
+                    techImg2,
+                    550
             ));
         }
     }

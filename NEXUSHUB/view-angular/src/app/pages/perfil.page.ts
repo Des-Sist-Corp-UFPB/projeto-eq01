@@ -30,7 +30,12 @@ import { AuthService, UsuarioResponse } from '../services/auth.service';
         <!-- View Profile Mode -->
         <div *ngIf="!isEditMode()">
           <header class="profile-header">
-            <div class="avatar-large">{{ getInitials() }}</div>
+            <div class="avatar-large" *ngIf="currentUser()?.fotoUrl; else largeInitials" style="overflow: hidden;">
+              <img [src]="currentUser()?.fotoUrl" alt="Foto do usuário" class="profile-avatar-img" />
+            </div>
+            <ng-template #largeInitials>
+              <div class="avatar-large">{{ getInitials() }}</div>
+            </ng-template>
             <div class="header-info">
               <h2>{{ currentUser()?.nome }}</h2>
               <span class="user-email">{{ currentUser()?.email }}</span>
@@ -112,20 +117,44 @@ import { AuthService, UsuarioResponse } from '../services/auth.service';
           </div>
 
           <form (ngSubmit)="onSaveProfile()" #editForm="ngForm">
-            <div class="form-group">
-              <label for="nome">Nome Completo *</label>
+            <!-- Profile Photo Upload / Edit -->
+            <div class="form-group photo-edit-group">
+              <label>Foto de Perfil</label>
+              <div class="photo-edit-layout">
+                <div class="avatar-large" style="overflow: hidden; width: 64px; height: 64px;">
+                  <img [src]="editFotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                </div>
+                <div class="photo-controls">
+                  <input type="file" id="profilePhotoUpload" (change)="onPhotoUpload($event)" accept="image/*" class="file-input-hidden" />
+                  <label for="profilePhotoUpload" class="file-upload-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-small">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 3.375 0 11-.75 0 .375 3.375 0 01.75 0z" />
+                    </svg>
+                    <span>Carregar Foto...</span>
+                  </label>
+                  <button type="button" class="btn btn-secondary btn-remove-photo" *ngIf="editFotoUrl" (click)="editFotoUrl = ''">Remover</button>
+                </div>
+              </div>
+              <div class="url-input-fallback" style="margin-top: 10px;">
+                <label for="edit-photo-url">Ou insira uma URL direta de imagem:</label>
+                <input type="text" id="edit-photo-url" name="fotoUrl" [(ngModel)]="editFotoUrl" placeholder="Ex: https://images.unsplash.com/photo-..." />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+              <label for="edit-nome">Nome Completo *</label>
               <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
               <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
             </div>
 
             <div class="form-group">
-              <label for="email">E-mail Acadêmico *</label>
+              <label for="edit-email">E-mail Acadêmico *</label>
               <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadêmico" #emailInput="ngModel" />
               <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
             </div>
 
             <div class="form-group">
-              <label for="cargo">Cargo Acadêmico</label>
+              <label for="edit-cargo">Cargo Acadêmico</label>
               <select id="edit-cargo" name="cargo" [(ngModel)]="editCargo">
                 <option value="ESTUDANTE">Estudante</option>
                 <option value="PROFESSOR">Professor / Orientador</option>
@@ -134,7 +163,7 @@ import { AuthService, UsuarioResponse } from '../services/auth.service';
             </div>
 
             <div class="form-group">
-              <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
+              <label for="edit-senha">Nova Senha (deixe em branco para manter a atual)</label>
               <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mínimo 6 dígitos)" minlength="6" #senhaInput="ngModel" />
               <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
             </div>
@@ -150,6 +179,33 @@ import { AuthService, UsuarioResponse } from '../services/auth.service';
           </form>
         </div>
 
+      </div>
+
+      <!-- Current Password Confirmation Pop-up Modal -->
+      <div class="password-modal-backdrop animate-fade-in" *ngIf="showConfirmPasswordModal()">
+        <div class="password-modal animate-scale-up">
+          <header class="modal-header">
+            <h3>Confirmar Senha Atual</h3>
+            <button type="button" class="close-btn" (click)="showConfirmPasswordModal.set(false)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="close-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </header>
+          <div class="modal-body">
+            <p>Para prosseguir com a alteração da sua senha, por favor confirme sua <strong>senha atual</strong>:</p>
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="password" [(ngModel)]="senhaConfirmacao" placeholder="Digite sua senha atual" required />
+            </div>
+            <div class="alert alert-danger" style="margin-top: 10px; padding: 8px 12px; font-size: 12px;" *ngIf="confirmError()">
+              {{ confirmError() }}
+            </div>
+          </div>
+          <footer class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="showConfirmPasswordModal.set(false)">Cancelar</button>
+            <button type="button" class="btn btn-primary" [disabled]="!senhaConfirmacao || isSaving()" (click)="submitWithPassword()">
+              {{ isSaving() ? 'Salvando...' : 'Confirmar e Salvar' }}
+            </button>
+          </footer>
+        </div>
       </div>
     </div>
   `,
@@ -446,6 +502,175 @@ import { AuthService, UsuarioResponse } from '../services/auth.service';
       color: var(--color-danger);
       border: 1px solid #fca5a5;
     }
+
+    .profile-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    /* Photo edit styles */
+    .photo-edit-group {
+      border: 1px dashed var(--color-border);
+      padding: 16px;
+      border-radius: var(--border-radius-md);
+      background: #f8fafc;
+    }
+
+    .photo-edit-layout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .photo-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    .file-upload-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .file-upload-trigger:hover {
+      border-color: var(--color-primary);
+      background: #eff6ff;
+    }
+
+    .upload-icon-small {
+      width: 16px;
+      height: 16px;
+      color: var(--color-muted);
+    }
+
+    .btn-remove-photo {
+      padding: 8px 16px;
+      font-size: 13px;
+      background: #fee2e2;
+      color: #ef4444;
+      border: 1px solid #fca5a5;
+    }
+
+    .btn-remove-photo:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    .url-input-fallback {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .url-input-fallback label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--color-muted);
+    }
+
+    /* Password Confirm Modal */
+    .password-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(19, 32, 51, 0.4);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1050;
+      padding: 20px;
+    }
+
+    .password-modal {
+      background: var(--color-surface);
+      border-radius: var(--border-radius-lg);
+      width: 100%;
+      max-width: 450px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--color-border);
+      box-sizing: border-box;
+    }
+
+    .password-modal .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .password-modal .modal-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      color: var(--color-text);
+    }
+
+    .password-modal .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--color-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-modal .close-btn:hover {
+      background: #f1f5f9;
+      color: var(--color-danger);
+    }
+
+    .password-modal .close-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .password-modal .modal-body {
+      padding: 20px;
+    }
+
+    .password-modal .modal-body p {
+      font-size: 13.5px;
+      color: var(--color-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .password-modal .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #f8fafc;
+    }
   `]
 })
 export class PerfilPageComponent {
@@ -462,6 +687,12 @@ export class PerfilPageComponent {
   protected editEmail = '';
   protected editCargo = 'ESTUDANTE';
   protected editSenha = '';
+  protected editFotoUrl = '';
+
+  // Confirmation Modal states
+  protected readonly showConfirmPasswordModal = signal(false);
+  protected senhaConfirmacao = '';
+  protected readonly confirmError = signal('');
 
   getInitials(): string {
     const user = this.currentUser();
@@ -479,9 +710,12 @@ export class PerfilPageComponent {
       this.editNome = user.nome;
       this.editEmail = user.email;
       this.editCargo = user.cargo;
+      this.editFotoUrl = user.fotoUrl || '';
       this.editSenha = '';
+      this.senhaConfirmacao = '';
       this.isEditMode.set(true);
       this.editError.set('');
+      this.showConfirmPasswordModal.set(false);
     }
   }
 
@@ -489,7 +723,36 @@ export class PerfilPageComponent {
     this.isEditMode.set(false);
   }
 
+  onPhotoUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.editFotoUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   onSaveProfile() {
+    // Se a senha foi preenchida para alteração, abre o popup de confirmação de senha
+    if (this.editSenha.trim().length >= 6) {
+      this.senhaConfirmacao = '';
+      this.confirmError.set('');
+      this.showConfirmPasswordModal.set(true);
+      return;
+    }
+    this.executeSaveProfile();
+  }
+
+  submitWithPassword() {
+    if (!this.senhaConfirmacao) return;
+    this.confirmError.set('');
+    this.executeSaveProfile(this.senhaConfirmacao);
+  }
+
+  private executeSaveProfile(senhaAtual?: string) {
     const user = this.currentUser();
     if (!user) return;
 
@@ -500,17 +763,25 @@ export class PerfilPageComponent {
       nome: this.editNome,
       email: this.editEmail,
       cargo: this.editCargo,
-      senha: this.editSenha || undefined // Envia apenas se alterada
+      senha: this.editSenha || undefined, // Envia apenas se alterada
+      fotoUrl: this.editFotoUrl || undefined,
+      senhaAtual: senhaAtual || undefined
     };
 
     this.authService.atualizarPerfil(user.id, payload).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.isEditMode.set(false);
+        this.showConfirmPasswordModal.set(false);
       },
       error: (err) => {
         this.isSaving.set(false);
-        this.editError.set(err.error?.message || 'Falha ao atualizar perfil. Verifique os dados inseridos.');
+        const errMsg = err.error?.message || 'Falha ao atualizar perfil. Verifique os dados inseridos.';
+        if (senhaAtual) {
+          this.confirmError.set(errMsg);
+        } else {
+          this.editError.set(errMsg);
+        }
       }
     });
   }

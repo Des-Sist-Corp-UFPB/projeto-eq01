@@ -2,6 +2,7 @@ import { Component, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Projeto } from '../services/project.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-project-card',
@@ -258,6 +259,7 @@ import { Projeto } from '../services/project.service';
 })
 export class ProjectCardComponent {
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   @Input({ required: true }) projeto!: Projeto;
 
   protected readonly isLiked = signal(false);
@@ -265,16 +267,61 @@ export class ProjectCardComponent {
 
   ngOnInit() {
     this.currentLikes.set(this.projeto.curtidas || 0);
+    const user = this.authService.currentUser();
+    if (user && this.projeto.id) {
+      const favsStr = localStorage.getItem(`nexushub_fav_projects_${user.id}`);
+      if (favsStr) {
+        try {
+          const parsed = JSON.parse(favsStr);
+          if (Array.isArray(parsed) && parsed.includes(this.projeto.id)) {
+            this.isLiked.set(true);
+          }
+        } catch {}
+      }
+    }
   }
 
   toggleLike(event: Event) {
     event.stopPropagation();
+    const user = this.authService.currentUser();
+    if (!user) {
+      this.isLiked.update(l => !l);
+      this.currentLikes.update(l => this.isLiked() ? l + 1 : l - 1);
+      return;
+    }
+
     if (this.isLiked()) {
       this.isLiked.set(false);
       this.currentLikes.update(l => l - 1);
+      if (this.projeto.id) {
+        const favsStr = localStorage.getItem(`nexushub_fav_projects_${user.id}`);
+        if (favsStr) {
+          try {
+            const parsed = JSON.parse(favsStr);
+            if (Array.isArray(parsed)) {
+              const updated = parsed.filter((id: any) => id !== this.projeto.id);
+              localStorage.setItem(`nexushub_fav_projects_${user.id}`, JSON.stringify(updated));
+            }
+          } catch {}
+        }
+      }
     } else {
       this.isLiked.set(true);
       this.currentLikes.update(l => l + 1);
+      if (this.projeto.id) {
+        const favsStr = localStorage.getItem(`nexushub_fav_projects_${user.id}`);
+        let parsed = [];
+        if (favsStr) {
+          try {
+            parsed = JSON.parse(favsStr);
+          } catch {}
+        }
+        if (!Array.isArray(parsed)) parsed = [];
+        if (!parsed.includes(this.projeto.id)) {
+          parsed.push(this.projeto.id);
+        }
+        localStorage.setItem(`nexushub_fav_projects_${user.id}`, JSON.stringify(parsed));
+      }
     }
   }
 

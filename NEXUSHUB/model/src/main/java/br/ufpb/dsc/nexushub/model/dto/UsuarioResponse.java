@@ -6,7 +6,8 @@ public record UsuarioResponse(
         Long id,
         String nome,
         String email,
-        String cargo
+        String cargo,
+        String fotoUrl
 ) {
     public static UsuarioResponse from(Usuario usuario) {
         if (usuario == null) return null;
@@ -14,7 +15,8 @@ public record UsuarioResponse(
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getCargo()
+                usuario.getCargo(),
+                usuario.getFotoUrl()
         );
     }
 }

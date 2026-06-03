@@ -7,6 +7,7 @@ import { PerfilPageComponent } from './pages/perfil.page';
 import { ProjetoDetalhePageComponent } from './pages/projeto-detalhe.page';
 import { GruposPageComponent } from './pages/grupos.page';
 import { GrupoDetalhePageComponent } from './pages/grupo-detalhe.page';
+import { LojaPageComponent } from './pages/loja.page';
 
 export const routes: Routes = [
   { path: '', component: DashboardPageComponent },
@@ -17,5 +18,6 @@ export const routes: Routes = [
   { path: 'projetos/:id', component: ProjetoDetalhePageComponent },
   { path: 'grupos', component: GruposPageComponent },
   { path: 'grupos/:id', component: GrupoDetalhePageComponent },
+  { path: 'loja', component: LojaPageComponent },
   { path: '**', redirectTo: '' }
 ];

@@ -36,11 +36,17 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("Este e-mail já está cadastrado.");
         }
 
+        if (request.senha() == null || request.senha().trim().length() < 6) {
+            log.warn("[Service - Cadastro] Senha muito curta ou nula.");
+            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres.");
+        }
+
         Usuario usuario = new Usuario(
                 request.nome().trim(),
                 emailFormatado,
                 passwordEncoder.encode(request.senha()),
-                request.cargo() != null ? request.cargo() : "ESTUDANTE"
+                request.cargo() != null ? request.cargo() : "ESTUDANTE",
+                request.fotoUrl() != null ? request.fotoUrl() : ""
         );
 
         Usuario salvo = usuarioRepository.save(usuario);
@@ -96,8 +102,22 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuario.setCargo(request.cargo());
         }
 
-        // Se a senha for enviada com comprimento mínimo de 6, redefinimos ela
-        if (request.senha() != null && request.senha().trim().length() >= 6) {
+        if (request.fotoUrl() != null) {
+            usuario.setFotoUrl(request.fotoUrl());
+        }
+
+        // Se a senha for enviada, validamos a senha atual antes de redefinir
+        if (request.senha() != null && !request.senha().trim().isEmpty()) {
+            if (request.senha().trim().length() < 6) {
+                throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
+            }
+            if (request.senhaAtual() == null || request.senhaAtual().trim().isEmpty()) {
+                throw new IllegalArgumentException("A senha atual é obrigatória para realizar a alteração de senha.");
+            }
+            if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenha())) {
+                log.warn("[Service - Perfil] Senha atual inválida para o usuário ID {}", id);
+                throw new IllegalArgumentException("Senha atual incorreta.");
+            }
             log.info("[Service - Perfil] Nova senha fornecida. Atualizando hash BCrypt...");
             usuario.setSenha(passwordEncoder.encode(request.senha().trim()));
         }

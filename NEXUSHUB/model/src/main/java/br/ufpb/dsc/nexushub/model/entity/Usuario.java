@@ -26,6 +26,9 @@ public class Usuario {
 
     private String cargo;
 
+    @jakarta.persistence.Column(columnDefinition = "TEXT")
+    private String fotoUrl;
+
     protected Usuario() {
     }
 
@@ -34,6 +37,15 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
         this.cargo = cargo;
+        this.fotoUrl = "";
+    }
+
+    public Usuario(String nome, String email, String senha, String cargo, String fotoUrl) {
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+        this.cargo = cargo;
+        this.fotoUrl = fotoUrl;
     }
 
     public Long getId() {
@@ -70,5 +82,13 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
     }
 }

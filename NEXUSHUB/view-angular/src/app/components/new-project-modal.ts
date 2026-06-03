@@ -1,7 +1,9 @@
-import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProjectService, ProjetoRequest } from '../services/project.service';
+import { GrupoService, Grupo } from '../services/grupo.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-new-project-modal',
@@ -92,14 +94,22 @@ import { ProjectService, ProjetoRequest } from '../services/project.service';
 
             <!-- STEP 2: Group & Visibility -->
             <div *ngIf="currentStep() === 2" class="step-content animate-fade-in">
-              <div class="form-group">
+              <div class="form-group" *ngIf="!hasNoGroups()">
                 <label for="grupo">Grupo ou Iniciativa *</label>
                 <select id="grupo" name="grupo" [(ngModel)]="formModel.grupoPertencente" required>
-                  <option value="Laboratorio de Inovacao e Ideias">Laboratório de Inovação e Ideias (Seu Grupo)</option>
-                  <option value="Núcleo de Robotica Aplicada">Núcleo de Robótica Aplicada</option>
-                  <option value="Iniciativa Geral Nexus">Iniciativa Geral Nexus</option>
+                  <option *ngFor="let g of myGroups()" [value]="g.nome">{{ g.nome }}</option>
                 </select>
                 <p class="form-hint">Baseado nos grupos dos quais você participa no campus.</p>
+              </div>
+
+              <div class="alert-danger-box" *ngIf="hasNoGroups()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon-error">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div>
+                  <h4>Você não participa de nenhum grupo!</h4>
+                  <p>Um projeto acadêmico do NexusHub deve estar vinculado a um grupo participante. Acesse a aba <strong>Grupos</strong> para entrar em um grupo ou criar um novo antes de continuar.</p>
+                </div>
               </div>
 
               <div class="form-group">
@@ -504,14 +514,51 @@ import { ProjectService, ProjetoRequest } from '../services/project.service';
       justify-content: flex-end;
       gap: 12px;
     }
+
+    .alert-danger-box {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 16px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .alert-icon-error {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: #ef4444;
+    }
+
+    .alert-danger-box h4 {
+      margin: 0 0 4px 0;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .alert-danger-box p {
+      margin: 0;
+      line-height: 1.4;
+      color: #7f1d1d;
+    }
   `]
 })
-export class NewProjectModalComponent {
+export class NewProjectModalComponent implements OnInit {
   @Output() onClose = new EventEmitter<void>();
   @Output() onSaved = new EventEmitter<void>();
 
   private readonly projectService = inject(ProjectService);
+  private readonly grupoService = inject(GrupoService);
+  private readonly authService = inject(AuthService);
+
   protected readonly currentStep = signal(1);
+  protected readonly myGroups = signal<Grupo[]>([]);
+  protected readonly hasNoGroups = signal(false);
 
   protected readonly presetCovers = [
     'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
@@ -529,12 +576,57 @@ export class NewProjectModalComponent {
     tipo: 'Desenvolvimento',
     tags: '',
     visibilidade: 'PUBLICO_ABERTO',
-    grupoPertencente: 'Laboratorio de Inovacao e Ideias',
-    autor: 'Rodrigo Silva', // Simula o autor logado por padrão
+    grupoPertencente: '',
+    autor: '',
     imagemCardUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
     imagemLandingUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
-    xpDistribuido: 250 // XP padrão
+    xpDistribuido: 250
   };
+
+  ngOnInit() {
+    const user = this.authService.currentUser();
+    if (user) {
+      this.formModel.autor = user.nome;
+    }
+    this.loadUserGroups();
+  }
+
+  loadUserGroups() {
+    const user = this.authService.currentUser();
+    if (!user) return;
+
+    this.grupoService.listar().subscribe({
+      next: (groups) => {
+        const filtered = groups.filter(g => {
+          if (g.responsavel && g.responsavel.trim().toLowerCase() === user.nome.trim().toLowerCase()) {
+            return true;
+          }
+          const cached = localStorage.getItem(`nexushub_group_members_${g.id}`);
+          if (cached) {
+            try {
+              const members = JSON.parse(cached);
+              return Array.isArray(members) && members.some((m: any) => m.nome && m.nome.trim().toLowerCase() === user.nome.trim().toLowerCase());
+            } catch (e) {
+              return false;
+            }
+          }
+          return false;
+        });
+
+        this.myGroups.set(filtered);
+        this.hasNoGroups.set(filtered.length === 0);
+
+        if (filtered.length > 0) {
+          this.formModel.grupoPertencente = filtered[0].nome;
+        } else {
+          this.formModel.grupoPertencente = '';
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar grupos para o modal', err);
+      }
+    });
+  }
 
   close() {
     this.onClose.emit();
@@ -562,12 +654,16 @@ export class NewProjectModalComponent {
       return this.formModel.nome.trim() !== '' && this.formModel.resumo.trim() !== '';
     }
     if (this.currentStep() === 2) {
-      return !!this.formModel.grupoPertencente && !!this.formModel.visibilidade;
+      return !this.hasNoGroups() && !!this.formModel.grupoPertencente && !!this.formModel.visibilidade;
     }
     return true;
   }
 
   submitForm() {
+    if (this.hasNoGroups()) {
+      alert('Você precisa fazer parte de pelo menos um grupo para cadastrar o projeto.');
+      return;
+    }
     this.projectService.criar(this.formModel).subscribe({
       next: () => {
         this.onSaved.emit();

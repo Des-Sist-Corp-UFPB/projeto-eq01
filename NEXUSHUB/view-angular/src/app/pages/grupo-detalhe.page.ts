@@ -19,6 +19,7 @@ export interface Vaga {
   tipo: string;
   requisitos: string;
   candidatos: string[]; // List of member names who applied
+  projetoNome?: string;
 }
 
 @Component({
@@ -153,7 +154,7 @@ export interface Vaga {
             <div class="section-header-row">
               <h3>Mural de Vagas e Oportunidades</h3>
               <button 
-                *ngIf="isCoordinator()" 
+                *ngIf="isProjectCreator()" 
                 class="btn-toggle-vaga"
                 [style.border-color]="grupo()?.cor || '#1e3a8a'"
                 [style.color]="grupo()?.cor || '#1e3a8a'"
@@ -163,8 +164,8 @@ export interface Vaga {
               </button>
             </div>
 
-            <!-- Create Vacancy Form (Coordinators only) -->
-            <div class="create-vaga-form animate-scale-up" *ngIf="isCoordinator() && showAddVagaForm()">
+            <!-- Create Vacancy Form (Project Creators only) -->
+            <div class="create-vaga-form animate-scale-up" *ngIf="isProjectCreator() && showAddVagaForm()">
               <h4>Nova Oportunidade no Grupo</h4>
               <div class="form-row">
                 <div class="form-group-item">
@@ -181,7 +182,16 @@ export interface Vaga {
                   </select>
                 </div>
               </div>
-              <div class="form-group-item">
+              <div class="form-row" style="margin-top: 10px;">
+                <div class="form-group-item" style="width: 100%;">
+                  <label for="vaga-projeto">Projeto Associado *</label>
+                  <select id="vaga-projeto" [(ngModel)]="novaVagaProjeto">
+                    <option value="">-- Selecione um projeto seu --</option>
+                    <option *ngFor="let p of myProjectsInGroup()" [value]="p.nome">{{ p.nome }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group-item" style="margin-top: 10px;">
                 <label for="vaga-req">Requisitos e Descrição *</label>
                 <textarea id="vaga-req" rows="3" placeholder="Requisitos da vaga, benefícios e prazos..." [(ngModel)]="novaVagaRequisitos"></textarea>
               </div>
@@ -196,11 +206,16 @@ export interface Vaga {
                 <div class="vaga-header">
                   <div class="vaga-title-row">
                     <h5>{{ vaga.cargo }}</h5>
-                    <span class="vaga-type-pill">{{ vaga.tipo }}</span>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                      <span class="vaga-type-pill">{{ vaga.tipo }}</span>
+                      <span class="vaga-proj-badge" *ngIf="vaga.projetoNome" [style.border-color]="grupo()?.cor || '#1e3a8a'" [style.color]="grupo()?.cor || '#1e3a8a'">
+                        📁 Projeto: {{ vaga.projetoNome }}
+                      </span>
+                    </div>
                   </div>
                   
                   <!-- Candidate Button -->
-                  <div class="vaga-action-side" *ngIf="currentUser() && !isCoordinator()">
+                  <div class="vaga-action-side" *ngIf="currentUser() && !isVagaOwner(vaga)">
                     <button 
                       class="btn-candidate" 
                       [class.applied]="hasApplied(vaga)" 
@@ -213,8 +228,8 @@ export interface Vaga {
                 
                 <p class="vaga-requirements-desc">{{ vaga.requisitos }}</p>
 
-                <!-- Coordinator-only Applicant View -->
-                <div class="vaga-candidates-coordinator" *ngIf="isCoordinator()">
+                <!-- Project Owner-only Applicant View -->
+                <div class="vaga-candidates-coordinator" *ngIf="isVagaOwner(vaga)">
                   <div class="candidates-header-row">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="cand-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
                     <span>Candidatos Inscritos ({{ vaga.candidatos.length }})</span>
@@ -671,6 +686,14 @@ export interface Vaga {
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+    .vaga-proj-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid;
+      background: rgba(255, 255, 255, 0.7);
+    }
     .vaga-requirements-desc {
       font-size: 13.5px;
       color: var(--color-muted);
@@ -878,9 +901,16 @@ export class GrupoDetalhePageComponent implements OnInit {
   protected novaVagaCargo = '';
   protected novaVagaTipo = 'Bolsista';
   protected novaVagaRequisitos = '';
+  protected novaVagaProjeto = '';
 
   // Logged in user session
   protected readonly currentUser = this.authService.currentUser;
+
+  protected readonly myProjectsInGroup = computed(() => {
+    const user = this.currentUser();
+    if (!user) return [];
+    return this.groupProjects().filter(p => p.autor && p.autor.trim().toLowerCase() === user.nome.trim().toLowerCase());
+  });
 
   // Mock list of member candidates default avatars
   private readonly mockAvatars = [
@@ -987,14 +1017,16 @@ export class GrupoDetalhePageComponent implements OnInit {
           cargo: 'Desenvolvedor Frontend Angular',
           tipo: 'Bolsista',
           requisitos: 'Experiência prévia com desenvolvimento Web (HTML/CSS), TypeScript e interesse em aprender Angular + RxJS.',
-          candidatos: ['Carla Dias']
+          candidatos: ['Carla Dias'],
+          projetoNome: grupoId === 1 ? 'Mapa de Projetos Academicos' : undefined
         },
         {
           id: `vaga_${grupoId}_2`,
           cargo: 'Pesquisador em Machine Learning',
           tipo: 'Voluntário',
           requisitos: 'Conhecimentos intermediários de Python, bibliotecas como NumPy/Pandas e lógica de modelagem de dados.',
-          candidatos: []
+          candidatos: [],
+          projetoNome: grupoId === 1 ? 'Plataforma de IA para Diagnostico' : (grupoId === 6 ? 'Phoebus' : undefined)
         }
       ];
       localStorage.setItem(`nexushub_group_vacancies_${grupoId}`, JSON.stringify(defaultVagas));
@@ -1060,9 +1092,20 @@ export class GrupoDetalhePageComponent implements OnInit {
     });
   }
 
+  isProjectCreator(): boolean {
+    return this.myProjectsInGroup().length > 0;
+  }
+
+  isVagaOwner(vaga: Vaga): boolean {
+    const user = this.currentUser();
+    if (!user || !vaga.projetoNome) return false;
+    const proj = this.groupProjects().find(p => p.nome.trim().toLowerCase() === vaga.projetoNome?.trim().toLowerCase());
+    return proj ? proj.autor?.trim().toLowerCase() === user.nome.trim().toLowerCase() : false;
+  }
+
   adicionarVaga() {
-    if (!this.novaVagaCargo.trim() || !this.novaVagaRequisitos.trim()) {
-      alert('Por favor, preencha o cargo e os requisitos da vaga.');
+    if (!this.novaVagaCargo.trim() || !this.novaVagaRequisitos.trim() || !this.novaVagaProjeto) {
+      alert('Por favor, preencha o cargo, os requisitos e selecione o projeto associado.');
       return;
     }
     
@@ -1074,7 +1117,8 @@ export class GrupoDetalhePageComponent implements OnInit {
       cargo: this.novaVagaCargo,
       tipo: this.novaVagaTipo,
       requisitos: this.novaVagaRequisitos,
-      candidatos: []
+      candidatos: [],
+      projetoNome: this.novaVagaProjeto
     };
 
     this.vagas.update(list => {
@@ -1086,6 +1130,7 @@ export class GrupoDetalhePageComponent implements OnInit {
     // Reset form
     this.novaVagaCargo = '';
     this.novaVagaRequisitos = '';
+    this.novaVagaProjeto = '';
     this.showAddVagaForm.set(false);
   }
 

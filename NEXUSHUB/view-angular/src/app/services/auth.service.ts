@@ -7,6 +7,7 @@ export interface UsuarioResponse {
   nome: string;
   email: string;
   cargo: string;
+  fotoUrl?: string;
 }
 
 @Injectable({
