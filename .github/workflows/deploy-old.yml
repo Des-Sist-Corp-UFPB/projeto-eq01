@@ -1,0 +1,114 @@
+name: Deploy NEXUS HUB
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute image name
+        id: image
+        shell: bash
+        run: |
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/eq01:latest"
+          echo "name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Validate deploy configuration
+        shell: bash
+        env:
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          test -n "$SSH_USERNAME" || (echo "Missing secret SSH_USERNAME" && exit 1)
+          test -n "$SSH_DEPLOY_KEY" || (echo "Missing secret SSH_DEPLOY_KEY" && exit 1)
+          test -n "$DB_PASSWORD" || (echo "Missing secret DB_PASSWORD" && exit 1)
+          test -n "$DEPLOY_HOST" || (echo "Missing secret DEPLOY_HOST" && exit 1)
+          test -n "$APP_PORT" || (echo "Missing secret APP_PORT" && exit 1)
+          test -n "$SPRING_DATASOURCE_URL" || (echo "Missing secret SPRING_DATASOURCE_URL" && exit 1)
+          test -n "$SPRING_DATASOURCE_USERNAME" || (echo "Missing secret SPRING_DATASOURCE_USERNAME" && exit 1)
+
+          [[ "$SSH_USERNAME" =~ ^[A-Za-z0-9._-]+$ ]] || (echo "Invalid secret SSH_USERNAME: use only the server username, without host, spaces or labels" && exit 1)
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || (echo "Invalid secret DEPLOY_HOST: use only the server host, without protocol, user, port or path" && exit 1)
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./NEXUSHUB
+          file: ./NEXUSHUB/Dockerfile
+          push: true
+          tags: ${{ steps.image.outputs.name }}
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy on server
+        shell: bash
+        env:
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -l "$SSH_USERNAME" "$DEPLOY_HOST" <<EOF
+          set -eu
+          mkdir -p ~/nexushub
+          cd ~/nexushub
+
+          cat > docker-compose.yml <<COMPOSE
+          services:
+            backend:
+              image: ${IMAGE_NAME}
+              container_name: eq01-nexushub-backend
+              restart: unless-stopped
+              ports:
+                - "127.0.0.1:${APP_PORT}:8080"
+              environment:
+                SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+                SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+                SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+                SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+                SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+          COMPOSE
+
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker compose pull
+          docker compose up -d --remove-orphans
+          EOF
