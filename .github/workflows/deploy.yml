@@ -23,7 +23,7 @@ jobs:
         id: image
         shell: bash
         run: |
-          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}:latest"
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/eq01:latest"
           echo "name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Login to GitHub Container Registry
@@ -32,6 +32,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate deploy configuration
+        shell: bash
+        run: |
+          test -n "${{ secrets.SSH_USERNAME }}" || (echo "Missing secret SSH_USERNAME" && exit 1)
+          test -n "${{ secrets.SSH_DEPLOY_KEY }}" || (echo "Missing secret SSH_DEPLOY_KEY" && exit 1)
+          test -n "${{ secrets.DB_PASSWORD }}" || (echo "Missing secret DB_PASSWORD" && exit 1)
+          test -n "${{ secrets.DEPLOY_HOST }}" || (echo "Missing secret DEPLOY_HOST" && exit 1)
+          test -n "${{ secrets.APP_PORT }}" || (echo "Missing secret APP_PORT" && exit 1)
+          test -n "${{ secrets.SPRING_DATASOURCE_URL }}" || (echo "Missing secret SPRING_DATASOURCE_URL" && exit 1)
+          test -n "${{ secrets.SPRING_DATASOURCE_USERNAME }}" || (echo "Missing secret SPRING_DATASOURCE_USERNAME" && exit 1)
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
@@ -48,27 +59,28 @@ jobs:
           chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Upload compose file
         shell: bash
         run: |
-          ssh -i ~/.ssh/deploy_key "${{ secrets.SSH_USERNAME }}@${{ vars.DEPLOY_HOST }}" "mkdir -p ~/nexushub"
-          scp -i ~/.ssh/deploy_key ./NEXUSHUB/docker-compose.yml "${{ secrets.SSH_USERNAME }}@${{ vars.DEPLOY_HOST }}:~/nexushub/docker-compose.yml"
+          ssh -i ~/.ssh/deploy_key "${{ secrets.SSH_USERNAME }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p ~/nexushub"
+          scp -i ~/.ssh/deploy_key ./NEXUSHUB/docker-compose.yml "${{ secrets.SSH_USERNAME }}@${{ secrets.DEPLOY_HOST }}:~/nexushub/docker-compose.yml"
 
       - name: Deploy on server
         shell: bash
         run: |
-          ssh -i ~/.ssh/deploy_key "${{ secrets.SSH_USERNAME }}@${{ vars.DEPLOY_HOST }}" <<'EOF'
+          ssh -i ~/.ssh/deploy_key "${{ secrets.SSH_USERNAME }}@${{ secrets.DEPLOY_HOST }}" <<'EOF'
           set -eu
           cd ~/nexushub
           cat > .env <<ENV
           IMAGE_NAME=${{ steps.image.outputs.name }}
-          APP_PORT=${{ vars.APP_PORT }}
-          SPRING_DATASOURCE_URL=${{ vars.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME=${{ vars.SPRING_DATASOURCE_USERNAME }}
+          APP_PORT=${{ secrets.APP_PORT }}
+          SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
           SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
           ENV
+          echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
           docker compose pull
           docker compose up -d
           EOF
