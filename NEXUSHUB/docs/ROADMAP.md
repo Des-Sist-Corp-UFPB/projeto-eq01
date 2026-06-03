@@ -24,23 +24,29 @@
 - Pagina de grupos.
 - Vinculo entre grupos e projetos.
 
-## Fase 4: Gamificacao
-
-- Pontos.
-- Badges.
-- Rankings.
-- Historico de atividades.
-
-## Fase 5: Eventos e oportunidades
+## Fase 4: Eventos e oportunidades
 
 - Calendario de eventos.
 - Mural de oportunidades.
 - Inscricoes ou links externos.
 - Filtros por area, tipo e status.
 
-## Fase 6: Painel administrativo
+## Fase 5: Painel administrativo
 
 - Moderacao.
 - Relatorios.
 - Gestao de usuarios.
 - Acompanhamento de engajamento.
+
+## Fase 6: Gamificacao
+
+- Pontos.
+- Badges.
+- Rankings.
+- Historico de atividades.
+
+## Fase 7: Polimento
+
+- ajustar logs
+- ajustar exceção.
+- ajustar segurança
