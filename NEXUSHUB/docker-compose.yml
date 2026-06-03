@@ -1,51 +1,13 @@
-version: '3.8'
-
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: nexushub-db
-    environment:
-      - POSTGRES_DB=nexushub
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - nexushub-network
-
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nexushub-backend
+    image: ${IMAGE_NAME}
+    container_name: eq01-nexushub-backend
+    restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "127.0.0.1:${APP_PORT:-8101}:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/nexushub
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-    depends_on:
-      - db
-    networks:
-      - nexushub-network
-
-  frontend:
-    build:
-      context: ./view-angular
-      dockerfile: Dockerfile
-    container_name: nexushub-frontend
-    ports:
-      - "4200:80"
-    depends_on:
-      - backend
-    networks:
-      - nexushub-network
-
-volumes:
-  postgres_data:
-
-networks:
-  nexushub-network:
-    driver: bridge
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
