@@ -80,6 +80,7 @@ jobs:
         env:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
           APP_PORT: ${{ secrets.APP_PORT }}
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
@@ -88,19 +89,25 @@ jobs:
         run: |
           COMPOSE_B64="$(base64 -w 0 ./NEXUSHUB/docker-compose.yml)"
 
-          ssh -T -o RequestTTY=no -i ~/.ssh/deploy_key -l "$SSH_USERNAME" "$DEPLOY_HOST" <<EOF
-          set -eu
-          mkdir -p ~/nexushub
-          cd ~/nexushub
-          printf '%s' '${COMPOSE_B64}' | base64 -d > docker-compose.yml
-          cat > .env <<ENV
-          IMAGE_NAME=${{ steps.image.outputs.name }}
-          APP_PORT=${APP_PORT}
-          SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-          SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-          SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+          ssh -T -o RequestTTY=no -i ~/.ssh/deploy_key -l "$SSH_USERNAME" "$DEPLOY_HOST" \
+            "IMAGE_NAME='$IMAGE_NAME' APP_PORT='$APP_PORT' SPRING_DATASOURCE_URL='$SPRING_DATASOURCE_URL' SPRING_DATASOURCE_USERNAME='$SPRING_DATASOURCE_USERNAME' SPRING_DATASOURCE_PASSWORD='$DB_PASSWORD' GHCR_TOKEN='$GHCR_TOKEN' GHCR_USER='${{ github.actor }}' COMPOSE_B64='$COMPOSE_B64' bash -se" <<'EOF'
+          set -euo pipefail
+
+          DEPLOY_DIR="$HOME/nexushub"
+          COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml"
+          ENV_FILE="$DEPLOY_DIR/.env"
+
+          mkdir -p "$DEPLOY_DIR"
+          printf '%s' "$COMPOSE_B64" | base64 -d > "$COMPOSE_FILE"
+          cat > "$ENV_FILE" <<ENV
+          IMAGE_NAME=$IMAGE_NAME
+          APP_PORT=$APP_PORT
+          SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+          SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
+          SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
           ENV
-          echo '${GHCR_TOKEN}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
-          docker pull '${{ steps.image.outputs.name }}'
-          docker compose up -d --no-deps --force-recreate backend
+
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+          docker pull "$IMAGE_NAME"
+          docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" -p eq01 up -d --no-deps --force-recreate backend
           EOF
