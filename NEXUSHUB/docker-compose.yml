@@ -1,13 +1,20 @@
 services:
   backend:
-    image: ${IMAGE_NAME}
+    image: ${BACKEND_IMAGE}
     container_name: eq01-nexushub-backend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${APP_PORT:-8101}:8080"
+      - "127.0.0.1:8101:8080"
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: eq01-nexushub-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8102:80"
