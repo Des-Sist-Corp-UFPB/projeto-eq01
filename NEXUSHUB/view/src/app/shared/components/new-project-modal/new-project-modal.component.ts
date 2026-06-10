@@ -1,4 +1,4 @@
-﻿import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -38,7 +38,7 @@ export class NewProjectModalComponent {
     grupoPertencente: 'Laboratorio de Inovacao e Ideias',
     imagemCardUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
     imagemLandingUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
-    xpDistribuido: 250 // XP padrÃ£o
+    xpDistribuido: 250 // XP padrão
   };
 
   close() {

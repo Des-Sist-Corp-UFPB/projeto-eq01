@@ -1,4 +1,4 @@
-﻿<article class="project-card animate-fade-in" (click)="goToDetails()" style="cursor: pointer;">
+<article class="project-card animate-fade-in" (click)="goToDetails()" style="cursor: pointer;">
       <div class="card-cover">
         <img [src]="projeto.imagemCardUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500'" alt="Capa do projeto" />
         <div class="card-badge" *ngIf="projeto.tipo">
@@ -29,7 +29,7 @@
         <div class="card-footer">
           <div class="author-info">
             <span class="avatar">{{ projeto.autor ? projeto.autor.charAt(0) : 'U' }}</span>
-            <span class="author-name">Por <strong>{{ projeto.autor || 'AnÃ´nimo' }}</strong></span>
+            <span class="author-name">Por <strong>{{ projeto.autor || 'Anônimo' }}</strong></span>
           </div>
           
           <div class="members-info">

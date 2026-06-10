@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -78,8 +78,8 @@ export class GrupoDetalhePageComponent implements OnInit {
           // Fallback mock group for instant preview & testing
           const mockGp: Grupo = {
             id: id,
-            nome: `Grupo AcadÃªmico Mock ${id}`,
-            descricao: 'Este Ã© um grupo de estudos e projetos criado localmente. Aqui, alunos e pesquisadores colaboram no desenvolvimento de soluÃ§Ãµes de software e artigos cientÃ­ficos aplicados.',
+            nome: `Grupo Acadêmico Mock ${id}`,
+            descricao: 'Este é um grupo de estudos e projetos criado localmente. Aqui, alunos e pesquisadores colaboram no desenvolvimento de soluções de software e artigos científicos aplicados.',
             area: 'Institucional',
             responsavel: 'Gabriel Costa',
             tipo: 'Aberto',
@@ -159,14 +159,14 @@ export class GrupoDetalhePageComponent implements OnInit {
           id: `vaga_${grupoId}_1`,
           cargo: 'Desenvolvedor Frontend Angular',
           tipo: 'Bolsista',
-          requisitos: 'ExperiÃªncia prÃ©via com desenvolvimento Web (HTML/CSS), TypeScript e interesse em aprender Angular + RxJS.',
+          requisitos: 'Experiência prévia com desenvolvimento Web (HTML/CSS), TypeScript e interesse em aprender Angular + RxJS.',
           candidatos: ['Carla Dias']
         },
         {
           id: `vaga_${grupoId}_2`,
           cargo: 'Pesquisador em Machine Learning',
-          tipo: 'VoluntÃ¡rio',
-          requisitos: 'Conhecimentos intermediÃ¡rios de Python, bibliotecas como NumPy/Pandas e lÃ³gica de modelagem de dados.',
+          tipo: 'Voluntário',
+          requisitos: 'Conhecimentos intermediários de Python, bibliotecas como NumPy/Pandas e lógica de modelagem de dados.',
           candidatos: []
         }
       ];
@@ -222,7 +222,7 @@ export class GrupoDetalhePageComponent implements OnInit {
     if (!id) return;
 
     if (this.isMembroCoordenador(user.nome)) {
-      alert('O Coordenador Geral nÃ£o pode sair do grupo.');
+      alert('O Coordenador Geral não pode sair do grupo.');
       return;
     }
 
@@ -295,17 +295,17 @@ export class GrupoDetalhePageComponent implements OnInit {
     const gp = this.grupo();
     if (!gp || !gp.id) return;
     
-    if (confirm(`Tem certeza absoluta de que deseja excluir o grupo "${gp.nome}" permanentemente? Todos os dados associados serÃ£o perdidos.`)) {
+    if (confirm(`Tem certeza absoluta de que deseja excluir o grupo "${gp.nome}" permanentemente? Todos os dados associados serão perdidos.`)) {
       this.grupoService.deletar(gp.id).subscribe({
         next: () => {
           localStorage.removeItem(`nexushub_group_members_${gp.id}`);
           localStorage.removeItem(`nexushub_group_vacancies_${gp.id}`);
-          alert('Grupo excluÃ­do com sucesso!');
+          alert('Grupo excluído com sucesso!');
           this.router.navigate(['/grupos']);
         },
         error: (err) => {
           console.error('Erro ao excluir grupo', err);
-          alert('Falha ao excluir o grupo. Verifique se o backend estÃ¡ ativo!');
+          alert('Falha ao excluir o grupo. Verifique se o backend está ativo!');
         }
       });
     }

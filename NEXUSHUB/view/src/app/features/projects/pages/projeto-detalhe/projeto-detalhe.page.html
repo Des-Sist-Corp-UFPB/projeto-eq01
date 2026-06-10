@@ -1,4 +1,4 @@
-﻿<div class="detail-container animate-fade-in" *ngIf="projeto()">
+<div class="detail-container animate-fade-in" *ngIf="projeto()">
       <!-- Back navigation link -->
       <a routerLink="/" class="back-link">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="arrow-icon">
@@ -24,23 +24,23 @@
           <section class="card-section">
             <h2 class="card-title">Objetivos do Projeto</h2>
             <p class="objective-text">
-              {{ projeto()?.objetivos || 'Sem objetivos cadastrados para esta iniciativa acadÃªmica.' }}
+              {{ projeto()?.objetivos || 'Sem objetivos cadastrados para esta iniciativa acadêmica.' }}
             </p>
           </section>
 
           <section class="card-section">
-            <h2 class="card-title">Tecnologias & CompetÃªncias</h2>
+            <h2 class="card-title">Tecnologias & Competências</h2>
             <div class="tags-row" *ngIf="projeto()?.tags">
               <span class="tag-badge" *ngFor="let tag of getTags()">#{{ tag.trim() }}</span>
             </div>
-            <p class="tags-empty" *ngIf="!projeto()?.tags">Nenhuma tecnologia/competÃªncia mapeada ainda.</p>
+            <p class="tags-empty" *ngIf="!projeto()?.tags">Nenhuma tecnologia/competência mapeada ainda.</p>
           </section>
 
           <!-- 1. AUTHOR WORKSPACE: membership requests pending approval -->
           <section class="card-section admin-section" *ngIf="isOwner()">
             <div class="admin-header">
               <span class="admin-badge">Dono do Projeto</span>
-              <h2 class="card-title">SolicitaÃ§Ãµes de Entrada AcadÃªmica</h2>
+              <h2 class="card-title">Solicitações de Entrada Acadêmica</h2>
               <p class="admin-subtitle">Avalie os estudantes que desejam colaborar no seu projeto.</p>
             </div>
 
@@ -58,7 +58,7 @@
                 </div>
                 
                 <p class="applicant-motivation">
-                  <strong>MotivaÃ§Ã£o:</strong> "{{ sol.motivo }}"
+                  <strong>Motivação:</strong> "{{ sol.motivo }}"
                 </p>
 
                 <!-- Action buttons (only visible for pending) -->
@@ -74,7 +74,7 @@
             </div>
 
             <div class="no-requests" *ngIf="solicitacoes().length === 0">
-              <p>Nenhuma solicitaÃ§Ã£o de entrada cadastrada para este projeto por enquanto.</p>
+              <p>Nenhuma solicitação de entrada cadastrada para este projeto por enquanto.</p>
             </div>
           </section>
         </main>
@@ -83,15 +83,15 @@
         <aside class="detail-sidebar">
           <!-- Information Card -->
           <section class="card-section">
-            <h3 class="sidebar-title">Detalhes AcadÃªmicos</h3>
+            <h3 class="sidebar-title">Detalhes Acadêmicos</h3>
             
             <div class="sidebar-info-row">
               <span class="info-label">Coordenador/Autor</span>
-              <span class="info-value"><strong>{{ projeto()?.autor || 'AnÃ´nimo' }}</strong></span>
+              <span class="info-value"><strong>{{ projeto()?.autor || 'Anônimo' }}</strong></span>
             </div>
 
             <div class="sidebar-info-row" *ngIf="projeto()?.grupoPertencente">
-              <span class="info-label">Grupo / NÃºcleo</span>
+              <span class="info-label">Grupo / Núcleo</span>
               <span class="info-value"><strong>{{ projeto()?.grupoPertencente }}</strong></span>
             </div>
 
@@ -116,7 +116,7 @@
               <span class="xp-badge">+{{ projeto()?.xpDistribuido || 100 }} XP</span>
               <div>
                 <h4 class="xp-title">Recompensa de Atividade</h4>
-                <p class="xp-subtitle">Ganhe experiÃªncia na modalidade <strong>{{ projeto()?.tipo }}</strong> ao ingressar e realizar contribuiÃ§Ãµes aprovadas.</p>
+                <p class="xp-subtitle">Ganhe experiência na modalidade <strong>{{ projeto()?.tipo }}</strong> ao ingressar e realizar contribuições aprovadas.</p>
               </div>
             </div>
           </section>
@@ -127,13 +127,13 @@
             
             <!-- Logged out prompt -->
             <div class="auth-prompt" *ngIf="!isLoggedIn()">
-              <p>VocÃª precisa estar logado na plataforma acadÃªmica para enviar uma solicitaÃ§Ã£o de entrada.</p>
+              <p>Você precisa estar logado na plataforma acadêmica para enviar uma solicitação de entrada.</p>
               <button class="btn btn-primary w-full" routerLink="/login">Fazer Login</button>
             </div>
 
             <!-- Logged in join request form -->
             <div *ngIf="isLoggedIn() && !solicitacaoSucesso()">
-              <p class="join-desc">Envie uma justificativa ao coordenador explicando o porquÃª do seu interesse e suas habilidades.</p>
+              <p class="join-desc">Envie uma justificativa ao coordenador explicando o porquê do seu interesse e suas habilidades.</p>
               
               <div class="alert alert-danger" *ngIf="joinError()">
                 {{ joinError() }}
@@ -148,11 +148,11 @@
                     [(ngModel)]="motivo" 
                     required 
                     rows="4" 
-                    placeholder="Ex: Gostaria de participar pois tenho interesse em pesquisar sobre essa Ã¡rea e possuo conhecimentos prÃ©vios de Angular/Spring..."
+                    placeholder="Ex: Gostaria de participar pois tenho interesse em pesquisar sobre essa área e possuo conhecimentos prévios de Angular/Spring..."
                   ></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary w-full" [disabled]="!motivo.trim() || isSending()">
-                  {{ isSending() ? 'Enviando...' : 'Enviar SolicitaÃ§Ã£o de Entrada' }}
+                  {{ isSending() ? 'Enviando...' : 'Enviar Solicitação de Entrada' }}
                 </button>
               </form>
             </div>
@@ -162,8 +162,8 @@
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="success-icon">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h4>SolicitaÃ§Ã£o Enviada!</h4>
-              <p>Sua mensagem foi enviada ao autor. VocÃª receberÃ¡ uma notificaÃ§Ã£o quando a solicitaÃ§Ã£o for avaliada.</p>
+              <h4>Solicitação Enviada!</h4>
+              <p>Sua mensagem foi enviada ao autor. Você receberá uma notificação quando a solicitação for avaliada.</p>
             </div>
           </section>
         </aside>

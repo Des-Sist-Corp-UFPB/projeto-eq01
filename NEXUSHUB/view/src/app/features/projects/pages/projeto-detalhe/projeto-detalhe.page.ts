@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -53,7 +53,7 @@ export class ProjetoDetalhePageComponent implements OnInit {
     this.projectService.obterPorId(id).subscribe({
       next: (proj) => {
         this.projeto.set(proj);
-        // Se for o criador do projeto, busca as solicitaÃ§Ãµes vinculadas
+        // Se for o criador do projeto, busca as solicitações vinculadas
         if (this.isOwner()) {
           this.loadSolicitacoes(id);
         }
@@ -94,7 +94,7 @@ export class ProjetoDetalhePageComponent implements OnInit {
       },
       error: (err) => {
         this.isSending.set(false);
-        this.joinError.set(err.error?.message || 'Falha ao enviar a solicitaÃ§Ã£o. Tente novamente.');
+        this.joinError.set(err.error?.message || 'Falha ao enviar a solicitação. Tente novamente.');
       }
     });
   }
@@ -104,7 +104,7 @@ export class ProjetoDetalhePageComponent implements OnInit {
       next: () => {
         const proj = this.projeto();
         if (proj && proj.id) {
-          // Recarrega os dados do projeto para atualizar contador de membros e a lista de solicitaÃ§Ãµes
+          // Recarrega os dados do projeto para atualizar contador de membros e a lista de solicitações
           this.loadProjectDetails(proj.id);
         }
       },

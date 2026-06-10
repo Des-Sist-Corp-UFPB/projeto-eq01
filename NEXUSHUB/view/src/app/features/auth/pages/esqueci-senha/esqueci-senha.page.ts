@@ -1,4 +1,4 @@
-﻿import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -34,11 +34,11 @@ export class EsqueciSenhaPageComponent {
     this.authService.redefinirSenha(payload).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.successMessage.set('Sua senha foi redefinida com sucesso! VocÃª jÃ¡ pode efetuar login com sua nova credencial.');
+        this.successMessage.set('Sua senha foi redefinida com sucesso! Você já pode efetuar login com sua nova credencial.');
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Falha ao redefinir senha. Confirme se o e-mail estÃ¡ correto.');
+        this.errorMessage.set(err.error?.message || 'Falha ao redefinir senha. Confirme se o e-mail está correto.');
       }
     });
   }

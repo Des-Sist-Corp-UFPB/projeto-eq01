@@ -1,4 +1,4 @@
-﻿<div class="modal-backdrop animate-fade-in" (click)="close()">
+<div class="modal-backdrop animate-fade-in" (click)="close()">
       <div class="modal-card animate-scale-up" (click)="$event.stopPropagation()">
         
         <!-- Modal Header -->
@@ -15,7 +15,7 @@
         <div class="stepper">
           <div class="step" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
             <span class="step-num">1</span>
-            <span class="step-name">Info. BÃ¡sica</span>
+            <span class="step-name">Info. Básica</span>
           </div>
           <div class="step-line" [class.active]="currentStep() > 1"></div>
           
@@ -39,25 +39,25 @@
             <div *ngIf="currentStep() === 1" class="step-content animate-fade-in">
               <div class="form-group">
                 <label for="nome">Nome do Projeto *</label>
-                <input type="text" id="nome" name="nome" [(ngModel)]="formModel.nome" required placeholder="Ex: Portal de Bolsas AcadÃªmicas" #nomeInput="ngModel" />
-                <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome do projeto Ã© obrigatÃ³rio.</span>
+                <input type="text" id="nome" name="nome" [(ngModel)]="formModel.nome" required placeholder="Ex: Portal de Bolsas Acadêmicas" #nomeInput="ngModel" />
+                <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome do projeto é obrigatório.</span>
               </div>
 
               <div class="form-group">
                 <label for="resumo">Resumo Breve *</label>
-                <textarea id="resumo" name="resumo" rows="2" [(ngModel)]="formModel.resumo" required placeholder="Uma descriÃ§Ã£o rÃ¡pida de duas linhas para exibiÃ§Ã£o nos cards." #resumoInput="ngModel"></textarea>
-                <span class="error-msg" *ngIf="resumoInput.invalid && resumoInput.touched">O resumo do projeto Ã© obrigatÃ³rio.</span>
+                <textarea id="resumo" name="resumo" rows="2" [(ngModel)]="formModel.resumo" required placeholder="Uma descrição rápida de duas linhas para exibição nos cards." #resumoInput="ngModel"></textarea>
+                <span class="error-msg" *ngIf="resumoInput.invalid && resumoInput.touched">O resumo do projeto é obrigatório.</span>
               </div>
 
               <div class="form-group">
                 <label for="objetivos">Objetivos do Projeto</label>
-                <textarea id="objetivos" name="objetivos" rows="3" [(ngModel)]="formModel.objetivos" placeholder="Descreva os objetivos de mÃ©dio/longo prazo do projeto..."></textarea>
+                <textarea id="objetivos" name="objetivos" rows="3" [(ngModel)]="formModel.objetivos" placeholder="Descreva os objetivos de médio/longo prazo do projeto..."></textarea>
               </div>
 
               <div class="form-row">
                 <div class="form-group col">
                   <label for="categoria">Categoria</label>
-                  <input type="text" id="categoria" name="categoria" [(ngModel)]="formModel.categoria" placeholder="Ex: ExtensÃ£o, Pesquisa, Ensino" />
+                  <input type="text" id="categoria" name="categoria" [(ngModel)]="formModel.categoria" placeholder="Ex: Extensão, Pesquisa, Ensino" />
                 </div>
                 
                 <div class="form-group col">
@@ -66,16 +66,16 @@
                     <option value="Desenvolvimento">Desenvolvimento</option>
                     <option value="Testes">Testes</option>
                     <option value="Marketing">Marketing</option>
-                    <option value="GestÃ£o">GestÃ£o</option>
+                    <option value="Gestão">Gestão</option>
                     <option value="Pesquisa">Pesquisa</option>
-                    <option value="ExtensÃ£o">ExtensÃ£o</option>
+                    <option value="Extensão">Extensão</option>
                     <option value="Outros">Outros</option>
                   </select>
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="tags">Tags (separadas por vÃ­rgula)</label>
+                <label for="tags">Tags (separadas por vírgula)</label>
                 <input type="text" id="tags" name="tags" [(ngModel)]="formModel.tags" placeholder="Ex: Angular, Spring Boot, Java" />
               </div>
             </div>
@@ -85,29 +85,29 @@
               <div class="form-group">
                 <label for="grupo">Grupo ou Iniciativa *</label>
                 <select id="grupo" name="grupo" [(ngModel)]="formModel.grupoPertencente" required>
-                  <option value="Laboratorio de Inovacao e Ideias">LaboratÃ³rio de InovaÃ§Ã£o e Ideias (Seu Grupo)</option>
-                  <option value="NÃºcleo de Robotica Aplicada">NÃºcleo de RobÃ³tica Aplicada</option>
+                  <option value="Laboratorio de Inovacao e Ideias">Laboratório de Inovação e Ideias (Seu Grupo)</option>
+                  <option value="Núcleo de Robotica Aplicada">Núcleo de Robótica Aplicada</option>
                   <option value="Iniciativa Geral Nexus">Iniciativa Geral Nexus</option>
                 </select>
-                <p class="form-hint">Baseado nos grupos dos quais vocÃª participa no campus.</p>
+                <p class="form-hint">Baseado nos grupos dos quais você participa no campus.</p>
               </div>
 
               <div class="form-group">
-                <label>NÃ­vel de Visibilidade *</label>
+                <label>Nível de Visibilidade *</label>
                 <div class="radio-group">
                   <label class="radio-card" [class.selected]="formModel.visibilidade === 'PUBLICO'">
                     <input type="radio" name="visibilidade" value="PUBLICO" [(ngModel)]="formModel.visibilidade" />
                     <div class="radio-info">
-                      <span class="title">PÃºblico</span>
-                      <span class="desc">VisÃ­vel a toda a comunidade universitÃ¡ria.</span>
+                      <span class="title">Público</span>
+                      <span class="desc">Visível a toda a comunidade universitária.</span>
                     </div>
                   </label>
 
                   <label class="radio-card" [class.selected]="formModel.visibilidade === 'PUBLICO_ABERTO'">
                     <input type="radio" name="visibilidade" value="PUBLICO_ABERTO" [(ngModel)]="formModel.visibilidade" />
                     <div class="radio-info">
-                      <span class="title">PÃºblico e Aberto</span>
-                      <span class="desc">VisÃ­vel e aberto a solicitaÃ§Ãµes de novos membros.</span>
+                      <span class="title">Público e Aberto</span>
+                      <span class="desc">Visível e aberto a solicitações de novos membros.</span>
                     </div>
                   </label>
 
@@ -115,7 +115,7 @@
                     <input type="radio" name="visibilidade" value="PRIVADO" [(ngModel)]="formModel.visibilidade" />
                     <div class="radio-info">
                       <span class="title">Privado</span>
-                      <span class="desc">VisÃ­vel apenas para membros aprovados.</span>
+                      <span class="desc">Visível apenas para membros aprovados.</span>
                     </div>
                   </label>
                 </div>
@@ -125,10 +125,10 @@
             <!-- STEP 3: Capa do Projeto -->
             <div *ngIf="currentStep() === 3" class="step-content animate-fade-in">
               <div class="form-group">
-                <label>Selecione uma imagem de capa padrÃ£o ou insira URLs customizadas</label>
+                <label>Selecione uma imagem de capa padrão ou insira URLs customizadas</label>
                 <div class="preset-covers">
                   <div class="preset-cover" *ngFor="let cover of presetCovers" (click)="selectPreset(cover)" [class.active]="formModel.imagemCardUrl === cover">
-                    <img [src]="cover" alt="Pre-visualizaÃ§Ã£o" />
+                    <img [src]="cover" alt="Pre-visualização" />
                   </div>
                 </div>
               </div>

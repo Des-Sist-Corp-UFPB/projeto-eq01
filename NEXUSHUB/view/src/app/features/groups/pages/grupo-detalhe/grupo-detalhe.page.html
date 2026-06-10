@@ -1,4 +1,4 @@
-﻿<div class="groups-detail-container animate-fade-in" *ngIf="grupo()">
+<div class="groups-detail-container animate-fade-in" *ngIf="grupo()">
       
       <!-- Cover Banner -->
       <div class="detail-banner" [style.background]="(grupo()?.logo && (grupo()?.logo || '').length > 20) ? 'none' : 'linear-gradient(135deg, ' + (grupo()?.cor || '#1e3a8a') + ' 0%, #13a37c 100%)'">
@@ -55,12 +55,12 @@
           <div class="action-card-box">
             <div class="action-info" *ngIf="!isCoordinator()">
               <h4>Gostou do nosso grupo de estudos e pesquisa?</h4>
-              <p *ngIf="!isJoinedUser()">FaÃ§a parte e colabore em projetos de alto impacto acadÃªmico e tecnolÃ³gico.</p>
-              <p *ngIf="isJoinedUser()">VocÃª jÃ¡ Ã© um membro deste grupo! Participe dos projetos ou candidate-se a vagas.</p>
+              <p *ngIf="!isJoinedUser()">Faça parte e colabore em projetos de alto impacto acadêmico e tecnológico.</p>
+              <p *ngIf="isJoinedUser()">Você já é um membro deste grupo! Participe dos projetos ou candidate-se a vagas.</p>
             </div>
             <div class="action-info" *ngIf="isCoordinator()">
               <h4>Painel do Coordenador Geral</h4>
-              <p>VocÃª gerencia este grupo acadÃªmico. Pode cadastrar novas oportunidades e visualizar candidatos.</p>
+              <p>Você gerencia este grupo acadêmico. Pode cadastrar novas oportunidades e visualizar candidatos.</p>
             </div>
             
             <div class="action-button-area">
@@ -87,7 +87,7 @@
                 <div *ngIf="isCoordinator()" class="coordinator-actions-wrapper">
                   <div class="coordinator-badge">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="badge-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
-                    VocÃª coordena este grupo
+                    Você coordena este grupo
                   </div>
                   <button 
                     class="action-cta-btn delete-group-btn" 
@@ -100,7 +100,7 @@
               </ng-container>
               <ng-template #loginPrompt>
                 <button class="action-cta-btn disabled" disabled>
-                  FaÃ§a login para participar
+                  Faça login para participar
                 </button>
               </ng-template>
             </div>
@@ -140,22 +140,22 @@
               <h4>Nova Oportunidade no Grupo</h4>
               <div class="form-row">
                 <div class="form-group-item">
-                  <label for="vaga-cargo">Cargo / FunÃ§Ã£o *</label>
+                  <label for="vaga-cargo">Cargo / Função *</label>
                   <input type="text" id="vaga-cargo" placeholder="Ex: Desenvolvedor Front-end Angular" [(ngModel)]="novaVagaCargo" />
                 </div>
                 <div class="form-group-item">
                   <label for="vaga-tipo">Tipo de Contrato</label>
                   <select id="vaga-tipo" [(ngModel)]="novaVagaTipo">
                     <option value="Bolsista">Bolsista</option>
-                    <option value="VoluntÃ¡rio">VoluntÃ¡rio</option>
-                    <option value="EstagiÃ¡rio">EstagiÃ¡rio</option>
+                    <option value="Voluntário">Voluntário</option>
+                    <option value="Estagiário">Estagiário</option>
                     <option value="CLT">CLT / CLT Flex</option>
                   </select>
                 </div>
               </div>
               <div class="form-group-item">
-                <label for="vaga-req">Requisitos e DescriÃ§Ã£o *</label>
-                <textarea id="vaga-req" rows="3" placeholder="Requisitos da vaga, benefÃ­cios e prazos..." [(ngModel)]="novaVagaRequisitos"></textarea>
+                <label for="vaga-req">Requisitos e Descrição *</label>
+                <textarea id="vaga-req" rows="3" placeholder="Requisitos da vaga, benefícios e prazos..." [(ngModel)]="novaVagaRequisitos"></textarea>
               </div>
               <button class="btn-submit-vaga" [style.background]="grupo()?.cor || '#1e3a8a'" (click)="adicionarVaga()">
                 Publicar Oportunidade
@@ -201,7 +201,7 @@
 
             <div class="empty-state-box" *ngIf="vagas().length === 0">
               <div class="empty-icon">ðŸ“¢</div>
-              <p class="empty-list-text">NÃ£o hÃ¡ vagas abertas neste grupo no momento.</p>
+              <p class="empty-list-text">Não há vagas abertas neste grupo no momento.</p>
             </div>
           </div>
 

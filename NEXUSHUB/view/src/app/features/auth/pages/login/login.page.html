@@ -1,9 +1,9 @@
-﻿<div class="auth-wrapper animate-fade-in">
+<div class="auth-wrapper animate-fade-in">
       <div class="auth-card">
         <header class="auth-header">
           <span class="logo-badge">N</span>
           <h2>Acesse sua conta</h2>
-          <p>Conecte-se ao ecossistema acadÃªmico Nexus</p>
+          <p>Conecte-se ao ecossistema acadêmico Nexus</p>
         </header>
 
         <div class="alert alert-danger" *ngIf="errorMessage()">
@@ -12,7 +12,7 @@
 
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
           <div class="form-group">
-            <label for="email">E-mail AcadÃªmico</label>
+            <label for="email">E-mail Acadêmico</label>
             <input 
               type="email" 
               id="email" 
@@ -23,7 +23,7 @@
               placeholder="Ex: rodrigo@nexushub.com" 
               #emailInput="ngModel"
             />
-            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
           </div>
 
           <div class="form-group">
@@ -65,7 +65,7 @@
         </form>
 
         <footer class="auth-footer">
-          <p>NÃ£o tem cadastro? <a routerLink="/cadastro">Crie sua conta agora</a></p>
+          <p>Não tem cadastro? <a routerLink="/cadastro">Crie sua conta agora</a></p>
         </footer>
       </div>
     </div>

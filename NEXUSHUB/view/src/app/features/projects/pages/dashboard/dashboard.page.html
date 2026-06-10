@@ -1,4 +1,4 @@
-﻿<div class="animate-fade-in">
+<div class="animate-fade-in">
       <!-- Search Mode results -->
       <div class="main-content" *ngIf="searchQuery().trim() !== ''">
         <section class="search-results-section">
@@ -28,10 +28,10 @@
         <!-- Hero Section -->
         <section class="hero-section">
           <div class="hero-content">
-            <p class="hero-eyebrow">A vida acadÃªmica em movimento</p>
+            <p class="hero-eyebrow">A vida acadêmica em movimento</p>
             <h2>Explore e divulgue iniciativas da sua universidade</h2>
             <p class="hero-desc">
-              Participe de grupos de pesquisa, projetos de extensÃ£o, monitorias e desafios da comunidade. Transforme sua jornada acadÃªmica e ganhe reconhecimento!
+              Participe de grupos de pesquisa, projetos de extensão, monitorias e desafios da comunidade. Transforme sua jornada acadêmica e ganhe reconhecimento!
             </p>
             
             <div class="project-actions-row">
@@ -66,8 +66,8 @@
             <section class="carousel-section" *ngIf="isLoggedIn()">
               <div class="section-header">
                 <span class="section-tag journey">Sua Jornada</span>
-                <h2 class="section-title">Projetos que vocÃª Participa</h2>
-                <p class="section-subtitle">OlÃ¡ <strong>{{ currentUser()?.nome }}</strong>, acompanhe seus projetos cadastrados.</p>
+                <h2 class="section-title">Projetos que você Participa</h2>
+                <p class="section-subtitle">Olá <strong>{{ currentUser()?.nome }}</strong>, acompanhe seus projetos cadastrados.</p>
               </div>
               <app-carousel [items]="myProjects()"></app-carousel>
             </section>
@@ -77,16 +77,16 @@
               <div class="section-header">
                 <span class="section-tag hot">Em Destaque</span>
                 <h2 class="section-title">Projetos Mais Quentes</h2>
-                <p class="section-subtitle">Iniciativas com maior engajamento acadÃªmico e maior distribuiÃ§Ã£o de XP.</p>
+                <p class="section-subtitle">Iniciativas com maior engajamento acadêmico e maior distribuição de XP.</p>
               </div>
               <app-carousel [items]="hotProjects()"></app-carousel>
             </section>
 
-            <!-- 3. RecÃ©m LanÃ§ados -->
+            <!-- 3. Recém Lançados -->
             <section class="carousel-section">
               <div class="section-header">
                 <span class="section-tag recent">Novidades</span>
-                <h2 class="section-title">RecÃ©m LanÃ§ados</h2>
+                <h2 class="section-title">Recém Lançados</h2>
                 <p class="section-subtitle">Veja o que acabou de surgir no campus e seja um dos primeiros a apoiar.</p>
               </div>
               <app-carousel [items]="recentProjects()"></app-carousel>
@@ -96,8 +96,8 @@
             <section class="carousel-section">
               <div class="section-header">
                 <span class="section-tag colab">Oportunidades</span>
-                <h2 class="section-title">ColaboraÃ§Ãµes em Aberto (Colabs)</h2>
-                <p class="section-subtitle">Grupos de pesquisa e extensÃ£o ativamente recrutando novos talentos universitÃ¡rios.</p>
+                <h2 class="section-title">Colaborações em Aberto (Colabs)</h2>
+                <p class="section-subtitle">Grupos de pesquisa e extensão ativamente recrutando novos talentos universitários.</p>
               </div>
               <app-carousel [items]="colabs()"></app-carousel>
             </section>
@@ -106,8 +106,8 @@
             <section class="carousel-section tags-carousel-section">
               <div class="section-header">
                 <span class="section-tag categories">Interesses</span>
-                <h2 class="section-title">Explorar por Ãreas de Interesse (Tags)</h2>
-                <p class="section-subtitle">Escolha uma tag para navegar por projetos especÃ­ficos dessa tecnologia ou disciplina.</p>
+                <h2 class="section-title">Explorar por Áreas de Interesse (Tags)</h2>
+                <p class="section-subtitle">Escolha uma tag para navegar por projetos específicos dessa tecnologia ou disciplina.</p>
               </div>
 
               <!-- Custom tag chips row -->

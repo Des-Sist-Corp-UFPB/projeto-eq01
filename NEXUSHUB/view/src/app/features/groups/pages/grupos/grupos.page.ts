@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -147,7 +147,7 @@ export class GruposPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao cadastrar grupo', err);
-        alert('Ocorreu um erro ao criar o grupo. Verifique se o backend estÃ¡ rodando!');
+        alert('Ocorreu um erro ao criar o grupo. Verifique se o backend está rodando!');
       }
     });
   }
@@ -160,17 +160,17 @@ export class GruposPageComponent implements OnInit {
 
   excluirGrupoLista(gp: Grupo) {
     if (!gp || !gp.id) return;
-    if (confirm(`Tem certeza absoluta de que deseja excluir o grupo "${gp.nome}"? Todos os dados associados serÃ£o perdidos.`)) {
+    if (confirm(`Tem certeza absoluta de que deseja excluir o grupo "${gp.nome}"? Todos os dados associados serão perdidos.`)) {
       this.grupoService.deletar(gp.id).subscribe({
         next: () => {
           localStorage.removeItem(`nexushub_group_members_${gp.id}`);
           localStorage.removeItem(`nexushub_group_vacancies_${gp.id}`);
-          alert('Grupo excluÃ­do com sucesso!');
+          alert('Grupo excluído com sucesso!');
           this.carregarDados();
         },
         error: (err) => {
           console.error('Erro ao excluir grupo', err);
-          alert('Falha ao excluir o grupo. Verifique se o backend estÃ¡ ativo!');
+          alert('Falha ao excluir o grupo. Verifique se o backend está ativo!');
         }
       });
     }

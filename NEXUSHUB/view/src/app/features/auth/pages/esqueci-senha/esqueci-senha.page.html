@@ -1,4 +1,4 @@
-﻿<div class="auth-wrapper animate-fade-in">
+<div class="auth-wrapper animate-fade-in">
       <div class="auth-card">
         <header class="auth-header">
           <span class="logo-badge">N</span>
@@ -16,7 +16,7 @@
 
         <form (ngSubmit)="onSubmit()" #forgotForm="ngForm" *ngIf="!successMessage()">
           <div class="form-group">
-            <label for="email">E-mail AcadÃªmico Cadastrado</label>
+            <label for="email">E-mail Acadêmico Cadastrado</label>
             <input 
               type="email" 
               id="email" 
@@ -27,7 +27,7 @@
               placeholder="Ex: rodrigo@nexushub.com" 
               #emailInput="ngModel"
             />
-            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
           </div>
 
           <div class="form-group">
@@ -39,7 +39,7 @@
               [(ngModel)]="novaSenha" 
               required 
               minlength="6"
-              placeholder="Digite a nova senha (mÃ­nimo 6 dÃ­gitos)" 
+              placeholder="Digite a nova senha (mínimo 6 dígitos)"
               #senhaInput="ngModel"
             />
             <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>

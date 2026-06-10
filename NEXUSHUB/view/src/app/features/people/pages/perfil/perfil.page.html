@@ -1,4 +1,4 @@
-﻿<div class="profile-wrapper animate-fade-in">
+<div class="profile-wrapper animate-fade-in">
       
       <!-- UNAUTHENTICATED STATE -->
       <div class="unauth-container" *ngIf="!isLoggedIn()">
@@ -6,10 +6,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
         </svg>
         <h3>Acesso restrito</h3>
-        <p>VocÃª precisa estar autenticado na plataforma para visualizar seu perfil acadÃªmico e suas mÃ©tricas.</p>
+        <p>Você precisa estar autenticado na plataforma para visualizar seu perfil acadêmico e suas métricas.</p>
         <div class="actions">
           <button class="btn btn-primary" routerLink="/login">Ir para Login</button>
-          <button class="btn btn-secondary" routerLink="/">Voltar ao InÃ­cio</button>
+          <button class="btn btn-secondary" routerLink="/">Voltar ao Início</button>
         </div>
       </div>
 
@@ -37,7 +37,7 @@
 
           <!-- Metrics Panel -->
           <section class="metrics-section">
-            <h3 class="section-title">Resumo de MÃ©tricas AcadÃªmicas</h3>
+            <h3 class="section-title">Resumo de Métricas Acadêmicas</h3>
             
             <div class="metrics-grid">
               
@@ -50,7 +50,7 @@
                 </div>
                 <div class="metric-data">
                   <span class="value">850 XP</span>
-                  <span class="label">NÃ­vel 4 (Jornada)</span>
+                  <span class="label">Nível 4 (Jornada)</span>
                 </div>
               </div>
 
@@ -92,8 +92,8 @@
         <!-- Edit Profile Mode -->
         <div *ngIf="isEditMode()">
           <header class="profile-header-edit">
-            <h2>Editar InformaÃ§Ãµes Pessoais</h2>
-            <p>Mantenha seus dados acadÃªmicos sempre atualizados.</p>
+            <h2>Editar Informações Pessoais</h2>
+            <p>Mantenha seus dados acadêmicos sempre atualizados.</p>
           </header>
 
           <div class="alert alert-danger" *ngIf="editError()">
@@ -104,33 +104,33 @@
             <div class="form-group">
               <label for="nome">Nome Completo *</label>
               <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
-              <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome Ã© obrigatÃ³rio.</span>
+              <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
             </div>
 
             <div class="form-group">
-              <label for="email">E-mail AcadÃªmico *</label>
-              <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadÃªmico" #emailInput="ngModel" />
-              <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+              <label for="email">E-mail Acadêmico *</label>
+              <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadêmico" #emailInput="ngModel" />
+              <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
             </div>
 
             <div class="form-group">
-              <label for="cargo">Cargo AcadÃªmico</label>
+              <label for="cargo">Cargo Acadêmico</label>
               <select id="edit-cargo" name="cargo" [(ngModel)]="editCargo">
                 <option value="ESTUDANTE">Estudante</option>
                 <option value="PROFESSOR">Professor / Orientador</option>
-                <option value="ADMINISTRATIVO">TÃ©cnico Administrativo</option>
+                <option value="ADMINISTRATIVO">Técnico Administrativo</option>
               </select>
             </div>
 
             <div class="form-group">
               <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
-              <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mÃ­nimo 6 dÃ­gitos)" minlength="6" #senhaInput="ngModel" />
+              <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mínimo 6 dígitos)" minlength="6" #senhaInput="ngModel" />
               <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
             </div>
 
             <div class="edit-actions">
               <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
-                {{ isSaving() ? 'Salvando...' : 'Salvar AlteraÃ§Ãµes' }}
+                {{ isSaving() ? 'Salvando...' : 'Salvar Alterações' }}
               </button>
               <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
                 Cancelar

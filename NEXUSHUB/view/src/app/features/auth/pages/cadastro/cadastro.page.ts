@@ -1,4 +1,4 @@
-﻿import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -26,15 +26,15 @@ export class CadastroPageComponent {
 
   onSubmit() {
     if (this.senha !== this.confirmarSenha) {
-      console.warn('[Cadastro Component] Tentativa de submissÃ£o falhou: As senhas digitadas nÃ£o coincidem.');
-      this.errorMessage.set('As senhas nÃ£o coincidem.');
+      console.warn('[Cadastro Component] Tentativa de submissão falhou: As senhas digitadas não coincidem.');
+      this.errorMessage.set('As senhas não coincidem.');
       return;
     }
 
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');
-    console.log('[Cadastro Component] Submetendo formulÃ¡rio para:', this.email);
+    console.log('[Cadastro Component] Submetendo formulário para:', this.email);
 
     const payload = {
       nome: this.nome,
@@ -47,7 +47,7 @@ export class CadastroPageComponent {
       next: (res) => {
         this.isLoading.set(false);
         console.log('[Cadastro Component] Cadastro efetuado com sucesso para:', res.email);
-        this.successMessage.set('Sua conta acadÃªmica foi criada com sucesso! FaÃ§a login para comeÃ§ar.');
+        this.successMessage.set('Sua conta acadêmica foi criada com sucesso! Faça login para começar.');
       },
       error: (err) => {
         this.isLoading.set(false);

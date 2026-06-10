@@ -1,4 +1,4 @@
-﻿import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -33,7 +33,7 @@ export class LoginPageComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
-        console.error('[Login Component] Erro de autenticaÃ§Ã£o recebido do backend:', err);
+        console.error('[Login Component] Erro de autenticação recebido do backend:', err);
         this.errorMessage.set(err.error?.message || 'Falha ao realizar login. Verifique suas credenciais.');
       }
     });
