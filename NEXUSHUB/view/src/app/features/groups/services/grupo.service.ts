@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { apiUrl } from '../../../core/config/api.config';
 
 export interface Grupo {
   id?: string;
@@ -11,6 +12,7 @@ export interface Grupo {
   tipo?: string;
   cor?: string;
   logo?: string;
+  criadorId?: string;
 }
 
 @Injectable({
@@ -18,7 +20,7 @@ export interface Grupo {
 })
 export class GrupoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/grupos';
+  private readonly apiUrl = apiUrl('/api/grupos');
 
   listar(): Observable<Grupo[]> {
     return this.http.get<Grupo[]>(this.apiUrl);

@@ -1,12 +1,38 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { apiUrl } from '../config/api.config';
 
 export interface UsuarioResponse {
   id: string;
   nome: string;
   email: string;
   cargo: string;
+  fotoUrl?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  senha: string;
+}
+
+export interface CadastroRequest {
+  nome: string;
+  email: string;
+  senha: string;
+  cargo: string;
+}
+
+export interface RedefinirSenhaRequest {
+  email: string;
+  novaSenha: string;
+}
+
+export interface AtualizarPerfilRequest {
+  nome: string;
+  email: string;
+  cargo: string;
+  senha?: string;
 }
 
 @Injectable({
@@ -14,7 +40,7 @@ export interface UsuarioResponse {
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/usuarios';
+  private readonly apiUrl = apiUrl('/api/usuarios');
 
   // Session Signal
   readonly currentUser = signal<UsuarioResponse | null>(null);
@@ -35,7 +61,7 @@ export class AuthService {
     }
   }
 
-  login(credentials: any): Observable<UsuarioResponse> {
+  login(credentials: LoginRequest): Observable<UsuarioResponse> {
     return this.http.post<UsuarioResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(user => {
         this.currentUser.set(user);
@@ -44,15 +70,15 @@ export class AuthService {
     );
   }
 
-  cadastrar(usuario: any): Observable<UsuarioResponse> {
+  cadastrar(usuario: CadastroRequest): Observable<UsuarioResponse> {
     return this.http.post<UsuarioResponse>(`${this.apiUrl}/cadastro`, usuario);
   }
 
-  redefinirSenha(request: any): Observable<void> {
+  redefinirSenha(request: RedefinirSenhaRequest): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/esqueci-senha`, request);
   }
 
-  atualizarPerfil(id: string, usuario: any): Observable<UsuarioResponse> {
+  atualizarPerfil(id: string, usuario: AtualizarPerfilRequest): Observable<UsuarioResponse> {
     return this.http.put<UsuarioResponse>(`${this.apiUrl}/perfil/${id}`, usuario).pipe(
       tap(updatedUser => {
         this.currentUser.set(updatedUser);

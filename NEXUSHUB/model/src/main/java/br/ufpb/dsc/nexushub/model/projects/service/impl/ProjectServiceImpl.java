@@ -213,32 +213,34 @@ public class ProjectServiceImpl implements ProjectService {
 
     private User resolveOwner(ProjetoRequest request) {
         if (request.autorId() != null) {
-            return userRepository.findAll().stream()
-                    .filter(user -> user.getHuman().getId().equals(request.autorId()))
-                    .findFirst()
+            return userRepository.findById(request.autorId())
+                    .or(() -> userRepository.findAll().stream()
+                            .filter(user -> user.getHuman().getId().equals(request.autorId()))
+                            .findFirst())
                     .orElseThrow(() -> new IllegalArgumentException("Autor nao encontrado."));
         }
         if (request.autor() != null && !request.autor().isBlank()) {
             return userRepository.findAll().stream()
                     .filter(user -> user.getHuman().getName().equalsIgnoreCase(request.autor()))
                     .findFirst()
-                    .orElseGet(identityService::firstUser);
+                    .orElseThrow(() -> new IllegalArgumentException("Autor nao encontrado."));
         }
-        return identityService.firstUser();
+        throw new IllegalArgumentException("Autor do projeto e obrigatorio.");
     }
 
     private User resolveRequester(SolicitacaoRequest request) {
         if (request.usuarioId() != null) {
-            return userRepository.findAll().stream()
-                    .filter(user -> user.getHuman().getId().equals(request.usuarioId()))
-                    .findFirst()
-                    .orElseGet(identityService::firstUser);
+            return userRepository.findById(request.usuarioId())
+                    .or(() -> userRepository.findAll().stream()
+                            .filter(user -> user.getHuman().getId().equals(request.usuarioId()))
+                            .findFirst())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario solicitante nao encontrado."));
         }
         if (request.usuarioEmail() != null && !request.usuarioEmail().isBlank()) {
             return userRepository.findByEmail(request.usuarioEmail().trim().toLowerCase())
-                    .orElseGet(identityService::firstUser);
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario solicitante nao encontrado."));
         }
-        return identityService.firstUser();
+        throw new IllegalArgumentException("Usuario solicitante e obrigatorio.");
     }
 
     private Integer parseType(String value, Integer fallback) {

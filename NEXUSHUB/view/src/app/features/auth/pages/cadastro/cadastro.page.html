@@ -1,0 +1,103 @@
+﻿<div class="auth-wrapper animate-fade-in">
+      <div class="auth-card">
+        <header class="auth-header">
+          <span class="logo-badge">N</span>
+          <h2>Crie sua conta acadÃªmica</h2>
+          <p>FaÃ§a parte da rede acadÃªmica e divulgue seus projetos</p>
+        </header>
+
+        <div class="alert alert-danger" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <div class="alert alert-success" *ngIf="successMessage()">
+          {{ successMessage() }}
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #cadForm="ngForm" *ngIf="!successMessage()">
+          <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input 
+              type="text" 
+              id="nome" 
+              name="nome" 
+              [(ngModel)]="nome" 
+              required 
+              placeholder="Ex: Rodrigo Silva" 
+              #nomeInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome Ã© obrigatÃ³rio.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail AcadÃªmico</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="email" 
+              required 
+              email
+              placeholder="Ex: rodrigo@nexushub.com" 
+              #emailInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="cargo">Cargo AcadÃªmico</label>
+              <select id="cargo" name="cargo" [(ngModel)]="cargo" required>
+                <option value="ESTUDANTE">Estudante</option>
+                <option value="PROFESSOR">Professor / Orientador</option>
+                <option value="ADMINISTRATIVO">TÃ©cnico Administrativo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label for="senha">Senha</label>
+            <input 
+              type="password" 
+              id="senha" 
+              name="senha" 
+              [(ngModel)]="senha" 
+              required 
+              minlength="6"
+              placeholder="Crie uma senha de acesso (mÃ­nimo 6 dÃ­gitos)" 
+              #senhaInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-group">
+            <label for="confirmarSenha">Confirmar Senha *</label>
+            <input 
+              type="password" 
+              id="confirmarSenha" 
+              name="confirmarSenha" 
+              [(ngModel)]="confirmarSenha" 
+              required 
+              placeholder="Digite a senha novamente" 
+              #confirmInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="confirmarSenha !== senha && confirmInput.touched">As senhas nÃ£o coincidem.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="cadForm.invalid || senha !== confirmarSenha || isLoading()">
+            {{ isLoading() ? 'Cadastrando...' : 'Registrar Conta' }}
+          </button>
+        </form>
+
+        <div class="success-actions animate-fade-in" *ngIf="successMessage()">
+          <button class="btn btn-primary w-full" routerLink="/login">Ir para o Login</button>
+        </div>
+
+        <footer class="auth-footer" *ngIf="!successMessage()">
+          <p>JÃ¡ possui cadastro? <a routerLink="/login">FaÃ§a o login aqui</a></p>
+        </footer>
+      </div>
+    </div>
+

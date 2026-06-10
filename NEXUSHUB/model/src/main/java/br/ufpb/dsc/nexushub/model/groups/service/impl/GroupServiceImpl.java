@@ -6,6 +6,8 @@ import br.ufpb.dsc.nexushub.model.dto.GrupoRequest;
 import br.ufpb.dsc.nexushub.model.groups.repository.GroupHumanMemberRepository;
 import br.ufpb.dsc.nexushub.model.groups.repository.GroupRepository;
 import br.ufpb.dsc.nexushub.model.groups.service.GroupService;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
 import br.ufpb.dsc.nexushub.model.identity.service.IdentityService;
 import br.ufpb.dsc.nexushub.model.people.domain.Human;
 import br.ufpb.dsc.nexushub.model.people.repository.HumanRepository;
@@ -20,17 +22,20 @@ public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
     private final HumanRepository humanRepository;
     private final GroupHumanMemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final IdentityService identityService;
 
     public GroupServiceImpl(
             GroupRepository groupRepository,
             HumanRepository humanRepository,
             GroupHumanMemberRepository memberRepository,
+            UserRepository userRepository,
             IdentityService identityService
     ) {
         this.groupRepository = groupRepository;
         this.humanRepository = humanRepository;
         this.memberRepository = memberRepository;
+        this.userRepository = userRepository;
         this.identityService = identityService;
     }
 
@@ -50,6 +55,17 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public String getResponsibleName(UUID groupId) {
+        Group group = getGroup(groupId);
+        return memberRepository.findByGroup(group).stream()
+                .filter(member -> Boolean.TRUE.equals(member.getAdmin()))
+                .findFirst()
+                .map(member -> member.getHuman().getName())
+                .orElse(null);
+    }
+
+    @Override
     @Transactional
     public Group createGroup(String name, String description, Integer type, UUID creatorHumanId, UUID updatedById) {
         UUID updater = updatedById == null ? identityService.firstUser().getId() : updatedById;
@@ -63,7 +79,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public Group createGroup(GrupoRequest request) {
-        UUID updater = identityService.firstUser().getId();
+        User creator = resolveCreator(request.criadorId());
+        UUID updater = creator.getId();
         Group group = groupRepository.save(new Group(
                 request.nome(),
                 request.descricao(),
@@ -73,9 +90,7 @@ public class GroupServiceImpl implements GroupService {
                 request.logo(),
                 updater
         ));
-        if (request.criadorId() != null) {
-            addHumanToGroup(group.getId(), request.criadorId(), true, updater);
-        }
+        addHumanToGroup(group.getId(), creator.getHuman().getId(), true, updater);
         return group;
     }
 
@@ -120,5 +135,16 @@ public class GroupServiceImpl implements GroupService {
             return 1;
         }
         return "restrito".equalsIgnoreCase(value.trim()) ? 2 : 1;
+    }
+
+    private User resolveCreator(UUID creatorId) {
+        if (creatorId == null) {
+            throw new IllegalArgumentException("Criador do grupo e obrigatorio.");
+        }
+        return userRepository.findById(creatorId)
+                .or(() -> userRepository.findAll().stream()
+                        .filter(user -> user.getHuman().getId().equals(creatorId))
+                        .findFirst())
+                .orElseThrow(() -> new IllegalArgumentException("Criador do grupo nao encontrado."));
     }
 }

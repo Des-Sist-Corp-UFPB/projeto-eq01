@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { apiUrl } from '../../../core/config/api.config';
 
 export interface SolicitacaoEntrada {
   id?: string;
@@ -19,7 +20,7 @@ export interface SolicitacaoEntrada {
 })
 export class SolicitacaoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/solicitacoes';
+  private readonly apiUrl = apiUrl('/api/solicitacoes');
 
   criar(solicitacao: SolicitacaoEntrada): Observable<SolicitacaoEntrada> {
     return this.http.post<SolicitacaoEntrada>(this.apiUrl, solicitacao);

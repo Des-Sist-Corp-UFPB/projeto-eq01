@@ -14,6 +14,10 @@ public record GrupoResponse(
         String logo
 ) {
     public static GrupoResponse from(Group group) {
+        return from(group, null);
+    }
+
+    public static GrupoResponse from(Group group, String responsavel) {
         if (group == null) {
             return null;
         }
@@ -22,7 +26,7 @@ public record GrupoResponse(
                 group.getName(),
                 group.getDescription(),
                 formatArea(group.getType()),
-                null,
+                responsavel,
                 formatStatus(group.getStatus()),
                 group.getColorCode(),
                 group.getLogoUrl()

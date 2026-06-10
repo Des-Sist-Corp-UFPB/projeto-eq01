@@ -12,6 +12,8 @@ public interface GroupService {
 
     Group getGroup(UUID groupId);
 
+    String getResponsibleName(UUID groupId);
+
     Group createGroup(String name, String description, Integer type, UUID creatorHumanId, UUID updatedById);
 
     Group createGroup(GrupoRequest request);

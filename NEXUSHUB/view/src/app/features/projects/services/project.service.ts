@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { apiUrl } from '../../../core/config/api.config';
 
 export interface Projeto {
   id?: string;
@@ -32,6 +33,7 @@ export interface ProjetoRequest {
   tags?: string;
   visibilidade?: string;
   grupoPertencente?: string;
+  autorId?: string;
   autor?: string;
   imagemCardUrl?: string;
   imagemLandingUrl?: string;
@@ -43,7 +45,7 @@ export interface ProjetoRequest {
 })
 export class ProjectService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/projetos';
+  private readonly apiUrl = apiUrl('/api/projetos');
 
   listar(): Observable<Projeto[]> {
     return this.http.get<Projeto[]>(this.apiUrl);

@@ -1,0 +1,62 @@
+﻿<div class="auth-wrapper animate-fade-in">
+      <div class="auth-card">
+        <header class="auth-header">
+          <span class="logo-badge">N</span>
+          <h2>Esqueceu sua senha?</h2>
+          <p>Digite seu e-mail cadastrado e insira sua nova senha de acesso</p>
+        </header>
+
+        <div class="alert alert-danger" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <div class="alert alert-success" *ngIf="successMessage()">
+          {{ successMessage() }}
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #forgotForm="ngForm" *ngIf="!successMessage()">
+          <div class="form-group">
+            <label for="email">E-mail AcadÃªmico Cadastrado</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="email" 
+              required 
+              email
+              placeholder="Ex: rodrigo@nexushub.com" 
+              #emailInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="novaSenha">Nova Senha</label>
+            <input 
+              type="password" 
+              id="novaSenha" 
+              name="novaSenha" 
+              [(ngModel)]="novaSenha" 
+              required 
+              minlength="6"
+              placeholder="Digite a nova senha (mÃ­nimo 6 dÃ­gitos)" 
+              #senhaInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="forgotForm.invalid || isLoading()">
+            {{ isLoading() ? 'Redefinindo...' : 'Atualizar Senha' }}
+          </button>
+        </form>
+
+        <div class="success-actions animate-fade-in" *ngIf="successMessage()">
+          <button class="btn btn-primary w-full" routerLink="/login">Fazer Login agora</button>
+        </div>
+
+        <footer class="auth-footer" *ngIf="!successMessage()">
+          <a routerLink="/login" class="back-link">Voltar para o login</a>
+        </footer>
+      </div>
+    </div>
+

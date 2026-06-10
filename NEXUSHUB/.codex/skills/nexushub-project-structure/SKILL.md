@@ -77,6 +77,23 @@ view/src/app/shared
 view/src/app/features/<module>
 ```
 
+For frontend implementation details, use `.codex/skills/nexushub-frontend-engineering/SKILL.md`.
+
+Angular pages must live in page-specific folders:
+
+```text
+view/src/app/features/<module>/pages/<page-name>/<page-name>.page.ts
+view/src/app/features/<module>/pages/<page-name>/<page-name>.page.html
+view/src/app/features/<module>/pages/<page-name>/<page-name>.page.css
+```
+
+Angular components must live in component-specific folders:
+
+```text
+view/src/app/features/<module>/components/<component-name>/<component-name>.component.ts
+view/src/app/shared/components/<component-name>/<component-name>.component.ts
+```
+
 Do not change visual screens/styles unless explicitly requested.
 
 Move Angular pages gradually, one feature at a time.
@@ -99,4 +116,3 @@ Use:
 - HTTP exposure goes in `controller/api/<module>`.
 - UI goes in `view/src/app`.
 - Project memory for AI goes in `.codex/skills`.
-

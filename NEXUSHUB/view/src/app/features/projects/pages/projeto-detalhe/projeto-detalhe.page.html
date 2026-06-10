@@ -1,0 +1,172 @@
+﻿<div class="detail-container animate-fade-in" *ngIf="projeto()">
+      <!-- Back navigation link -->
+      <a routerLink="/" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="arrow-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Voltar para o Dashboard
+      </a>
+
+      <!-- Large Hero Header Card -->
+      <header class="detail-hero">
+        <img [src]="projeto()?.imagemLandingUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&auto=format&fit=crop'" alt="Capa" class="hero-cover" />
+        <div class="hero-overlay">
+          <div class="category-badge" *ngIf="projeto()?.tipo">{{ projeto()?.tipo }}</div>
+          <h1 class="project-title">{{ projeto()?.nome }}</h1>
+          <p class="project-tagline">{{ projeto()?.resumo }}</p>
+        </div>
+      </header>
+
+      <!-- Main Columns Layout -->
+      <div class="detail-grid">
+        <!-- Left Column: Details -->
+        <main class="detail-main">
+          <section class="card-section">
+            <h2 class="card-title">Objetivos do Projeto</h2>
+            <p class="objective-text">
+              {{ projeto()?.objetivos || 'Sem objetivos cadastrados para esta iniciativa acadÃªmica.' }}
+            </p>
+          </section>
+
+          <section class="card-section">
+            <h2 class="card-title">Tecnologias & CompetÃªncias</h2>
+            <div class="tags-row" *ngIf="projeto()?.tags">
+              <span class="tag-badge" *ngFor="let tag of getTags()">#{{ tag.trim() }}</span>
+            </div>
+            <p class="tags-empty" *ngIf="!projeto()?.tags">Nenhuma tecnologia/competÃªncia mapeada ainda.</p>
+          </section>
+
+          <!-- 1. AUTHOR WORKSPACE: membership requests pending approval -->
+          <section class="card-section admin-section" *ngIf="isOwner()">
+            <div class="admin-header">
+              <span class="admin-badge">Dono do Projeto</span>
+              <h2 class="card-title">SolicitaÃ§Ãµes de Entrada AcadÃªmica</h2>
+              <p class="admin-subtitle">Avalie os estudantes que desejam colaborar no seu projeto.</p>
+            </div>
+
+            <div class="requests-list" *ngIf="solicitacoes().length > 0">
+              <div class="request-card" *ngFor="let sol of solicitacoes()">
+                <div class="request-meta">
+                  <div class="applicant-info">
+                    <span class="applicant-avatar">{{ sol.usuarioNome.charAt(0) }}</span>
+                    <div>
+                      <h4 class="applicant-name">{{ sol.usuarioNome }}</h4>
+                      <p class="applicant-email">{{ sol.usuarioEmail }}</p>
+                    </div>
+                  </div>
+                  <span class="status-badge" [class]="sol.status?.toLowerCase()">{{ sol.status }}</span>
+                </div>
+                
+                <p class="applicant-motivation">
+                  <strong>MotivaÃ§Ã£o:</strong> "{{ sol.motivo }}"
+                </p>
+
+                <!-- Action buttons (only visible for pending) -->
+                <div class="request-actions" *ngIf="sol.status === 'PENDENTE'">
+                  <button class="btn btn-secondary btn-sm" (click)="responderSolicitacao(sol.id!, false)">
+                    Recusar
+                  </button>
+                  <button class="btn btn-primary btn-sm" (click)="responderSolicitacao(sol.id!, true)">
+                    Aprovar Candidato
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="no-requests" *ngIf="solicitacoes().length === 0">
+              <p>Nenhuma solicitaÃ§Ã£o de entrada cadastrada para este projeto por enquanto.</p>
+            </div>
+          </section>
+        </main>
+
+        <!-- Right Column: Sidebar -->
+        <aside class="detail-sidebar">
+          <!-- Information Card -->
+          <section class="card-section">
+            <h3 class="sidebar-title">Detalhes AcadÃªmicos</h3>
+            
+            <div class="sidebar-info-row">
+              <span class="info-label">Coordenador/Autor</span>
+              <span class="info-value"><strong>{{ projeto()?.autor || 'AnÃ´nimo' }}</strong></span>
+            </div>
+
+            <div class="sidebar-info-row" *ngIf="projeto()?.grupoPertencente">
+              <span class="info-label">Grupo / NÃºcleo</span>
+              <span class="info-value"><strong>{{ projeto()?.grupoPertencente }}</strong></span>
+            </div>
+
+            <div class="sidebar-info-row">
+              <span class="info-label">Total de Membros</span>
+              <span class="info-value"><strong>{{ projeto()?.quantidadeMembros || 1 }} participante(s)</strong></span>
+            </div>
+
+            <div class="sidebar-info-row" *ngIf="projeto()?.status">
+              <span class="info-label">Status de Entrada</span>
+              <span class="info-value">
+                <span class="status-indicator" [class.aberto]="projeto()?.status === 'ABERTO'">
+                  {{ projeto()?.status }}
+                </span>
+              </span>
+            </div>
+          </section>
+
+          <!-- Gamification Highlight -->
+          <section class="card-section gamification-card">
+            <div class="xp-banner">
+              <span class="xp-badge">+{{ projeto()?.xpDistribuido || 100 }} XP</span>
+              <div>
+                <h4 class="xp-title">Recompensa de Atividade</h4>
+                <p class="xp-subtitle">Ganhe experiÃªncia na modalidade <strong>{{ projeto()?.tipo }}</strong> ao ingressar e realizar contribuiÃ§Ãµes aprovadas.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. STUDENT WORKSPACE: Request entrance -->
+          <section class="card-section join-section" *ngIf="!isOwner() && projeto()?.status === 'ABERTO'">
+            <h3 class="sidebar-title">Quer participar do time?</h3>
+            
+            <!-- Logged out prompt -->
+            <div class="auth-prompt" *ngIf="!isLoggedIn()">
+              <p>VocÃª precisa estar logado na plataforma acadÃªmica para enviar uma solicitaÃ§Ã£o de entrada.</p>
+              <button class="btn btn-primary w-full" routerLink="/login">Fazer Login</button>
+            </div>
+
+            <!-- Logged in join request form -->
+            <div *ngIf="isLoggedIn() && !solicitacaoSucesso()">
+              <p class="join-desc">Envie uma justificativa ao coordenador explicando o porquÃª do seu interesse e suas habilidades.</p>
+              
+              <div class="alert alert-danger" *ngIf="joinError()">
+                {{ joinError() }}
+              </div>
+
+              <form (ngSubmit)="enviarSolicitacao()">
+                <div class="form-group">
+                  <label for="motivo">Sua Justificativa</label>
+                  <textarea 
+                    id="motivo" 
+                    name="motivo" 
+                    [(ngModel)]="motivo" 
+                    required 
+                    rows="4" 
+                    placeholder="Ex: Gostaria de participar pois tenho interesse em pesquisar sobre essa Ã¡rea e possuo conhecimentos prÃ©vios de Angular/Spring..."
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" [disabled]="!motivo.trim() || isSending()">
+                  {{ isSending() ? 'Enviando...' : 'Enviar SolicitaÃ§Ã£o de Entrada' }}
+                </button>
+              </form>
+            </div>
+
+            <!-- Join request success card -->
+            <div class="success-prompt animate-fade-in" *ngIf="solicitacaoSucesso()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="success-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h4>SolicitaÃ§Ã£o Enviada!</h4>
+              <p>Sua mensagem foi enviada ao autor. VocÃª receberÃ¡ uma notificaÃ§Ã£o quando a solicitaÃ§Ã£o for avaliada.</p>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+

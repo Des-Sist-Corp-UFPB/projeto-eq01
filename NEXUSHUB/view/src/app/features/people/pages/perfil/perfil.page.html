@@ -1,0 +1,144 @@
+﻿<div class="profile-wrapper animate-fade-in">
+      
+      <!-- UNAUTHENTICATED STATE -->
+      <div class="unauth-container" *ngIf="!isLoggedIn()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="lock-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        <h3>Acesso restrito</h3>
+        <p>VocÃª precisa estar autenticado na plataforma para visualizar seu perfil acadÃªmico e suas mÃ©tricas.</p>
+        <div class="actions">
+          <button class="btn btn-primary" routerLink="/login">Ir para Login</button>
+          <button class="btn btn-secondary" routerLink="/">Voltar ao InÃ­cio</button>
+        </div>
+      </div>
+
+      <!-- AUTHENTICATED STATE -->
+      <div class="profile-card" *ngIf="isLoggedIn() && currentUser()">
+        
+        <!-- View Profile Mode -->
+        <div *ngIf="!isEditMode()">
+          <header class="profile-header">
+            <div class="avatar-large">{{ getInitials() }}</div>
+            <div class="header-info">
+              <h2>{{ currentUser()?.nome }}</h2>
+              <span class="user-email">{{ currentUser()?.email }}</span>
+              <span class="badge" [class.student]="currentUser()?.cargo === 'ESTUDANTE'" [class.teacher]="currentUser()?.cargo === 'PROFESSOR'">
+                {{ currentUser()?.cargo === 'ESTUDANTE' ? 'Estudante' : 'Professor' }}
+              </span>
+            </div>
+            <button class="btn btn-secondary edit-btn" (click)="enableEditMode()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="edit-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+              </svg>
+              Editar Perfil
+            </button>
+          </header>
+
+          <!-- Metrics Panel -->
+          <section class="metrics-section">
+            <h3 class="section-title">Resumo de MÃ©tricas AcadÃªmicas</h3>
+            
+            <div class="metrics-grid">
+              
+              <!-- Metric 1: XP / Pontos -->
+              <div class="metric-card xp">
+                <div class="metric-visual">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="xp-icon">
+                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="metric-data">
+                  <span class="value">850 XP</span>
+                  <span class="label">NÃ­vel 4 (Jornada)</span>
+                </div>
+              </div>
+
+              <!-- Metric 2: Projetos Ativos -->
+              <div class="metric-card projects">
+                <div class="metric-visual">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="proj-icon">
+                    <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10.159a1.5 1.5 0 011.061.44l3.9 3.9a1.5 1.5 0 01.44 1.06V18a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm3-1.5H6a1.5 1.5 0 00-1.5 1.5v12A1.5 1.5 0 006 19.5h12a1.5 1.5 0 001.5-1.5V9h-3.75A1.5 1.5 0 0114.25 7.5V3.75H6z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="metric-data">
+                  <span class="value">3 Ativos</span>
+                  <span class="label">Projetos no Campus</span>
+                </div>
+              </div>
+
+              <!-- Metric 3: Grupo -->
+              <div class="metric-card group">
+                <div class="metric-visual">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="group-icon">
+                    <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.658 18.98a5.002 5.002 0 019.236-5.969 5.002 5.002 0 019.236 5.969 1.2 1.2 0 01-2.064-1.233 2.602 2.602 0 00-4.344-2.806 2.602 2.602 0 00-4.344 2.806 1.2 1.2 0 01-2.064 1.233z" />
+                  </svg>
+                </div>
+                <div class="metric-data">
+                  <span class="value">Ideias Lab</span>
+                  <span class="label">Grupo Principal</span>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Back to Dashboard -->
+          <footer class="profile-footer">
+            <button class="btn btn-primary" routerLink="/">Voltar para Projetos</button>
+          </footer>
+        </div>
+
+        <!-- Edit Profile Mode -->
+        <div *ngIf="isEditMode()">
+          <header class="profile-header-edit">
+            <h2>Editar InformaÃ§Ãµes Pessoais</h2>
+            <p>Mantenha seus dados acadÃªmicos sempre atualizados.</p>
+          </header>
+
+          <div class="alert alert-danger" *ngIf="editError()">
+            {{ editError() }}
+          </div>
+
+          <form (ngSubmit)="onSaveProfile()" #editForm="ngForm">
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
+              <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome Ã© obrigatÃ³rio.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-mail AcadÃªmico *</label>
+              <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadÃªmico" #emailInput="ngModel" />
+              <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail vÃ¡lido.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="cargo">Cargo AcadÃªmico</label>
+              <select id="edit-cargo" name="cargo" [(ngModel)]="editCargo">
+                <option value="ESTUDANTE">Estudante</option>
+                <option value="PROFESSOR">Professor / Orientador</option>
+                <option value="ADMINISTRATIVO">TÃ©cnico Administrativo</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
+              <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mÃ­nimo 6 dÃ­gitos)" minlength="6" #senhaInput="ngModel" />
+              <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+            </div>
+
+            <div class="edit-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
+                {{ isSaving() ? 'Salvando...' : 'Salvar AlteraÃ§Ãµes' }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
