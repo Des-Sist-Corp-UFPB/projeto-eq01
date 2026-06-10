@@ -10,8 +10,6 @@ Configure os secrets em `Settings -> Secrets and variables -> Actions -> New rep
 - `SSH_DEPLOY_KEY`: chave privada SSH liberada para deploy.
 - `DEPLOY_HOST`: host SSH do servidor.
 - `APP_PORT`: porta local publicada no servidor.
-- `GHCR_DEPLOY_USERNAME`: usuario do GitHub dono do token usado pelo servidor.
-- `GHCR_DEPLOY_TOKEN`: Personal Access Token com permissao `read:packages`.
 - `SPRING_DATASOURCE_URL`: URL JDBC do PostgreSQL.
 - `SPRING_DATASOURCE_USERNAME`: usuario do PostgreSQL.
 - `DB_PASSWORD`: senha do usuario do banco PostgreSQL.
@@ -20,7 +18,7 @@ O workflow `.github/workflows/deploy.yml` cria/atualiza o `.env` no servidor dur
 
 ## Imagem no GHCR
 
-O build publica a imagem com `GITHUB_TOKEN`. O servidor usa os secrets persistentes `GHCR_DEPLOY_USERNAME` e `GHCR_DEPLOY_TOKEN` para baixar a imagem privada. O token deve ter `read:packages` e acesso ao pacote da organizacao. Se a organizacao exigir SSO, o token tambem deve ser autorizado nela.
+O build publica a imagem com `GITHUB_TOKEN`. A chave SSH possui um comando forcado no servidor e recebe `actor:GITHUB_TOKEN`, usando esse token efemero somente para autenticar no GHCR e baixar a imagem.
 
 ## Reset do banco de producao sem dados reais
 

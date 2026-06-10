@@ -27,14 +27,6 @@ jobs:
         run: |
           echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> $GITHUB_ENV
 
-      - name: Validar secrets de deploy
-        env:
-          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
-          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
-        run: |
-          test -n "$GHCR_DEPLOY_USERNAME" || { echo "Secret GHCR_DEPLOY_USERNAME nao configurado"; exit 1; }
-          test -n "$GHCR_DEPLOY_TOKEN" || { echo "Secret GHCR_DEPLOY_TOKEN nao configurado"; exit 1; }
-
       - name: Verificar estrutura do repositório
         run: |
           pwd
@@ -63,14 +55,11 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
       - name: Deploy no servidor
-        env:
-          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
-          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
-            "$GHCR_DEPLOY_USERNAME:$GHCR_DEPLOY_TOKEN"
+            "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
 
       - name: Resetar banco de producao
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.reset_database }}
