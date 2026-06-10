@@ -32,11 +32,14 @@ Use este procedimento somente quando o banco de producao/homologacao nao tiver d
 
 O passo `Resetar banco de producao`:
 
-- para o container `eq01-nexushub-backend`;
 - envia `ops/reset-production-schema.sql` por SSH;
 - executa o SQL no container `postgres`, banco `eq01`, usuario `eq01`;
 - interrompe a pipeline se o reset falhar;
-- segue para o deploy, que inicia o backend e executa a migration `V1`.
+- reinicia explicitamente o container `eq01-nexushub-backend`;
+- aguarda o health check `GET /ping`;
+- exibe os ultimos logs do backend e falha a pipeline se a aplicacao nao subir.
+
+O deploy da imagem acontece antes do reset. Assim, a pipeline nao apaga o banco se a publicacao da nova versao falhar.
 
 O reset nao acontece em deploy automatico por `push`. Ele exige disparo manual com `reset_database` marcado.
 
