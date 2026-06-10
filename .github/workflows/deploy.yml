@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      reset_database:
+        description: Apagar e recriar o schema public antes do deploy
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build-and-deploy:
@@ -42,12 +48,23 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}
 
-      - name: Deploy no servidor
+      - name: Configurar acesso SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
+      - name: Resetar banco de producao
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.reset_database }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
+            "docker stop eq01-nexushub-backend >/dev/null 2>&1 || true; docker exec -i postgres psql -v ON_ERROR_STOP=1 -U eq01 -d eq01" \
+            < NEXUSHUB/ops/reset-production-schema.sql
+
+      - name: Deploy no servidor
+        run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
