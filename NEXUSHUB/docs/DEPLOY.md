@@ -10,6 +10,8 @@ Configure os secrets em `Settings -> Secrets and variables -> Actions -> New rep
 - `SSH_DEPLOY_KEY`: chave privada SSH liberada para deploy.
 - `DEPLOY_HOST`: host SSH do servidor.
 - `APP_PORT`: porta local publicada no servidor.
+- `GHCR_DEPLOY_USERNAME`: usuario do GitHub dono do token usado pelo servidor.
+- `GHCR_DEPLOY_TOKEN`: Personal Access Token com permissao `read:packages`.
 - `SPRING_DATASOURCE_URL`: URL JDBC do PostgreSQL.
 - `SPRING_DATASOURCE_USERNAME`: usuario do PostgreSQL.
 - `DB_PASSWORD`: senha do usuario do banco PostgreSQL.
@@ -18,7 +20,7 @@ O workflow `.github/workflows/deploy.yml` cria/atualiza o `.env` no servidor dur
 
 ## Imagem no GHCR
 
-O workflow faz login no GitHub Container Registry no servidor antes de executar `docker compose pull`, usando o token automatico do GitHub Actions. Por isso, o pacote nao precisa estar publico.
+O build publica a imagem com `GITHUB_TOKEN`. O servidor usa os secrets persistentes `GHCR_DEPLOY_USERNAME` e `GHCR_DEPLOY_TOKEN` para baixar a imagem privada. O token deve ter `read:packages` e acesso ao pacote da organizacao. Se a organizacao exigir SSO, o token tambem deve ser autorizado nela.
 
 ## Reset do banco de producao sem dados reais
 
@@ -37,6 +39,7 @@ O passo `Resetar banco de producao`:
 - interrompe a pipeline se o reset falhar;
 - reinicia explicitamente o container `eq01-nexushub-backend`;
 - aguarda o health check `GET /ping`;
+- confirma a migration `V1` com sucesso e a existencia de `grp_group`;
 - exibe os ultimos logs do backend e falha a pipeline se a aplicacao nao subir.
 
 O deploy da imagem acontece antes do reset. Assim, a pipeline nao apaga o banco se a publicacao da nova versao falhar.

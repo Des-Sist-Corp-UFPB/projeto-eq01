@@ -27,6 +27,14 @@ jobs:
         run: |
           echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> $GITHUB_ENV
 
+      - name: Validar secrets de deploy
+        env:
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+        run: |
+          test -n "$GHCR_DEPLOY_USERNAME" || { echo "Secret GHCR_DEPLOY_USERNAME nao configurado"; exit 1; }
+          test -n "$GHCR_DEPLOY_TOKEN" || { echo "Secret GHCR_DEPLOY_TOKEN nao configurado"; exit 1; }
+
       - name: Verificar estrutura do repositório
         run: |
           pwd
@@ -55,11 +63,14 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
       - name: Deploy no servidor
+        env:
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
-            "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
+            "$GHCR_DEPLOY_USERNAME:$GHCR_DEPLOY_TOKEN"
 
       - name: Resetar banco de producao
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.reset_database }}
@@ -81,3 +92,11 @@ jobs:
             -o StrictHostKeyChecking=no \
             "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
             "for attempt in \$(seq 1 30); do response=\$(curl --silent --fail http://127.0.0.1:8101/ping) && echo \"\$response\" && exit 0; sleep 2; done; docker logs --tail 200 eq01-nexushub-backend; exit 1"
+
+      - name: Validar reset do banco
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.reset_database }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
+            "docker exec postgres psql -v ON_ERROR_STOP=1 -U eq01 -d eq01 -Atqc \"SELECT version || ':' || success FROM flyway_schema_history ORDER BY installed_rank\" | grep -qx '1:true' && docker exec postgres psql -v ON_ERROR_STOP=1 -U eq01 -d eq01 -Atqc \"SELECT to_regclass('public.grp_group') IS NOT NULL\" | grep -qx 't'"
