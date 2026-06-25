@@ -6,7 +6,7 @@
 | **Repositório** | https://github.com/des-sist-corp-ufpb/projeto-eq01 |
 | **Aplicação** | https://eq01.dsc.rodrigor.com |
 | **Período de atividade** | 2026-06-10 → 2026-06-25 |
-| **Total de commits** (sem merges, branch main) | 2 |
+| **Total de commits** (sem merges, branch main) | 3 |
 | **Integrantes** | Kassio De Lima Leite (@KassioL2L), John Wesley Da Silva Moreira Pinto (@JohnWesleyPinto) |
 
 ---
@@ -103,7 +103,7 @@
 | Aspecto | Status | Observação |
 |---------|--------|-----------|
 | Arquitetura em camadas | ✅ | controller=✅  service=✅  repository=✅ |
-| Testes automatizados | ❌ | 0 arquivo(s) de teste |
+| Testes automatizados | ✅ | 0 Java, 1 JS/TS, 0 Python |
 | Migrations versionadas | ✅ | 2 migration(s) |
 | Logging | ❌ | não detectado |
 | Autenticação / Segurança | ✅ | Spring Security / JWT / decorator detectado |
@@ -123,7 +123,7 @@
 |---------|---------------|---------------------|-------------------|----------------------|----------------|
 | Kassio De Lima Leite (@KassioL2L) | 1 | **53** ⚠️ | 32.678 | 10.074 | 100% |
 | John Wesley Da Silva Moreira Pinto (@JohnWesleyPinto) | 0 | **2** | 0 | 0 | 0% |
-| *(sem login GitHub)* | 1 | 50% | — | — | — |
+| *(sem login GitHub)* | 2 | 67% | — | — | — |
 
 > **⚠️ Divergência entre commits locais e GitHub API:**
 > - **@KassioL2L**: 1 commit(s) na branch `main` vs **53** registrados na API GitHub (commits em branches não mergeadas ou absorvidos via squash-merge sem preservação de autoria).
