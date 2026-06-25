@@ -50,3 +50,11 @@
 - ajustar logs
 - ajustar exceção.
 - ajustar segurança
+
+
+## Fase 8: Proxima entrega
+- Uso de API externa
+- Incorporarr LLM usando API externa ou modelo Local.
+- Guard Rail
+- Pipeline verificação de segurança.
+- Ajustar o DarkMode
