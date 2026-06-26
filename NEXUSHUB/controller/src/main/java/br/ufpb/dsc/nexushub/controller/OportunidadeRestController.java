@@ -1,26 +1,28 @@
 package br.ufpb.dsc.nexushub.controller;
 
-import br.ufpb.dsc.nexushub.model.entity.Oportunidade;
-import br.ufpb.dsc.nexushub.model.repository.OportunidadeRepository;
+import br.ufpb.dsc.nexushub.model.dto.OportunidadeResponse;
+import br.ufpb.dsc.nexushub.model.opportunities.service.OpportunityService;
 import java.util.List;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/oportunidades")
 public class OportunidadeRestController {
 
-    private final OportunidadeRepository oportunidadeRepository;
+    private final OpportunityService opportunityService;
 
-    public OportunidadeRestController(OportunidadeRepository oportunidadeRepository) {
-        this.oportunidadeRepository = oportunidadeRepository;
+    public OportunidadeRestController(OpportunityService opportunityService) {
+        this.opportunityService = opportunityService;
     }
 
     @GetMapping
-    public List<Oportunidade> listar() {
-        return oportunidadeRepository.findAll();
+    public List<OportunidadeResponse> listar() {
+        return opportunityService.listOpenOpportunities().stream()
+                .map(OportunidadeResponse::from)
+                .toList();
     }
 }
+
+

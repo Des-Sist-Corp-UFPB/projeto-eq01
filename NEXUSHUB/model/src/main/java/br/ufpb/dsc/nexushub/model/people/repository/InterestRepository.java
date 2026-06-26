@@ -1,0 +1,11 @@
+package br.ufpb.dsc.nexushub.model.people.repository;
+
+import br.ufpb.dsc.nexushub.model.people.domain.Interest;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface InterestRepository extends JpaRepository<Interest, UUID> {
+
+    Optional<Interest> findByName(String name);
+}

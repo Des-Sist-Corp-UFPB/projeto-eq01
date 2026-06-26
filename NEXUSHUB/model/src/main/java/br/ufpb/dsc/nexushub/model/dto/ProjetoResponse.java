@@ -1,10 +1,11 @@
 package br.ufpb.dsc.nexushub.model.dto;
 
-import br.ufpb.dsc.nexushub.model.entity.Projeto;
+import br.ufpb.dsc.nexushub.model.projects.domain.Project;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record ProjetoResponse(
-        Long id,
+        UUID id,
         String nome,
         String resumo,
         String objetivos,
@@ -23,29 +24,29 @@ public record ProjetoResponse(
         Integer pontos,
         LocalDateTime criadoEm
 ) {
-    public static ProjetoResponse from(Projeto projeto) {
-        if (projeto == null) {
+    public static ProjetoResponse from(Project project) {
+        if (project == null) {
             return null;
         }
         return new ProjetoResponse(
-                projeto.getId(),
-                projeto.getNome(),
-                projeto.getResumo(),
-                projeto.getObjetivos(),
-                projeto.getCategoria(),
-                projeto.getTipo(),
-                projeto.getTags(),
-                projeto.getVisibilidade(),
-                projeto.getGrupoPertencente(),
-                projeto.getAutor(),
-                projeto.getCurtidas(),
-                projeto.getQuantidadeMembros(),
-                projeto.getImagemCardUrl(),
-                projeto.getImagemLandingUrl(),
-                projeto.getXpDistribuido(),
-                projeto.getStatus(),
-                projeto.getPontos(),
-                projeto.getCriadoEm()
+                project.getId(),
+                project.getName(),
+                project.getResume(),
+                project.getGoals(),
+                project.getType() == null ? null : project.getType().toString(),
+                project.getType() == null ? null : project.getType().toString(),
+                null,
+                project.getVisibilityStatus() == null ? null : project.getVisibilityStatus().toString(),
+                project.getGroup() == null ? null : project.getGroup().getName(),
+                project.getOwner() == null ? null : project.getOwner().getName(),
+                0,
+                0,
+                project.getCoverUrl(),
+                project.getLandingUrl(),
+                project.getXpAmount(),
+                project.getStatus() == null ? null : project.getStatus().toString(),
+                project.getPoints(),
+                project.getUpdatedAt()
         );
     }
 }

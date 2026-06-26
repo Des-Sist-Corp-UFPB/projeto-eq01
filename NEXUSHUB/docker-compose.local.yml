@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nexushub-local-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nexushub
+      POSTGRES_USER: nexushub
+      POSTGRES_PASSWORD: nexushub
+    ports:
+      - "5432:5432"
+    volumes:
+      - nexushub_local_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexushub -d nexushub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: nexushub-local-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexushub-local-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/nexushub
+      SPRING_DATASOURCE_USERNAME: nexushub
+      SPRING_DATASOURCE_PASSWORD: nexushub
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:4200,http://localhost:8080,http://dsc.rodrigor.com,https://dsc.rodrigor.com,http://eq01.dsc.rodrigor.com,https://eq01.dsc.rodrigor.com
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: nexushub-local-frontend
+    build:
+      context: ./view
+      dockerfile: Dockerfile
+    container_name: nexushub-local-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  nexushub_local_postgres_data:

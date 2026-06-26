@@ -4,7 +4,7 @@
 
 Este arquivo contém tudo o que você precisa instalar e configurar no seu
 sistema operacional (Linux) para rodar o backend (Spring Boot) e os
-frontends (Angular e Next.js) do NEXUS HUB localmente.
+frontend Angular do NEXUS HUB localmente.
 
 Como o Docker não está instalado na sua máquina, fornecemos abaixo os passos
 para instalar todas as ferramentas diretamente no seu sistema operacional.
@@ -15,7 +15,7 @@ para instalar todas as ferramentas diretamente no seu sistema operacional.
 
 * Java Development Kit (JDK) 21  -> Para rodar o Backend Spring Boot.
 * Apache Maven (v3.6+)          -> Para gerenciar dependências e compilar o Backend.
-* Node.js (v18+ ou v20+) & npm  -> Para rodar os Frontends (Angular e Next.js).
+* Node.js (v18+ ou v20+) & npm  -> Para rodar o Frontend Angular.
 * PostgreSQL                    -> Banco de dados principal para persistência de dados.
 
 ------------------------------------------------------------------------

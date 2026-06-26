@@ -1,0 +1,237 @@
+<div class="groups-detail-container animate-fade-in" *ngIf="grupo()">
+      
+      <!-- Cover Banner -->
+      <div class="detail-banner" [style.background]="(grupo()?.logo && (grupo()?.logo || '').length > 20) ? 'none' : 'linear-gradient(135deg, ' + (grupo()?.cor || '#1e3a8a') + ' 0%, #13a37c 100%)'">
+        <img [src]="(grupo()?.logo && (grupo()?.logo || '').length > 20) ? grupo()?.logo : fallbackCover" alt="Banner do grupo" />
+        
+        <div class="banner-overlay">
+          <div class="banner-content">
+            <span class="category-badge" [style.background-color]="grupo()?.cor || '#1e3a8a'">
+              {{ grupo()?.area || 'Pesquisa' }}
+            </span>
+            <h1 class="group-banner-title">{{ grupo()?.nome }}</h1>
+            <p class="group-banner-subtitle">Coordenado por {{ grupo()?.responsavel }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="detail-grid">
+        
+        <!-- Main Column (Left) -->
+        <div class="main-info-column">
+          
+          <!-- About Section -->
+          <div class="section-block">
+            <div class="section-header-row">
+              <h3>Sobre o Grupo</h3>
+              <span class="privacy-pill" [class.private]="grupo()?.tipo === 'Restrito'">
+                <svg *ngIf="grupo()?.tipo === 'Restrito'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="lock-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                {{ grupo()?.tipo || 'Aberto' }}
+              </span>
+            </div>
+            <p class="description-text">{{ grupo()?.descricao }}</p>
+          </div>
+
+          <!-- Stats Dashboard -->
+          <div class="stats-dashboard">
+            <div class="stat-card">
+              <span class="stat-num" [style.color]="grupo()?.cor || '#1e3a8a'">{{ members().length }}</span>
+              <span class="stat-label">Membros</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" [style.color]="grupo()?.cor || '#1e3a8a'">{{ groupProjects().length }}</span>
+              <span class="stat-label">Projetos Ativos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" [style.color]="grupo()?.cor || '#1e3a8a'">{{ vagas().length }}</span>
+              <span class="stat-label">Vagas Abertas</span>
+            </div>
+          </div>
+
+          <!-- Join / Leave CTA -->
+          <div class="action-card-box">
+            <div class="action-info" *ngIf="!isCoordinator()">
+              <h4>Gostou do nosso grupo de estudos e pesquisa?</h4>
+              <p *ngIf="!isJoinedUser()">Faça parte e colabore em projetos de alto impacto acadêmico e tecnológico.</p>
+              <p *ngIf="isJoinedUser()">Você já é um membro deste grupo! Participe dos projetos ou candidate-se a vagas.</p>
+            </div>
+            <div class="action-info" *ngIf="isCoordinator()">
+              <h4>Painel do Coordenador Geral</h4>
+              <p>Você gerencia este grupo acadêmico. Pode cadastrar novas oportunidades e visualizar candidatos.</p>
+            </div>
+            
+            <div class="action-button-area">
+              <ng-container *ngIf="currentUser(); else loginPrompt">
+                <button 
+                  *ngIf="!isCoordinator() && !isJoinedUser()"
+                  class="action-cta-btn" 
+                  [style.background]="grupo()?.cor || '#1e3a8a'"
+                  (click)="joinGroup()"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5L12 14.25L5 7.5" /></svg>
+                  Participar do Grupo
+                </button>
+                
+                <button 
+                  *ngIf="!isCoordinator() && isJoinedUser()"
+                  class="action-cta-btn leave" 
+                  (click)="leaveGroup()"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                  Sair do Grupo
+                </button>
+
+                <div *ngIf="isCoordinator()" class="coordinator-actions-wrapper">
+                  <div class="coordinator-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="badge-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                    Você coordena este grupo
+                  </div>
+                  <button 
+                    class="action-cta-btn delete-group-btn" 
+                    (click)="excluirGrupo()"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                    Excluir Grupo
+                  </button>
+                </div>
+              </ng-container>
+              <ng-template #loginPrompt>
+                <button class="action-cta-btn disabled" disabled>
+                  Faça login para participar
+                </button>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- Projects Section -->
+          <div class="section-block">
+            <h3>Projetos do Grupo ({{ groupProjects().length }})</h3>
+            <div class="projects-grid" *ngIf="groupProjects().length > 0">
+              <div class="proj-card-wrapper" *ngFor="let proj of groupProjects()">
+                <app-project-card [projeto]="proj"></app-project-card>
+              </div>
+            </div>
+            <div class="empty-state-box" *ngIf="groupProjects().length === 0">
+              <div class="empty-icon">ðŸ“</div>
+              <p class="empty-list-text">Nenhum projeto ativo associado a este grupo ainda.</p>
+            </div>
+          </div>
+
+          <!-- Opportunities / Vacancies Wall -->
+          <div class="section-block">
+            <div class="section-header-row">
+              <h3>Mural de Vagas e Oportunidades</h3>
+              <button 
+                *ngIf="isCoordinator()" 
+                class="btn-toggle-vaga"
+                [style.border-color]="grupo()?.cor || '#1e3a8a'"
+                [style.color]="grupo()?.cor || '#1e3a8a'"
+                (click)="showAddVagaForm.set(!showAddVagaForm())"
+              >
+                {{ showAddVagaForm() ? 'Fechar Form' : 'Adicionar Vaga' }}
+              </button>
+            </div>
+
+            <!-- Create Vacancy Form (Coordinators only) -->
+            <div class="create-vaga-form animate-scale-up" *ngIf="isCoordinator() && showAddVagaForm()">
+              <h4>Nova Oportunidade no Grupo</h4>
+              <div class="form-row">
+                <div class="form-group-item">
+                  <label for="vaga-cargo">Cargo / Função *</label>
+                  <input type="text" id="vaga-cargo" placeholder="Ex: Desenvolvedor Front-end Angular" [(ngModel)]="novaVagaCargo" />
+                </div>
+                <div class="form-group-item">
+                  <label for="vaga-tipo">Tipo de Contrato</label>
+                  <select id="vaga-tipo" [(ngModel)]="novaVagaTipo">
+                    <option value="Bolsista">Bolsista</option>
+                    <option value="Voluntário">Voluntário</option>
+                    <option value="Estagiário">Estagiário</option>
+                    <option value="CLT">CLT / CLT Flex</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group-item">
+                <label for="vaga-req">Requisitos e Descrição *</label>
+                <textarea id="vaga-req" rows="3" placeholder="Requisitos da vaga, benefícios e prazos..." [(ngModel)]="novaVagaRequisitos"></textarea>
+              </div>
+              <button class="btn-submit-vaga" [style.background]="grupo()?.cor || '#1e3a8a'" (click)="adicionarVaga()">
+                Publicar Oportunidade
+              </button>
+            </div>
+
+            <!-- Vacancies List -->
+            <div class="vagas-list-container" *ngIf="vagas().length > 0">
+              <div class="vaga-card" *ngFor="let vaga of vagas()">
+                <div class="vaga-header">
+                  <div class="vaga-title-row">
+                    <h5>{{ vaga.cargo }}</h5>
+                    <span class="vaga-type-pill">{{ vaga.tipo }}</span>
+                  </div>
+                  
+                  <!-- Candidate Button -->
+                  <div class="vaga-action-side" *ngIf="currentUser() && !isCoordinator()">
+                    <button 
+                      class="btn-candidate" 
+                      [class.applied]="hasApplied(vaga)" 
+                      (click)="toggleCandidatura(vaga.id)"
+                    >
+                      {{ hasApplied(vaga) ? 'Candidatado âœ“' : 'Candidatar-se' }}
+                    </button>
+                  </div>
+                </div>
+                
+                <p class="vaga-requirements-desc">{{ vaga.requisitos }}</p>
+
+                <!-- Coordinator-only Applicant View -->
+                <div class="vaga-candidates-coordinator" *ngIf="isCoordinator()">
+                  <div class="candidates-header-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="cand-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+                    <span>Candidatos Inscritos ({{ vaga.candidatos.length }})</span>
+                  </div>
+                  <div class="candidates-names-list" *ngIf="vaga.candidatos.length > 0">
+                    <span class="cand-name-pill" *ngFor="let cand of vaga.candidatos">{{ cand }}</span>
+                  </div>
+                  <p class="no-cand-text" *ngIf="vaga.candidatos.length === 0">Nenhum candidato inscrito ainda.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-state-box" *ngIf="vagas().length === 0">
+              <div class="empty-icon">ðŸ“¢</div>
+              <p class="empty-list-text">Não há vagas abertas neste grupo no momento.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar Column (Right) -->
+        <aside class="sidebar-column">
+          <h3>Membros do Grupo ({{ members().length }})</h3>
+          
+          <div class="members-list-container">
+            <!-- Members Loop -->
+            <div 
+              class="sidebar-user" 
+              *ngFor="let mb of members()"
+              [class.coordinator]="isMembroCoordenador(mb.nome)"
+            >
+              <div class="avatar-wrapper">
+                <img [src]="isMembroCoordenador(mb.nome) && grupo()?.logo && (grupo()?.logo || '').length > 20 ? grupo()?.logo : mb.fotoUrl" alt="Foto do Membro" class="avatar-photo" />
+                <span class="crown-badge" *ngIf="isMembroCoordenador(mb.nome)">ðŸ‘‘</span>
+              </div>
+              
+              <div class="user-text-info">
+                <span class="u-name">{{ mb.nome }}</span>
+                <span class="u-role">{{ mb.papel }}</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+

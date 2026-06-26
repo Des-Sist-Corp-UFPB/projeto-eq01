@@ -1,0 +1,56 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build, push e deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepara nome da imagem (lowercase)
+        run: |
+          echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> $GITHUB_ENV
+
+      - name: Verificar estrutura do repositório
+        run: |
+          pwd
+          ls -la
+          find . -name Dockerfile
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push da imagem
+        uses: docker/build-push-action@v5
+        with:
+          context: ./NEXUSHUB
+          file: ./NEXUSHUB/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}
+
+      - name: Configurar acesso SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Deploy no servidor
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            "${{ secrets.SSH_USERNAME }}@dsc.rodrigor.com" \
+            "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"

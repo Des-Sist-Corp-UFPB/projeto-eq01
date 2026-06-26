@@ -1,58 +1,55 @@
 package br.ufpb.dsc.nexushub.controller;
 
 import br.ufpb.dsc.nexushub.model.dto.SolicitacaoRequest;
+import br.ufpb.dsc.nexushub.model.dto.SolicitacaoResponse;
 import br.ufpb.dsc.nexushub.model.dto.SolicitacaoRespostaRequest;
-import br.ufpb.dsc.nexushub.model.entity.SolicitacaoEntrada;
-import br.ufpb.dsc.nexushub.model.service.SolicitacaoService;
+import br.ufpb.dsc.nexushub.model.projects.service.ProjectService;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:3000"})
 @RestController
 @RequestMapping("/api/solicitacoes")
 public class SolicitacaoRestController {
 
-    private static final Logger log = LoggerFactory.getLogger(SolicitacaoRestController.class);
-    private final SolicitacaoService solicitacaoService;
+    private final ProjectService projectService;
 
-    public SolicitacaoRestController(SolicitacaoService solicitacaoService) {
-        this.solicitacaoService = solicitacaoService;
+    public SolicitacaoRestController(ProjectService projectService) {
+        this.projectService = projectService;
     }
 
     @PostMapping
     public ResponseEntity<?> criar(@Valid @RequestBody SolicitacaoRequest request) {
-        log.info("[Solicitacao REST] POST /api/solicitacoes recebido para projeto ID: {}, estudante: '{}'", 
-                request.projetoId(), request.usuarioEmail());
         try {
-            SolicitacaoEntrada response = solicitacaoService.criar(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(SolicitacaoResponse.from(projectService.requestMembership(request)));
         } catch (IllegalArgumentException e) {
-            log.warn("[Solicitacao REST] Erro ao criar solicitação: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UsuarioRestController.ErrorDto(e.getMessage()));
         }
     }
 
     @GetMapping("/projeto/{projetoId}")
-    public ResponseEntity<List<SolicitacaoEntrada>> listarPorProjeto(@PathVariable Long projetoId) {
-        log.info("[Solicitacao REST] GET /api/solicitacoes/projeto/{} recebido", projetoId);
-        List<SolicitacaoEntrada> solicitacoes = solicitacaoService.listarPorProjeto(projetoId);
-        return ResponseEntity.ok(solicitacoes);
+    public ResponseEntity<List<SolicitacaoResponse>> listarPorProjeto(@PathVariable UUID projetoId) {
+        return ResponseEntity.ok(projectService.listRequestsByProject(projetoId).stream().map(SolicitacaoResponse::from).toList());
     }
 
     @PutMapping("/{id}/resposta")
-    public ResponseEntity<?> responder(@PathVariable Long id, @Valid @RequestBody SolicitacaoRespostaRequest request) {
-        log.info("[Solicitacao REST] PUT /api/solicitacoes/{}/resposta recebido. Aprovado: {}", id, request.aprovado());
+    public ResponseEntity<?> responder(@PathVariable UUID id, @Valid @RequestBody SolicitacaoRespostaRequest request) {
         try {
-            solicitacaoService.responder(id, request.aprovado());
+            projectService.respondMembershipRequest(id, Boolean.TRUE.equals(request.aprovado()));
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            log.warn("[Solicitacao REST] Erro ao responder solicitação ID {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UsuarioRestController.ErrorDto(e.getMessage()));
         }
     }
 }
+
+

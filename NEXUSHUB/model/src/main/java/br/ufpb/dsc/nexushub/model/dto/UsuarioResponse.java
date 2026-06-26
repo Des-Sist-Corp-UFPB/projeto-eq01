@@ -1,22 +1,25 @@
 package br.ufpb.dsc.nexushub.model.dto;
 
-import br.ufpb.dsc.nexushub.model.entity.Usuario;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import java.util.UUID;
 
 public record UsuarioResponse(
-        Long id,
+        UUID id,
         String nome,
         String email,
         String cargo,
         String fotoUrl
 ) {
-    public static UsuarioResponse from(Usuario usuario) {
-        if (usuario == null) return null;
+    public static UsuarioResponse from(User user) {
+        if (user == null) {
+            return null;
+        }
         return new UsuarioResponse(
-                usuario.getId(),
-                usuario.getNome(),
-                usuario.getEmail(),
-                usuario.getCargo(),
-                usuario.getFotoUrl()
+                user.getId(),
+                user.getHuman().getName(),
+                user.getEmail(),
+                user.getRole().getName(),
+                user.getHuman().getPhotoUrl()
         );
     }
 }

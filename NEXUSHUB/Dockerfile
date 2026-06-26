@@ -1,21 +1,58 @@
-# Stage 1: Build the Maven packages
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+# =========================
+# Stage 1 - Build Angular
+# =========================
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /frontend
+
+COPY view/package*.json ./
+
+RUN npm install
+
+COPY view/ .
+
+RUN npm run build -- --configuration production
+
+# Debug
+RUN echo "=== Angular build ===" && \
+    find dist -type f | head -50
+
+
+# =========================
+# Stage 2 - Build Spring
+# =========================
+FROM maven:3.9-eclipse-temurin-21-alpine AS backend-build
+
 WORKDIR /app
 
-# Copiar arquivos de definição e códigos fonte
 COPY pom.xml .
 COPY model ./model
 COPY controller ./controller
 
-# Compilar e empacotar pulando os testes unitários para maior rapidez no build do container
+RUN mkdir -p /app/controller/src/main/resources/static
+
+COPY --from=frontend-build \
+    /frontend/dist/view/browser/ \
+    /app/controller/src/main/resources/static/
+
 RUN mvn clean package -DskipTests
 
-# Stage 2: Rodar o jar final
+# Debug
+RUN echo "=== Conteúdo do JAR ===" && \
+    jar tf /app/controller/target/controller-0.0.1-SNAPSHOT.jar | grep static | head -50
+
+
+# =========================
+# Stage 3 - Runtime
+# =========================
 FROM eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
 
-# Copiar o jar gerado do Stage 1
-COPY --from=build /app/controller/target/controller-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=backend-build \
+    /app/controller/target/controller-0.0.1-SNAPSHOT.jar \
+    app.jar
 
 EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

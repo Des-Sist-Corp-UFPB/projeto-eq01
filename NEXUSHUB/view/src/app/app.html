@@ -1,0 +1,92 @@
+<div class="app-layout">
+  <header class="main-header animate-fade-in">
+    <div class="header-container">
+      <a class="brand" routerLink="/" (click)="closeMobileMenu()">
+        <svg class="logo-svg" viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="14" fill="#3B6EF4" />
+          <circle cx="50" cy="18" r="5.5" fill="#0B1D3A" />
+          <circle cx="72.6" cy="27.4" r="5.5" fill="#0B1D3A" />
+          <circle cx="82" cy="50" r="5.5" fill="#0B1D3A" />
+          <circle cx="72.6" cy="72.6" r="5.5" fill="#0B1D3A" />
+          <circle cx="50" cy="82" r="5.5" fill="#0B1D3A" />
+          <circle cx="27.4" cy="72.6" r="5.5" fill="#0B1D3A" />
+          <circle cx="18" cy="50" r="5.5" fill="#0B1D3A" />
+          <circle cx="27.4" cy="27.4" r="5.5" fill="#0B1D3A" />
+        </svg>
+        <h1>NEXUS<span>HUB</span></h1>
+      </a>
+
+      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen()" aria-label="Menu principal">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-wrapper" [class.mobile-open]="isMobileMenuOpen()">
+        <nav class="main-nav">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">
+            Inicio
+          </a>
+          <a routerLink="/grupos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+            Grupos
+          </a>
+          <a routerLink="/loja" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+            Loja
+          </a>
+          <a routerLink="/perfil" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn()" (click)="closeMobileMenu()">
+            Meu Perfil
+          </a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary theme-toggle-btn" (click)="toggleTheme(); closeMobileMenu()" [title]="isDarkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="theme-icon" *ngIf="isDarkMode()">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="theme-icon" *ngIf="!isDarkMode()">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+          </button>
+
+          <ng-container *ngIf="!isLoggedIn()">
+            <button class="btn btn-secondary" routerLink="/login" (click)="closeMobileMenu()">Entrar</button>
+            <button class="btn btn-primary" routerLink="/cadastro" (click)="closeMobileMenu()">Cadastrar-se</button>
+          </ng-container>
+
+          <ng-container *ngIf="isLoggedIn() && currentUser()">
+            <div class="user-greeting" routerLink="/perfil" (click)="closeMobileMenu()">
+              <span class="avatar-small" *ngIf="currentUser()?.fotoUrl; else smallInitials">
+                <img [src]="currentUser()?.fotoUrl" alt="Avatar" class="header-avatar-img" />
+              </span>
+              <ng-template #smallInitials>
+                <span class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</span>
+              </ng-template>
+              <span class="greeting-text">Ola, <strong>{{ currentUser()?.nome?.split(' ')?.at(0) }}</strong></span>
+            </div>
+
+            <button class="btn btn-secondary logout-btn" (click)="logout(); closeMobileMenu()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="logout-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              </svg>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>&copy; 2026 NEXUS HUB. Desenvolvido para a UFPB.</p>
+      <div class="footer-links">
+        <a href="#">Sobre a plataforma</a>
+        <a href="#">Termos de uso</a>
+        <a href="#">Contato</a>
+      </div>
+    </div>
+  </footer>
+</div>
