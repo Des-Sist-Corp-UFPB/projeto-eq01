@@ -63,8 +63,8 @@ export class NewProjectModalComponent implements OnInit {
           if (cached) {
             try {
               const members = JSON.parse(cached);
-              return Array.isArray(members) && members.some((m: any) => m.nome && m.nome.trim().toLowerCase() === user.nome.trim().toLowerCase());
-            } catch (e) {
+              return Array.isArray(members) && members.some((m: { nome?: string }) => m.nome && m.nome.trim().toLowerCase() === user.nome.trim().toLowerCase());
+            } catch {
               return false;
             }
           }
