@@ -1,13 +1,21 @@
 name: Qualidade e segurança
+
 on:
   push:
   pull_request:
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * 1'
+
 permissions:
   contents: read
+  packages: read
   security-events: write
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -39,6 +47,7 @@ jobs:
           name: dependency-check-report
           path: NEXUSHUB/target/dependency-check-report.html
           if-no-files-found: ignore
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -56,3 +65,18 @@ jobs:
       - run: npm test -- --watch=false
       - run: npm audit --audit-level=high
       - run: npm run build -- --configuration production
+
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [java-kotlin, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+      - uses: github/codeql-action/autobuild@v4
+      - uses: github/codeql-action/analyze@v4

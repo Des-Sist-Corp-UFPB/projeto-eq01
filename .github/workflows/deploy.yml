@@ -1,31 +1,34 @@
 name: Build & Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Qualidade e segurança"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     name: Build, push e deploy
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Prepara nome da imagem (lowercase)
+      - name: Preparar nome da imagem
         run: |
-          echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> $GITHUB_ENV
-
-      - name: Verificar estrutura do repositório
-        run: |
-          pwd
-          ls -la
-          find . -name Dockerfile
+          echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest" >> "$GITHUB_ENV"
 
       - name: Login no GitHub Container Registry
         uses: docker/login-action@v3
