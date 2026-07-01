@@ -35,7 +35,16 @@ COPY --from=frontend-build \
     /frontend/dist/view/browser/ \
     /app/controller/src/main/resources/static/
 
-RUN mvn clean verify
+RUN --mount=type=cache,target=/root/.m2 \
+    set -e; \
+    for attempt in 1 2 3; do \
+      mvn --batch-mode --no-transfer-progress \
+        -Dmaven.wagon.http.retryHandler.count=5 \
+        clean verify && exit 0; \
+      echo "Maven falhou na tentativa ${attempt}; nova tentativa em $((attempt * 10))s..."; \
+      sleep $((attempt * 10)); \
+    done; \
+    exit 1
 
 # Debug
 RUN echo "=== Conteúdo do JAR ===" && \
