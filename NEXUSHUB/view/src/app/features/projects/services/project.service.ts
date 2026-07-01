@@ -33,6 +33,7 @@ export interface ProjetoRequest {
   tags?: string;
   visibilidade?: string;
   grupoPertencente?: string;
+  grupoId?: string;
   autorId?: string;
   autor?: string;
   imagemCardUrl?: string;

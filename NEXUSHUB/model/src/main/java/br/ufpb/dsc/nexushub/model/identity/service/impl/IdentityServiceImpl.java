@@ -41,7 +41,7 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional
-    public User registerUser(String name, String email, String rawPassword, String roleName) {
+    public User registerUser(String name, String email, String rawPassword, String roleName, String fotoUrl) {
         String normalizedEmail = normalizeEmail(email);
         userRepository.findByEmail(normalizedEmail).ifPresent(user -> {
             throw new IllegalArgumentException("Este e-mail ja esta cadastrado.");
@@ -51,7 +51,11 @@ public class IdentityServiceImpl implements IdentityService {
         Role role = roleRepository.findByName(resolveRoleName(roleName))
                 .orElseGet(() -> roleRepository.save(new Role(resolveRoleName(roleName), "Default role", 1, userId)));
 
-        Human human = humanRepository.save(new Human(UUID.randomUUID(), name.trim(), normalizedEmail, userId));
+        Human human = new Human(UUID.randomUUID(), name.trim(), normalizedEmail, userId);
+        if (fotoUrl != null) {
+            human.setPhotoUrl(fotoUrl);
+        }
+        human = humanRepository.save(human);
         User user = new User(userId, human, role, normalizedEmail, passwordEncoder.encode(rawPassword));
         return userRepository.save(user);
     }
@@ -84,12 +88,15 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional
-    public User updateUserProfile(UUID userId, String name, String email, String rawPassword) {
+    public User updateUserProfile(UUID userId, String name, String email, String rawPassword, String fotoUrl) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado."));
         String normalizedEmail = normalizeEmail(email);
         user.changeEmail(normalizedEmail, userId);
         user.getHuman().updateProfile(name.trim(), normalizedEmail, null, null, null, userId);
+        if (fotoUrl != null) {
+            user.getHuman().setPhotoUrl(fotoUrl);
+        }
         if (rawPassword != null && rawPassword.trim().length() >= 6) {
             user.changePassword(passwordEncoder.encode(rawPassword.trim()), userId);
         }

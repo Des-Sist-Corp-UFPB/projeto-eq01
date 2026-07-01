@@ -37,9 +37,9 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        User rodrigo = identityService.registerUser("Rodrigo Silva", "rodrigo@nexushub.com", "senha123", "STUDENT");
-        User kassio = identityService.registerUser("Kassio Leite", "kassio@nexushub.com", "senha123", "PROFESSOR");
-        User john = identityService.registerUser("John Wesley", "john@nexushub.com", "senha123", "SYSADMIN");
+        User rodrigo = identityService.registerUser("Rodrigo Silva", "rodrigo@nexushub.com", "senha123", "STUDENT", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150");
+        User kassio = identityService.registerUser("Kassio Leite", "kassio@nexushub.com", "senha123", "PROFESSOR", "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150");
+        User john = identityService.registerUser("John Wesley", "john@nexushub.com", "senha123", "SYSADMIN", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150");
 
         Group innovationLab = groupService.createGroup(
                 "Laboratorio de Inovacao e Ideias",

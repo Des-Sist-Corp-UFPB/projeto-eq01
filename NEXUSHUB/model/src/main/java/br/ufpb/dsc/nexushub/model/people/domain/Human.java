@@ -71,6 +71,10 @@ public class Human extends AuditableEntity implements Persistable<UUID> {
         touch(updatedById);
     }
 
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
     @Override
     public boolean isNew() {
         return !persisted;

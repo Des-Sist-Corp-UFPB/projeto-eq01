@@ -1,8 +1,9 @@
-import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ProjectService, ProjetoRequest } from '../../../features/projects/services/project.service';
+import { GrupoService, Grupo } from '../../../features/groups/services/grupo.service';
 
 @Component({
   selector: 'app-new-project-modal',
@@ -11,13 +12,16 @@ import { ProjectService, ProjetoRequest } from '../../../features/projects/servi
   templateUrl: './new-project-modal.component.html',
   styleUrl: './new-project-modal.component.css'
 })
-export class NewProjectModalComponent {
+export class NewProjectModalComponent implements OnInit {
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
   private readonly projectService = inject(ProjectService);
+  private readonly grupoService = inject(GrupoService);
   private readonly authService = inject(AuthService);
   protected readonly currentStep = signal(1);
+  protected readonly myGroups = signal<Grupo[]>([]);
+  protected readonly hasNoGroups = signal(false);
 
   protected readonly presetCovers = [
     'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
@@ -35,11 +39,52 @@ export class NewProjectModalComponent {
     tipo: 'Desenvolvimento',
     tags: '',
     visibilidade: 'PUBLICO_ABERTO',
-    grupoPertencente: 'Laboratorio de Inovacao e Ideias',
+    grupoPertencente: '',
     imagemCardUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
     imagemLandingUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
     xpDistribuido: 250 // XP padrão
   };
+
+  ngOnInit() {
+    this.loadUserGroups();
+  }
+
+  loadUserGroups() {
+    const user = this.authService.currentUser();
+    if (!user) return;
+
+    this.grupoService.listar().subscribe({
+      next: (groups) => {
+        const filtered = groups.filter(g => {
+          if (g.responsavel && g.responsavel.trim().toLowerCase() === user.nome.trim().toLowerCase()) {
+            return true;
+          }
+          const cached = localStorage.getItem(`nexushub_group_members_${g.id}`);
+          if (cached) {
+            try {
+              const members = JSON.parse(cached);
+              return Array.isArray(members) && members.some((m: any) => m.nome && m.nome.trim().toLowerCase() === user.nome.trim().toLowerCase());
+            } catch (e) {
+              return false;
+            }
+          }
+          return false;
+        });
+
+        this.myGroups.set(filtered);
+        this.hasNoGroups.set(filtered.length === 0);
+
+        if (filtered.length > 0) {
+          this.formModel.grupoPertencente = filtered[0].nome;
+        } else {
+          this.formModel.grupoPertencente = '';
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar grupos para o modal', err);
+      }
+    });
+  }
 
   close() {
     this.closed.emit();
@@ -67,7 +112,7 @@ export class NewProjectModalComponent {
       return this.formModel.nome.trim() !== '' && this.formModel.resumo.trim() !== '';
     }
     if (this.currentStep() === 2) {
-      return !!this.formModel.grupoPertencente && !!this.formModel.visibilidade;
+      return !this.hasNoGroups() && !!this.formModel.grupoPertencente && !!this.formModel.visibilidade;
     }
     return true;
   }
@@ -79,8 +124,16 @@ export class NewProjectModalComponent {
       return;
     }
 
+    if (this.hasNoGroups()) {
+      alert('Você precisa fazer parte de pelo menos um grupo para cadastrar o projeto.');
+      return;
+    }
+
+    const selectedGroup = this.myGroups().find(g => g.nome === this.formModel.grupoPertencente);
+
     const request: ProjetoRequest = {
       ...this.formModel,
+      grupoId: selectedGroup?.id,
       autorId: user.id,
       autor: user.nome
     };

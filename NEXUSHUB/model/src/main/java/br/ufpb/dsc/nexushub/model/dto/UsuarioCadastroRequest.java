@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Size;
 public record UsuarioCadastroRequest(
         @NotBlank String nome,
         @NotBlank String email,
-        @NotBlank @Size(min = 6) String senha,
-        String cargo
+        String senha,
+        String cargo,
+        String fotoUrl
 ) {
 }

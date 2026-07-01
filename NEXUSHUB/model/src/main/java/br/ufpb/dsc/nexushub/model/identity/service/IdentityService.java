@@ -8,7 +8,7 @@ public interface IdentityService {
 
     boolean hasUsers();
 
-    User registerUser(String name, String email, String rawPassword, String roleName);
+    User registerUser(String name, String email, String rawPassword, String roleName, String fotoUrl);
 
     Optional<User> authenticate(String email, String rawPassword);
 
@@ -16,7 +16,7 @@ public interface IdentityService {
 
     void changePasswordByEmail(String email, String rawPassword);
 
-    User updateUserProfile(UUID userId, String name, String email, String rawPassword);
+    User updateUserProfile(UUID userId, String name, String email, String rawPassword, String fotoUrl);
 
     User firstUser();
     User findByEmail(String email);

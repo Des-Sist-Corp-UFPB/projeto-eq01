@@ -7,7 +7,8 @@ public record UsuarioResponse(
         UUID id,
         String nome,
         String email,
-        String cargo
+        String cargo,
+        String fotoUrl
 ) {
     public static UsuarioResponse from(User user) {
         if (user == null) {
@@ -17,7 +18,8 @@ public record UsuarioResponse(
                 user.getId(),
                 user.getHuman().getName(),
                 user.getEmail(),
-                user.getRole().getName()
+                user.getRole().getName(),
+                user.getHuman().getPhotoUrl()
         );
     }
 }

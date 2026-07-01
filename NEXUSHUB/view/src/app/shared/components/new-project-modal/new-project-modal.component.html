@@ -82,14 +82,22 @@
 
             <!-- STEP 2: Group & Visibility -->
             <div *ngIf="currentStep() === 2" class="step-content animate-fade-in">
-              <div class="form-group">
+              <div class="form-group" *ngIf="!hasNoGroups()">
                 <label for="grupo">Grupo ou Iniciativa *</label>
                 <select id="grupo" name="grupo" [(ngModel)]="formModel.grupoPertencente" required>
-                  <option value="Laboratorio de Inovacao e Ideias">Laboratório de Inovação e Ideias (Seu Grupo)</option>
-                  <option value="Núcleo de Robotica Aplicada">Núcleo de Robótica Aplicada</option>
-                  <option value="Iniciativa Geral Nexus">Iniciativa Geral Nexus</option>
+                  <option *ngFor="let g of myGroups()" [value]="g.nome">{{ g.nome }}</option>
                 </select>
                 <p class="form-hint">Baseado nos grupos dos quais você participa no campus.</p>
+              </div>
+
+              <div class="alert-danger-box" *ngIf="hasNoGroups()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon-error">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div>
+                  <h4>Você não participa de nenhum grupo!</h4>
+                  <p>Um projeto acadêmico do NexusHub deve estar vinculado a um grupo participante. Acesse a aba <strong>Grupos</strong> para entrar em um grupo ou criar um novo antes de continuar.</p>
+                </div>
               </div>
 
               <div class="form-group">

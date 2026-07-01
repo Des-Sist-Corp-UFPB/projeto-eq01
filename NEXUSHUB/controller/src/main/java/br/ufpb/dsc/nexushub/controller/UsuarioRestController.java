@@ -39,7 +39,10 @@ public class UsuarioRestController {
     @PostMapping("/cadastro")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request, HttpServletRequest httpRequest) {
         try {
-            User user = identityService.registerUser(request.nome(), request.email(), request.senha(), request.cargo());
+            if (request.senha() == null || request.senha().trim().length() < 6) {
+                throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres.");
+            }
+            User user = identityService.registerUser(request.nome(), request.email(), request.senha(), request.cargo(), request.fotoUrl());
             audit(user.getId(), "USER_REGISTERED", user.getId().toString(), "SUCCESS", httpRequest, "role=" + user.getRole().getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(user));
         } catch (IllegalArgumentException e) {
@@ -89,7 +92,7 @@ public class UsuarioRestController {
     public ResponseEntity<?> atualizarPerfil(@PathVariable UUID id, @Valid @RequestBody UsuarioCadastroRequest request,
                                              HttpServletRequest httpRequest) {
         try {
-            User user = identityService.updateUserProfile(id, request.nome(), request.email(), request.senha());
+            User user = identityService.updateUserProfile(id, request.nome(), request.email(), request.senha(), request.fotoUrl());
             audit(id, "PROFILE_UPDATED", id.toString(), "SUCCESS", httpRequest, null);
             return ResponseEntity.ok(UsuarioResponse.from(user));
         } catch (IllegalArgumentException e) {

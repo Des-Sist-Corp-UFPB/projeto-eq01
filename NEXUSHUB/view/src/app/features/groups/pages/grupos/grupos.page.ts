@@ -175,6 +175,59 @@ export class GruposPageComponent implements OnInit {
       });
     }
   }
+
+  isGroupFavorited(id?: string): boolean {
+    if (!id) return false;
+    const user = this.authService.currentUser();
+    if (!user) return false;
+    const favsStr = localStorage.getItem(`nexushub_fav_groups_${user.id}`);
+    if (favsStr) {
+      try {
+        const parsed = JSON.parse(favsStr);
+        return Array.isArray(parsed) && parsed.includes(id);
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  toggleFavoriteGroup(gp: Grupo, event: Event) {
+    event.stopPropagation();
+    if (!gp.id) return;
+    const user = this.authService.currentUser();
+    if (!user) {
+      alert('Você precisa estar logado para favoritar um grupo!');
+      return;
+    }
+
+    const favsKey = `nexushub_fav_groups_${user.id}`;
+    const favsStr = localStorage.getItem(favsKey);
+    let parsed = [];
+    if (favsStr) {
+      try {
+        parsed = JSON.parse(favsStr);
+      } catch (e) {}
+    }
+    if (!Array.isArray(parsed)) parsed = [];
+
+    if (parsed.includes(gp.id)) {
+      parsed = parsed.filter((id: string) => id !== gp.id);
+    } else {
+      parsed.push(gp.id);
+    }
+    localStorage.setItem(favsKey, JSON.stringify(parsed));
+  }
+
+  getGroupLikesCount(gp: Grupo): number {
+    if (!gp.id) return 0;
+    let hash = 0;
+    for (let i = 0; i < gp.id.length; i++) {
+      hash += gp.id.charCodeAt(i);
+    }
+    const baseLikes = (hash % 10) + 4;
+    return this.isGroupFavorited(gp.id) ? baseLikes + 1 : baseLikes;
+  }
 }
 
 interface BentoProject {
