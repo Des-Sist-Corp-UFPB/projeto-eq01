@@ -35,9 +35,11 @@ public class PaymentRestController {
   payments.processWebhook(requestId==null?id:requestId,id,payload);
   return ResponseEntity.ok().build();
  }
- @PostMapping("/fake/{orderId}") public ResponseEntity<Void> fake(@PathVariable UUID orderId){
+ @PostMapping("/fake/{orderId}") public ResponseEntity<Void> fake(@PathVariable UUID orderId,Principal p,HttpServletRequest req){
   if(!fake)return ResponseEntity.notFound().build();
-  payments.processWebhook("fake-event-"+orderId,"fake-"+orderId,"{}");return ResponseEntity.noContent().build();
+  payments.processWebhook("fake-event-"+orderId,"fake-"+orderId,"{}");
+  User user=user(p);audit.record(user.getId(),"PAYMENT_COMPLETED","PAYMENT",orderId.toString(),"SUCCESS",req.getRemoteAddr(),req.getHeader("X-Correlation-ID"),null,"status=PAID");
+  return ResponseEntity.noContent().build();
  }
  boolean validSignature(String dataId,String requestId,String signature){
   if(webhookSecret.isBlank()||signature==null||requestId==null)return false;

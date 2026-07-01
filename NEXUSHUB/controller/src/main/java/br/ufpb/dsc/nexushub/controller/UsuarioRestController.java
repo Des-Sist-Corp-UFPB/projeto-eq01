@@ -4,6 +4,8 @@ import br.ufpb.dsc.nexushub.model.dto.ForgotPasswordRequest;
 import br.ufpb.dsc.nexushub.model.dto.LoginRequest;
 import br.ufpb.dsc.nexushub.model.dto.UsuarioCadastroRequest;
 import br.ufpb.dsc.nexushub.model.dto.UsuarioResponse;
+import br.ufpb.dsc.nexushub.model.administration.service.AuditService;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
 import br.ufpb.dsc.nexushub.model.identity.service.IdentityService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -27,17 +29,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class UsuarioRestController {
 
     private final IdentityService identityService;
+    private final AuditService auditService;
 
-    public UsuarioRestController(IdentityService identityService) {
+    public UsuarioRestController(IdentityService identityService, AuditService auditService) {
         this.identityService = identityService;
+        this.auditService = auditService;
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<?> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request) {
+    public ResponseEntity<?> cadastrar(@Valid @RequestBody UsuarioCadastroRequest request, HttpServletRequest httpRequest) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(
-                    identityService.registerUser(request.nome(), request.email(), request.senha(), request.cargo())
-            ));
+            User user = identityService.registerUser(request.nome(), request.email(), request.senha(), request.cargo());
+            audit(user.getId(), "USER_REGISTERED", user.getId().toString(), "SUCCESS", httpRequest, "role=" + user.getRole().getName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDto(e.getMessage()));
         }
@@ -54,9 +58,13 @@ public class UsuarioRestController {
                     SecurityContextHolder.setContext(context);
                     httpRequest.getSession(true).setAttribute(
                             HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+                    audit(user.getId(), "LOGIN", user.getId().toString(), "SUCCESS", httpRequest, null);
                     return ResponseEntity.ok(UsuarioResponse.from(user));
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto("E-mail ou senha incorretos.")));
+                .orElseGet(() -> {
+                    audit(null, "LOGIN_FAILED", null, "DENIED", httpRequest, null);
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto("E-mail ou senha incorretos."));
+                });
     }
 
     @GetMapping("/sessao")
@@ -66,9 +74,11 @@ public class UsuarioRestController {
     }
 
     @PostMapping("/esqueci-senha")
-    public ResponseEntity<?> redefinirSenha(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<?> redefinirSenha(@Valid @RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
         try {
             identityService.changePasswordByEmail(request.email(), request.novaSenha());
+            User user = identityService.findByEmail(request.email());
+            audit(user.getId(), "PASSWORD_CHANGED", user.getId().toString(), "SUCCESS", httpRequest, null);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDto(e.getMessage()));
@@ -76,17 +86,24 @@ public class UsuarioRestController {
     }
 
     @PutMapping("/perfil/{id}")
-    public ResponseEntity<?> atualizarPerfil(@PathVariable UUID id, @Valid @RequestBody UsuarioCadastroRequest request) {
+    public ResponseEntity<?> atualizarPerfil(@PathVariable UUID id, @Valid @RequestBody UsuarioCadastroRequest request,
+                                             HttpServletRequest httpRequest) {
         try {
-            return ResponseEntity.ok(UsuarioResponse.from(
-                    identityService.updateUserProfile(id, request.nome(), request.email(), request.senha())
-            ));
+            User user = identityService.updateUserProfile(id, request.nome(), request.email(), request.senha());
+            audit(id, "PROFILE_UPDATED", id.toString(), "SUCCESS", httpRequest, null);
+            return ResponseEntity.ok(UsuarioResponse.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDto(e.getMessage()));
         }
     }
 
     public record ErrorDto(String message) {
+    }
+
+    private void audit(UUID actorId, String action, String entityId, String result,
+                       HttpServletRequest request, String afterValue) {
+        auditService.record(actorId, action, "USER", entityId, result, request.getRemoteAddr(),
+                request.getHeader("X-Correlation-ID"), null, afterValue);
     }
 }
 

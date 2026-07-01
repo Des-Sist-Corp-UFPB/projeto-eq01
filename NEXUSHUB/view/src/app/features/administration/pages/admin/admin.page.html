@@ -1,5 +1,42 @@
-<section class="admin-page"><h2>Administração</h2><p *ngIf="error()">{{error()}}</p>
- <h3>Feature toggles</h3><div class="flags"><button *ngFor="let flag of flags()" (click)="toggle(flag)" [class.enabled]="flag.enabled">
-  <strong>{{flag.code}}</strong><span>{{flag.enabled?'Ligada':'Desligada'}}</span><small>{{flag.description}}</small></button></div>
- <h3>Auditoria recente</h3><div class="table"><div class="row" *ngFor="let item of audits()"><strong>{{item.action}}</strong><span>{{item.entity}} {{item.entityId}}</span><time>{{item.createdAt|date:'short'}}</time></div></div>
+<section class="admin-page">
+  <h2>Administração</h2>
+  <p class="feedback error" *ngIf="error()">{{ error() }}</p>
+  <p class="feedback success" *ngIf="message()">{{ message() }}</p>
+
+  <h3>Funcionalidades</h3>
+  <p class="hint">Use o botão de cada item para ativar ou desativar a funcionalidade.</p>
+  <div class="flags">
+    <article *ngFor="let flag of flags()" [class.enabled]="flag.enabled">
+      <div>
+        <strong>{{ flagName(flag.code) }}</strong>
+        <span class="status">{{ flag.enabled ? 'Ativada' : 'Desativada' }}</span>
+        <small>{{ flag.description }}</small>
+      </div>
+      <button type="button" (click)="toggle(flag)" [disabled]="changing() === flag.code">
+        {{ changing() === flag.code ? 'Salvando...' : (flag.enabled ? 'Desativar' : 'Ativar') }}
+      </button>
+    </article>
+  </div>
+
+  <div class="audit-heading">
+    <div>
+      <h3>Auditoria recente</h3>
+      <p class="hint">Últimas ações relevantes de segurança, administração, pagamentos e privacidade.</p>
+    </div>
+    <button type="button" class="refresh" (click)="refresh()">Atualizar</button>
+  </div>
+  <div class="table">
+    <div class="row header"><span>Ação</span><span>Recurso</span><span>Resultado</span><span>Data</span></div>
+    <div class="row" *ngFor="let item of audits()">
+      <div><strong>{{ actionName(item.action) }}</strong><small>{{ item.action }}</small></div>
+      <div>
+        <span>{{ entityName(item.entity) }}</span>
+        <small *ngIf="item.afterValue">{{ item.afterValue }}</small>
+        <small *ngIf="item.entityId">ID: {{ item.entityId }}</small>
+      </div>
+      <span class="result" [class.ok]="item.result === 'SUCCESS'">{{ item.result === 'SUCCESS' ? 'Sucesso' : item.result }}</span>
+      <time>{{ item.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</time>
+    </div>
+    <p class="empty" *ngIf="!audits().length">Nenhum evento de auditoria registrado.</p>
+  </div>
 </section>
