@@ -34,6 +34,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Baixar imagens-base com retry
+        shell: bash
+        run: |
+          for image in node:20-alpine maven:3.9-eclipse-temurin-21-alpine eclipse-temurin:21-jre-alpine; do
+            success=false
+            for attempt in 1 2 3 4 5; do
+              if docker pull "$image"; then
+                success=true
+                break
+              fi
+              echo "Tentativa $attempt falhou para $image; aguardando..."
+              sleep $((attempt * 10))
+            done
+            if [ "$success" != true ]; then
+              echo "Não foi possível baixar $image após 5 tentativas."
+              exit 1
+            fi
+          done
+
       - name: Build e push da imagem
         uses: docker/build-push-action@v5
         with:
