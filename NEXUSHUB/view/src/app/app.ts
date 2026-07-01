@@ -21,6 +21,19 @@ export class AppComponent implements OnInit {
   protected readonly isDarkMode = signal(false);
 
   ngOnInit() {
+    this.applyTheme();
+    
+    // Listen for dynamic changes in the system color scheme
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      const savedTheme = localStorage.getItem('nexushub_theme');
+      if (!savedTheme) {
+        this.isDarkMode.set(e.matches);
+        document.body.classList.toggle('dark-mode', e.matches);
+      }
+    });
+  }
+
+  private applyTheme() {
     const savedTheme = localStorage.getItem('nexushub_theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const nextDark = savedTheme === 'dark' || (!savedTheme && prefersDark);

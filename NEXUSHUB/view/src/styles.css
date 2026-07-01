@@ -55,6 +55,110 @@ body.dark-mode {
   --nav-wrapper-bg: rgba(17, 28, 46, 0.98);
 }
 
+/* Dark Mode UI Adaptations and Button Fixes */
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .search-input {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+body.dark-mode .stepper,
+body.dark-mode .create-panel-wrapper,
+body.dark-mode .preview-card-container,
+body.dark-mode .empty-groups,
+body.dark-mode .upload-dropzone {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+
+body.dark-mode .step-num {
+  background-color: var(--color-border) !important;
+  color: var(--color-muted) !important;
+}
+
+body.dark-mode .step.active .step-num {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+body.dark-mode .step-line {
+  background-color: var(--color-border) !important;
+}
+
+body.dark-mode .radio-card {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-surface) !important;
+}
+body.dark-mode .radio-card:hover {
+  background-color: var(--nav-hover-bg) !important;
+  border-color: var(--color-primary) !important;
+}
+body.dark-mode .radio-card.selected {
+  background-color: rgba(59, 110, 244, 0.12) !important;
+  border-color: var(--color-primary) !important;
+}
+
+body.dark-mode .file-upload-trigger,
+body.dark-mode .preset-cover {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+body.dark-mode .file-upload-trigger:hover {
+  background-color: var(--nav-hover-bg) !important;
+}
+
+body.dark-mode .btn-delete-group-icon {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: #f87171 !important;
+}
+body.dark-mode .btn-delete-group-icon:hover {
+  background-color: rgba(220, 38, 38, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .carousel-nav-btn {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+body.dark-mode .carousel-nav-btn:hover {
+  background-color: var(--nav-hover-bg) !important;
+}
+body.dark-mode .carousel-nav-btn svg {
+  color: var(--color-text) !important;
+}
+
+body.dark-mode .like-button,
+body.dark-mode .tag-badge,
+body.dark-mode .count-badge {
+  background-color: var(--color-border) !important;
+  color: var(--color-muted) !important;
+}
+body.dark-mode .like-button:hover {
+  background-color: var(--nav-hover-bg) !important;
+  color: var(--color-text) !important;
+}
+
+body.dark-mode .btn-secondary:hover {
+  border-color: var(--color-border) !important;
+  background-color: var(--nav-hover-bg) !important;
+}
+
+body.dark-mode .metric-card.xp .metric-visual {
+  background-color: rgba(251, 191, 36, 0.15) !important;
+}
+body.dark-mode .metric-card.projects .metric-visual {
+  background-color: rgba(59, 110, 244, 0.15) !important;
+}
+body.dark-mode .metric-card.group .metric-visual {
+  background-color: rgba(52, 211, 153, 0.15) !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
