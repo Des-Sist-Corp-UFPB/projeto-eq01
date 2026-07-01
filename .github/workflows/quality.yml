@@ -43,7 +43,7 @@ jobs:
           -DossindexAnalyzerEnabled=false
       - name: Publicar relatório OWASP
         if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dependency-check-report
           path: NEXUSHUB/target/dependency-check-report.html
