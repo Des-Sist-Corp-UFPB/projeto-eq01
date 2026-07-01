@@ -36,7 +36,7 @@ app:
     webhook-secret: ${MERCADO_PAGO_WEBHOOK_SECRET:}
     base-url: ${MERCADO_PAGO_BASE_URL:https://api.mercadopago.com}
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080,http://dsc.rodrigor.com,https://dsc.rodrigor.com,http://eq01.dsc.rodrigor.com,https://eq01.dsc.rodrigor.com}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080,http://localhost:8085,http://dsc.rodrigor.com,https://dsc.rodrigor.com,http://eq01.dsc.rodrigor.com,https://eq01.dsc.rodrigor.com}
 
 management:
   endpoints:
