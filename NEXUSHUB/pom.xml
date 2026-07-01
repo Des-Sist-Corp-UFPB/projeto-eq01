@@ -74,6 +74,11 @@
                                 <exclude>**/*Application*</exclude>
                                 <exclude>**/config/**</exclude>
                             </excludes>
+                            <includes>
+                                <include>br/ufpb/dsc/nexushub/model/administration/service/**</include>
+                                <include>br/ufpb/dsc/nexushub/model/privacy/service/**</include>
+                                <include>br/ufpb/dsc/nexushub/model/payments/service/**</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
