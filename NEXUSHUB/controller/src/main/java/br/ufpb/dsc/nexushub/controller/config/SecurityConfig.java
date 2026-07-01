@@ -46,9 +46,14 @@ public class SecurityConfig {
                     .frameOptions(frame -> frame.deny()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg",
+                        "/*.woff", "/*.woff2", "/*.map", "/assets/**").permitAll()
                 .requestMatchers("/", "/index.html", "/ping", "/actuator/health", "/api/usuarios/login",
                         "/api/usuarios/cadastro", "/api/pagamentos/webhook",
                         "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                .requestMatchers("/login", "/cadastro", "/esqueci-senha", "/perfil",
+                        "/projetos/**", "/grupos", "/grupos/**", "/loja", "/admin",
+                        "/privacidade").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/projetos/**", "/api/grupos/**",
                         "/api/oportunidades/**").permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SYSADMIN")
