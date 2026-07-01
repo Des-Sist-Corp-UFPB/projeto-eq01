@@ -69,6 +69,7 @@ jobs:
 
   codeql:
     name: CodeQL (${{ matrix.language }})
+    if: vars.CODEQL_ENABLED == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
