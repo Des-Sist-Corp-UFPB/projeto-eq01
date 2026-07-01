@@ -24,12 +24,19 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
       - name: OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
+        run: >
+          mvn --batch-mode
+          org.owasp:dependency-check-maven:check
+          -DfailBuildOnCVSS=7
+          -Dformat=HTML
+          -DossindexAnalyzerEnabled=false
+      - name: Publicar relatório OWASP
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          project: NexusHub
-          path: NEXUSHUB
-          format: HTML
-          args: --failOnCVSS 7
+          name: dependency-check-report
+          path: NEXUSHUB/target/dependency-check-report.html
+          if-no-files-found: ignore
   frontend:
     runs-on: ubuntu-latest
     defaults:
