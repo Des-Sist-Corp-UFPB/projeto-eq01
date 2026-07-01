@@ -11,7 +11,9 @@ import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.http.HttpMethod;
 
@@ -37,10 +39,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        var csrfRequestHandler = new CsrfTokenRequestAttributeHandler();
+        csrfRequestHandler.setCsrfRequestAttributeName(null);
+
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(csrfRequestHandler)
                     .ignoringRequestMatchers("/api/pagamentos/webhook", "/api/usuarios/login", "/api/usuarios/cadastro"))
+            .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
             .headers(headers -> headers
                     .contentTypeOptions(Customizer.withDefaults())
                     .frameOptions(frame -> frame.deny()))
