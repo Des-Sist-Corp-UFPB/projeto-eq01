@@ -2,6 +2,9 @@ name: Qualidade e segurança
 on:
   push:
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
 permissions:
   contents: read
   security-events: write
@@ -21,6 +24,8 @@ jobs:
       - name: Testes e cobertura mínima de 85%
         run: mvn --batch-mode clean verify
       - name: OWASP Dependency Check
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        timeout-minutes: 20
         run: >
           mvn --batch-mode
           org.owasp:dependency-check-maven:check
@@ -28,7 +33,7 @@ jobs:
           -Dformat=HTML
           -DossindexAnalyzerEnabled=false
       - name: Publicar relatório OWASP
-        if: always()
+        if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v6
         with:
           name: dependency-check-report
