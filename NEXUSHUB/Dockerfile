@@ -11,7 +11,7 @@ RUN npm install
 
 COPY view/ .
 
-RUN npm run build -- --configuration production
+RUN npm run lint && npm test -- --watch=false && npm run build -- --configuration production
 
 # Debug
 RUN echo "=== Angular build ===" && \
@@ -35,7 +35,7 @@ COPY --from=frontend-build \
     /frontend/dist/view/browser/ \
     /app/controller/src/main/resources/static/
 
-RUN mvn clean package -DskipTests
+RUN mvn clean verify
 
 # Debug
 RUN echo "=== Conteúdo do JAR ===" && \
