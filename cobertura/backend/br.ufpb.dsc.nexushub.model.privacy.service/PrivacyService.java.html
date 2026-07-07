@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrivacyService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NEXUS HUB Model</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.nexushub.model.privacy.service</a> &gt; <span class="el_source">PrivacyService.java</span></div><h1>PrivacyService.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.nexushub.model.privacy.service;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
+import br.ufpb.dsc.nexushub.model.privacy.domain.*;
+import br.ufpb.dsc.nexushub.model.privacy.repository.*;
+import java.util.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+@Service
+public class PrivacyService {
+ private final ConsentRepository consents; private final DataSubjectRequestRepository requests; private final UserRepository users;
+<span class="fc" id="L12"> public PrivacyService(ConsentRepository consents,DataSubjectRequestRepository requests,UserRepository users){this.consents=consents;this.requests=requests;this.users=users;}</span>
+<span class="fc" id="L13"> @Transactional public Consent consent(UUID user,String purpose,String version,boolean granted){requireUser(user);return consents.save(new Consent(user,purpose,version,granted));}</span>
+<span class="fc" id="L14"> @Transactional public DataSubjectRequest request(UUID user,String type){requireUser(user);return requests.save(new DataSubjectRequest(user,type));}</span>
+ @Transactional(readOnly=true) public Map&lt;String,Object&gt; export(UUID userId){
+<span class="fc" id="L16">  User user=requireUser(userId);</span>
+<span class="fc" id="L17">  Map&lt;String,Object&gt; data=new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L18">  data.put(&quot;id&quot;,user.getId());data.put(&quot;name&quot;,user.getHuman().getName());data.put(&quot;email&quot;,user.getEmail());</span>
+<span class="fc" id="L19">  data.put(&quot;role&quot;,user.getRole().getName());data.put(&quot;consents&quot;,consents.findByUserIdOrderByCreatedAtDesc(userId));</span>
+<span class="fc" id="L20">  data.put(&quot;requests&quot;,requests.findByUserIdOrderByCreatedAtDesc(userId));</span>
+<span class="fc" id="L21">  return data;</span>
+ }
+<span class="fc" id="L23"> private User requireUser(UUID id){return users.findById(id).orElseThrow(()-&gt;new IllegalArgumentException(&quot;Usuario nao encontrado.&quot;));}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

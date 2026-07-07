@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IdentityServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NEXUS HUB Model</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.nexushub.model.identity.service.impl</a> &gt; <span class="el_source">IdentityServiceImpl.java</span></div><h1>IdentityServiceImpl.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.nexushub.model.identity.service.impl;
+
+import br.ufpb.dsc.nexushub.model.identity.domain.Role;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import br.ufpb.dsc.nexushub.model.identity.repository.RoleRepository;
+import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
+import br.ufpb.dsc.nexushub.model.identity.service.IdentityService;
+import br.ufpb.dsc.nexushub.model.people.domain.Human;
+import br.ufpb.dsc.nexushub.model.people.repository.HumanRepository;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class IdentityServiceImpl implements IdentityService {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final HumanRepository humanRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public IdentityServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            HumanRepository humanRepository,
+            PasswordEncoder passwordEncoder
+<span class="fc" id="L29">    ) {</span>
+<span class="fc" id="L30">        this.userRepository = userRepository;</span>
+<span class="fc" id="L31">        this.roleRepository = roleRepository;</span>
+<span class="fc" id="L32">        this.humanRepository = humanRepository;</span>
+<span class="fc" id="L33">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasUsers() {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        return userRepository.count() &gt; 0;</span>
+    }
+
+    @Override
+    @Transactional
+    public User registerUser(String name, String email, String rawPassword, String roleName, String fotoUrl) {
+<span class="fc" id="L45">        String normalizedEmail = normalizeEmail(email);</span>
+<span class="fc" id="L46">        userRepository.findByEmail(normalizedEmail).ifPresent(user -&gt; {</span>
+<span class="fc" id="L47">            throw new IllegalArgumentException(&quot;Este e-mail ja esta cadastrado.&quot;);</span>
+        });
+
+<span class="fc" id="L50">        UUID userId = UUID.randomUUID();</span>
+<span class="fc" id="L51">        Role role = roleRepository.findByName(resolveRoleName(roleName))</span>
+<span class="fc" id="L52">                .orElseGet(() -&gt; roleRepository.save(new Role(resolveRoleName(roleName), &quot;Default role&quot;, 1, userId)));</span>
+
+<span class="fc" id="L54">        Human human = new Human(UUID.randomUUID(), name.trim(), normalizedEmail, userId);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (fotoUrl != null) {</span>
+<span class="nc" id="L56">            human.setPhotoUrl(fotoUrl);</span>
+        }
+<span class="fc" id="L58">        human = humanRepository.save(human);</span>
+<span class="fc" id="L59">        User user = new User(userId, human, role, normalizedEmail, passwordEncoder.encode(rawPassword));</span>
+<span class="fc" id="L60">        return userRepository.save(user);</span>
+    }
+
+    @Override
+    @Transactional
+    public Optional&lt;User&gt; authenticate(String email, String rawPassword) {
+<span class="fc" id="L66">        Optional&lt;User&gt; user = userRepository.findByEmail(normalizeEmail(email))</span>
+<span class="fc" id="L67">                .filter(found -&gt; passwordEncoder.matches(rawPassword, found.getPasswordHash()));</span>
+<span class="fc" id="L68">        user.ifPresent(User::registerAccess);</span>
+<span class="fc" id="L69">        return user;</span>
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID userId, String rawPassword, UUID updatedById) {
+<span class="fc" id="L75">        User user = userRepository.findById(userId)</span>
+<span class="fc" id="L76">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Usuario nao encontrado.&quot;));</span>
+<span class="fc" id="L77">        user.changePassword(passwordEncoder.encode(rawPassword), updatedById);</span>
+<span class="fc" id="L78">        userRepository.save(user);</span>
+<span class="fc" id="L79">    }</span>
+
+    @Override
+    @Transactional
+    public void changePasswordByEmail(String email, String rawPassword) {
+<span class="fc" id="L84">        User user = userRepository.findByEmail(normalizeEmail(email))</span>
+<span class="fc" id="L85">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Nenhum usuario cadastrado com este e-mail.&quot;));</span>
+<span class="fc" id="L86">        changePassword(user.getId(), rawPassword, user.getId());</span>
+<span class="fc" id="L87">    }</span>
+
+    @Override
+    @Transactional
+    public User updateUserProfile(UUID userId, String name, String email, String rawPassword, String fotoUrl) {
+<span class="fc" id="L92">        User user = userRepository.findById(userId)</span>
+<span class="pc" id="L93">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Usuario nao encontrado.&quot;));</span>
+<span class="fc" id="L94">        String normalizedEmail = normalizeEmail(email);</span>
+<span class="fc" id="L95">        user.changeEmail(normalizedEmail, userId);</span>
+<span class="fc" id="L96">        user.getHuman().updateProfile(name.trim(), normalizedEmail, null, null, null, userId);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (fotoUrl != null) {</span>
+<span class="nc" id="L98">            user.getHuman().setPhotoUrl(fotoUrl);</span>
+        }
+<span class="pc bpc" id="L100" title="1 of 4 branches missed.">        if (rawPassword != null &amp;&amp; rawPassword.trim().length() &gt;= 6) {</span>
+<span class="fc" id="L101">            user.changePassword(passwordEncoder.encode(rawPassword.trim()), userId);</span>
+        }
+<span class="fc" id="L103">        return userRepository.save(user);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User firstUser() {
+<span class="fc" id="L109">        return userRepository.findAll().stream()</span>
+<span class="fc" id="L110">                .findFirst()</span>
+<span class="fc" id="L111">                .orElseThrow(() -&gt; new IllegalStateException(&quot;Nenhum usuario auditor encontrado.&quot;));</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+<span class="fc" id="L117">        return userRepository.findByEmail(normalizeEmail(email))</span>
+<span class="fc" id="L118">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Usuario nao encontrado.&quot;));</span>
+    }
+
+    private String normalizeEmail(String email) {
+<span class="fc" id="L122">        return email.trim().toLowerCase();</span>
+    }
+
+    private String resolveRoleName(String roleName) {
+<span class="pc bpc" id="L126" title="1 of 4 branches missed.">        return roleName == null || roleName.isBlank() ? &quot;STUDENT&quot; : roleName.trim().toUpperCase();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -16,7 +16,11 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: vi.fn().mockReturnValue({ matches: false })
+      value: vi.fn().mockReturnValue({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn()
+      })
     });
     await TestBed.configureTestingModule({
       imports: [AppComponent],
@@ -39,5 +43,32 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.app-layout')).toBeTruthy();
     expect(compiled.textContent).toContain('NEXUS');
+  });
+
+  it('should toggle theme', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    const initial = (app as any).isDarkMode();
+    app.toggleTheme();
+    expect((app as any).isDarkMode()).toBe(!initial);
+  });
+
+  it('should toggle mobile menu', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    
+    app.toggleMobileMenu();
+    expect((app as any).isMobileMenuOpen()).toBe(true);
+    
+    app.closeMobileMenu();
+    expect((app as any).isMobileMenuOpen()).toBe(false);
+  });
+
+  it('should logout and redirect', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    
+    app.logout();
+    expect(authStub.logout).toHaveBeenCalled();
   });
 });

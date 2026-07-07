@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NEXUS HUB Model</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.nexushub.model.projects.service.impl</a> &gt; <span class="el_source">ProjectServiceImpl.java</span></div><h1>ProjectServiceImpl.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.nexushub.model.projects.service.impl;
+
+import br.ufpb.dsc.nexushub.model.groups.domain.Group;
+import br.ufpb.dsc.nexushub.model.groups.repository.GroupRepository;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
+import br.ufpb.dsc.nexushub.model.identity.service.IdentityService;
+import br.ufpb.dsc.nexushub.model.people.domain.Human;
+import br.ufpb.dsc.nexushub.model.people.repository.HumanRepository;
+import br.ufpb.dsc.nexushub.model.dto.ProjetoRequest;
+import br.ufpb.dsc.nexushub.model.dto.SolicitacaoRequest;
+import br.ufpb.dsc.nexushub.model.projects.domain.Project;
+import br.ufpb.dsc.nexushub.model.projects.domain.ProjectHumanMember;
+import br.ufpb.dsc.nexushub.model.projects.domain.ProjectRequest;
+import br.ufpb.dsc.nexushub.model.projects.domain.ProjectTag;
+import br.ufpb.dsc.nexushub.model.projects.domain.Tag;
+import br.ufpb.dsc.nexushub.model.projects.repository.ProjectHumanMemberRepository;
+import br.ufpb.dsc.nexushub.model.projects.repository.ProjectRepository;
+import br.ufpb.dsc.nexushub.model.projects.repository.ProjectRequestRepository;
+import br.ufpb.dsc.nexushub.model.projects.repository.ProjectTagRepository;
+import br.ufpb.dsc.nexushub.model.projects.repository.TagRepository;
+import br.ufpb.dsc.nexushub.model.projects.service.ProjectService;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class ProjectServiceImpl implements ProjectService {
+
+    private final ProjectRepository projectRepository;
+    private final ProjectTagRepository projectTagRepository;
+    private final TagRepository tagRepository;
+    private final ProjectRequestRepository requestRepository;
+    private final ProjectHumanMemberRepository memberRepository;
+    private final HumanRepository humanRepository;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+    private final IdentityService identityService;
+
+    public ProjectServiceImpl(
+            ProjectRepository projectRepository,
+            ProjectTagRepository projectTagRepository,
+            TagRepository tagRepository,
+            ProjectRequestRepository requestRepository,
+            ProjectHumanMemberRepository memberRepository,
+            HumanRepository humanRepository,
+            GroupRepository groupRepository,
+            UserRepository userRepository,
+            IdentityService identityService
+<span class="fc" id="L52">    ) {</span>
+<span class="fc" id="L53">        this.projectRepository = projectRepository;</span>
+<span class="fc" id="L54">        this.projectTagRepository = projectTagRepository;</span>
+<span class="fc" id="L55">        this.tagRepository = tagRepository;</span>
+<span class="fc" id="L56">        this.requestRepository = requestRepository;</span>
+<span class="fc" id="L57">        this.memberRepository = memberRepository;</span>
+<span class="fc" id="L58">        this.humanRepository = humanRepository;</span>
+<span class="fc" id="L59">        this.groupRepository = groupRepository;</span>
+<span class="fc" id="L60">        this.userRepository = userRepository;</span>
+<span class="fc" id="L61">        this.identityService = identityService;</span>
+<span class="fc" id="L62">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listPublishedProjects() {
+<span class="fc" id="L67">        return projectRepository.findAll().stream()</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                .filter(project -&gt; project.getRecordStatus() == 1)</span>
+<span class="fc" id="L69">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listProjects(String tag, String author) {
+<span class="pc bpc" id="L75" title="1 of 4 branches missed.">        List&lt;Project&gt; projects = tag == null || tag.isBlank()</span>
+<span class="fc" id="L76">                ? listPublishedProjects()</span>
+<span class="fc" id="L77">                : projectTagRepository.findByTag_NameIgnoreCase(tag.trim()).stream()</span>
+<span class="fc" id="L78">                        .map(ProjectTag::getProject)</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                        .filter(project -&gt; project.getRecordStatus() == 1)</span>
+<span class="fc" id="L80">                        .toList();</span>
+
+<span class="fc" id="L82">        return projects.stream()</span>
+<span class="pc bpc" id="L83" title="3 of 6 branches missed.">                .filter(project -&gt; author == null || author.isBlank() || project.getOwner().getName().equalsIgnoreCase(author))</span>
+<span class="fc" id="L84">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listProjectsByAuthor(String author) {
+<span class="fc" id="L90">        return listProjects(null, author);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listHotProjects() {
+<span class="fc" id="L96">        return listPublishedProjects().stream()</span>
+<span class="fc" id="L97">                .sorted(Comparator.comparing(Project::getXpAmount, Comparator.nullsLast(Comparator.reverseOrder())))</span>
+<span class="fc" id="L98">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listRecentProjects() {
+<span class="fc" id="L104">        return listPublishedProjects().stream()</span>
+<span class="fc" id="L105">                .sorted(Comparator.comparing(Project::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))</span>
+<span class="fc" id="L106">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Project&gt; listCollaborativeProjects() {
+<span class="fc" id="L112">        return listPublishedProjects();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Project getProject(UUID projectId) {
+<span class="fc" id="L118">        return projectRepository.findById(projectId)</span>
+<span class="fc" id="L119">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Projeto nao encontrado.&quot;));</span>
+    }
+
+    @Override
+    @Transactional
+    public Project createProject(UUID ownerHumanId, UUID groupId, String name, String resume, String goals, Integer type, UUID updatedById) {
+<span class="fc" id="L125">        Human owner = humanRepository.findById(ownerHumanId)</span>
+<span class="fc" id="L126">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Responsavel do projeto nao encontrado.&quot;));</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        Group group = groupId == null ? null : groupRepository.findById(groupId).orElse(null);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        Project project = new Project(group, owner, name, resume, goals, type == null ? 1 : type, updatedById);</span>
+<span class="fc" id="L129">        project.publish(updatedById);</span>
+<span class="fc" id="L130">        Project saved = projectRepository.save(project);</span>
+<span class="fc" id="L131">        memberRepository.save(new ProjectHumanMember(saved, owner, 1, updatedById));</span>
+<span class="fc" id="L132">        return saved;</span>
+    }
+
+    @Override
+    @Transactional
+    public Project createProject(ProjetoRequest request) {
+<span class="fc" id="L138">        User owner = resolveOwner(request);</span>
+<span class="fc" id="L139">        Project project = createProject(</span>
+<span class="fc" id="L140">                owner.getHuman().getId(),</span>
+<span class="fc" id="L141">                request.grupoId(),</span>
+<span class="fc" id="L142">                request.nome(),</span>
+<span class="fc" id="L143">                request.resumo(),</span>
+<span class="fc" id="L144">                request.objetivos(),</span>
+<span class="fc" id="L145">                parseType(request.tipo(), 1),</span>
+<span class="fc" id="L146">                owner.getId()</span>
+        );
+<span class="fc" id="L148">        project.updatePresentation(</span>
+<span class="fc" id="L149">                parseType(request.visibilidade(), 1),</span>
+<span class="fc" id="L150">                request.imagemCardUrl(),</span>
+<span class="fc" id="L151">                request.imagemLandingUrl(),</span>
+<span class="fc" id="L152">                request.xpDistribuido(),</span>
+<span class="fc" id="L153">                0,</span>
+<span class="fc" id="L154">                owner.getId()</span>
+        );
+<span class="fc" id="L156">        Project saved = projectRepository.save(project);</span>
+<span class="fc" id="L157">        syncProjectTags(saved, request.tags(), owner.getId());</span>
+<span class="fc" id="L158">        return saved;</span>
+    }
+
+    @Override
+    @Transactional
+    public ProjectRequest requestMembership(UUID projectId, UUID humanId, String motive, UUID updatedById) {
+<span class="fc" id="L164">        Project project = projectRepository.findById(projectId)</span>
+<span class="fc" id="L165">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Projeto nao encontrado.&quot;));</span>
+<span class="fc" id="L166">        Human human = humanRepository.findById(humanId)</span>
+<span class="pc" id="L167">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Pessoa nao encontrada.&quot;));</span>
+<span class="fc" id="L168">        requestRepository.findByProjectAndRequester(project, human).ifPresent(request -&gt; {</span>
+<span class="fc" id="L169">            throw new IllegalArgumentException(&quot;Voce ja enviou uma solicitacao para este projeto.&quot;);</span>
+        });
+<span class="fc" id="L171">        return requestRepository.save(new ProjectRequest(project, human, motive, updatedById));</span>
+    }
+
+    @Override
+    @Transactional
+    public ProjectRequest requestMembership(SolicitacaoRequest request) {
+<span class="fc" id="L177">        User user = resolveRequester(request);</span>
+<span class="fc" id="L178">        return requestMembership(request.projetoId(), user.getHuman().getId(), request.motivo(), user.getId());</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ProjectRequest&gt; listRequestsByProject(UUID projectId) {
+<span class="fc" id="L184">        return requestRepository.findByProject(getProject(projectId));</span>
+    }
+
+    @Override
+    @Transactional
+    public void respondMembershipRequest(UUID requestId, boolean approved) {
+<span class="fc" id="L190">        User evaluator = identityService.firstUser();</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (approved) {</span>
+<span class="fc" id="L192">            approveMembershipRequest(requestId, evaluator.getHuman().getId(), evaluator.getId());</span>
+<span class="fc" id="L193">            return;</span>
+        }
+<span class="fc" id="L195">        ProjectRequest request = requestRepository.findById(requestId)</span>
+<span class="pc" id="L196">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Solicitacao nao encontrada.&quot;));</span>
+<span class="fc" id="L197">        request.reject(evaluator.getHuman(), evaluator.getId());</span>
+<span class="fc" id="L198">        requestRepository.save(request);</span>
+<span class="fc" id="L199">    }</span>
+
+    @Override
+    @Transactional
+    public ProjectHumanMember approveMembershipRequest(UUID requestId, UUID evaluatorHumanId, UUID updatedById) {
+<span class="fc" id="L204">        ProjectRequest request = requestRepository.findById(requestId)</span>
+<span class="fc" id="L205">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Solicitacao nao encontrada.&quot;));</span>
+<span class="fc" id="L206">        Human evaluator = humanRepository.findById(evaluatorHumanId)</span>
+<span class="pc" id="L207">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Avaliador nao encontrado.&quot;));</span>
+<span class="fc" id="L208">        request.approve(evaluator, updatedById);</span>
+<span class="fc" id="L209">        requestRepository.save(request);</span>
+<span class="fc" id="L210">        return memberRepository.findByProjectAndHuman(request.getProject(), request.getRequester())</span>
+<span class="fc" id="L211">                .orElseGet(() -&gt; memberRepository.save(new ProjectHumanMember(request.getProject(), request.getRequester(), 2, updatedById)));</span>
+    }
+
+    private User resolveOwner(ProjetoRequest request) {
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (request.autorId() != null) {</span>
+<span class="fc" id="L216">            return userRepository.findById(request.autorId())</span>
+<span class="pc" id="L217">                    .or(() -&gt; userRepository.findAll().stream()</span>
+<span class="nc" id="L218">                            .filter(user -&gt; user.getHuman().getId().equals(request.autorId()))</span>
+<span class="nc" id="L219">                            .findFirst())</span>
+<span class="pc" id="L220">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Autor nao encontrado.&quot;));</span>
+        }
+<span class="pc bpc" id="L222" title="3 of 4 branches missed.">        if (request.autor() != null &amp;&amp; !request.autor().isBlank()) {</span>
+<span class="nc" id="L223">            return userRepository.findAll().stream()</span>
+<span class="nc" id="L224">                    .filter(user -&gt; user.getHuman().getName().equalsIgnoreCase(request.autor()))</span>
+<span class="nc" id="L225">                    .findFirst()</span>
+<span class="nc" id="L226">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Autor nao encontrado.&quot;));</span>
+        }
+<span class="fc" id="L228">        throw new IllegalArgumentException(&quot;Autor do projeto e obrigatorio.&quot;);</span>
+    }
+
+    private User resolveRequester(SolicitacaoRequest request) {
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if (request.usuarioId() != null) {</span>
+<span class="nc" id="L233">            return userRepository.findById(request.usuarioId())</span>
+<span class="nc" id="L234">                    .or(() -&gt; userRepository.findAll().stream()</span>
+<span class="nc" id="L235">                            .filter(user -&gt; user.getHuman().getId().equals(request.usuarioId()))</span>
+<span class="nc" id="L236">                            .findFirst())</span>
+<span class="nc" id="L237">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Usuario solicitante nao encontrado.&quot;));</span>
+        }
+<span class="pc bpc" id="L239" title="1 of 4 branches missed.">        if (request.usuarioEmail() != null &amp;&amp; !request.usuarioEmail().isBlank()) {</span>
+<span class="fc" id="L240">            return userRepository.findByEmail(request.usuarioEmail().trim().toLowerCase())</span>
+<span class="fc" id="L241">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Usuario solicitante nao encontrado.&quot;));</span>
+        }
+<span class="fc" id="L243">        throw new IllegalArgumentException(&quot;Usuario solicitante e obrigatorio.&quot;);</span>
+    }
+
+    private Integer parseType(String value, Integer fallback) {
+        try {
+<span class="pc bpc" id="L248" title="2 of 4 branches missed.">            return value == null || value.isBlank() ? fallback : Integer.parseInt(value);</span>
+<span class="fc" id="L249">        } catch (NumberFormatException ex) {</span>
+<span class="fc" id="L250">            return fallback;</span>
+        }
+    }
+
+    private void syncProjectTags(Project project, String tags, UUID updatedById) {
+<span class="pc bpc" id="L255" title="2 of 4 branches missed.">        if (tags == null || tags.isBlank()) {</span>
+<span class="nc" id="L256">            return;</span>
+        }
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        for (String rawTag : tags.split(&quot;,&quot;)) {</span>
+<span class="fc" id="L259">            String tagName = rawTag.trim();</span>
+<span class="pc bpc" id="L260" title="2 of 4 branches missed.">            if (tagName.isBlank() || projectTagRepository.existsByProjectAndTag_NameIgnoreCase(project, tagName)) {</span>
+<span class="nc" id="L261">                continue;</span>
+            }
+<span class="fc" id="L263">            Tag tag = tagRepository.findByNameIgnoreCase(tagName)</span>
+<span class="fc" id="L264">                    .orElseGet(() -&gt; tagRepository.save(new Tag(tagName, updatedById)));</span>
+<span class="fc" id="L265">            projectTagRepository.save(new ProjectTag(project, tag, updatedById));</span>
+        }
+<span class="fc" id="L267">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
