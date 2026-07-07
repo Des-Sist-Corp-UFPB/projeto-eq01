@@ -24,7 +24,7 @@ public abstract class AuditableEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    protected void deactivate(UUID updatedById) {
+    public void deactivate(UUID updatedById) {
         this.recordStatus = 0;
         touch(updatedById);
     }

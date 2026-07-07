@@ -115,7 +115,7 @@
               </div>
             </div>
             <div class="empty-state-box" *ngIf="groupProjects().length === 0">
-              <div class="empty-icon">ðŸ“</div>
+              <div class="empty-icon">📁</div>
               <p class="empty-list-text">Nenhum projeto ativo associado a este grupo ainda.</p>
             </div>
           </div>
@@ -178,7 +178,7 @@
                       [class.applied]="hasApplied(vaga)" 
                       (click)="toggleCandidatura(vaga.id)"
                     >
-                      {{ hasApplied(vaga) ? 'Candidatado âœ“' : 'Candidatar-se' }}
+                      {{ hasApplied(vaga) ? 'Candidatado ✅' : 'Candidatar-se' }}
                     </button>
                   </div>
                 </div>
@@ -200,7 +200,7 @@
             </div>
 
             <div class="empty-state-box" *ngIf="vagas().length === 0">
-              <div class="empty-icon">ðŸ“¢</div>
+              <div class="empty-icon">📢</div>
               <p class="empty-list-text">Não há vagas abertas neste grupo no momento.</p>
             </div>
           </div>
@@ -220,7 +220,7 @@
             >
               <div class="avatar-wrapper">
                 <img [src]="isMembroCoordenador(mb.nome) && grupo()?.logo && (grupo()?.logo || '').length > 20 ? grupo()?.logo : mb.fotoUrl" alt="Foto do Membro" class="avatar-photo" />
-                <span class="crown-badge" *ngIf="isMembroCoordenador(mb.nome)">ðŸ‘‘</span>
+                <span class="crown-badge" *ngIf="isMembroCoordenador(mb.nome)">👑</span>
               </div>
               
               <div class="user-text-info">

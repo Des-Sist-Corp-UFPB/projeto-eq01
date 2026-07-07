@@ -29,7 +29,7 @@ public class Group extends AuditableEntity {
     @Column(name = "nmgroup", nullable = false)
     private String name;
 
-    @Column(name = "dsgroup", nullable = false)
+    @Column(name = "dsgroup", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "tpgroup", nullable = false)
@@ -41,7 +41,7 @@ public class Group extends AuditableEntity {
     @Column(name = "cdcolor")
     private String colorCode;
 
-    @Column(name = "urllogo")
+    @Column(name = "urllogo", columnDefinition = "TEXT")
     private String logoUrl;
 
     public Group(String name, String description, Integer type, String colorCode, String logoUrl, UUID updatedById) {

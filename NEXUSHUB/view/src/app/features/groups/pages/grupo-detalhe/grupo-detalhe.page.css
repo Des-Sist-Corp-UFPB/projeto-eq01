@@ -1,4 +1,4 @@
-﻿.groups-detail-container {
+.groups-detail-container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 40px 24px;
@@ -143,7 +143,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
-      background: #f8fafc;
+      background: var(--color-surface);
       padding: 24px;
       border-radius: var(--border-radius-md);
       border: 1px solid var(--color-border);
@@ -173,7 +173,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 24px;
-      background: #f1f5f9;
+      background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius-md);
       padding: 24px;
@@ -288,7 +288,7 @@
 
     /* Vacancies Wall */
     .btn-toggle-vaga {
-      background: white;
+      background: var(--color-surface);
       border: 1px solid;
       border-radius: var(--border-radius-sm);
       padding: 6px 14px;
@@ -304,7 +304,7 @@
 
     /* Add Vacancy Form */
     .create-vaga-form {
-      background: #f8fafc;
+      background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius-md);
       padding: 20px;
@@ -363,7 +363,7 @@
       gap: 16px;
     }
     .vaga-card {
-      background: white;
+      background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius-md);
       padding: 20px;
@@ -464,7 +464,7 @@
       gap: 6px;
     }
     .cand-name-pill {
-      background: #f1f5f9;
+      background: var(--color-surface);
       color: var(--color-text);
       font-size: 11px;
       font-weight: 600;
@@ -481,7 +481,7 @@
 
     /* Empty State Box */
     .empty-state-box {
-      background: #f8fafc;
+      background: var(--color-surface);
       border: 1px dashed var(--color-border);
       border-radius: var(--border-radius-md);
       padding: 32px;
@@ -502,7 +502,7 @@
 
     /* Sidebar Members column styling */
     .sidebar-column {
-      background: #f8fafc;
+      background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius-md);
       padding: 24px;
