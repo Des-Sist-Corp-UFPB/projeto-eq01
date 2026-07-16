@@ -1,7 +1,13 @@
 -- V12: Make project group mandatory and add project mural to feed_post
 
--- Ensure all existing projects have a valid group or delete/update them if any are null (optional, safety check)
--- UPDATE prj_project SET idgroup = (SELECT idgroup FROM grp_group LIMIT 1) WHERE idgroup IS NULL;
+-- Safety: assign the first available group to orphan projects (no group assigned)
+UPDATE prj_project
+SET idgroup = (SELECT idgroup FROM grp_group LIMIT 1)
+WHERE idgroup IS NULL
+  AND EXISTS (SELECT 1 FROM grp_group LIMIT 1);
+
+-- Safety: if no group exists at all, remove orphan projects to avoid NOT NULL violation
+DELETE FROM prj_project WHERE idgroup IS NULL;
 
 -- Make idgroup column in prj_project NOT NULL
 ALTER TABLE prj_project ALTER COLUMN idgroup SET NOT NULL;
