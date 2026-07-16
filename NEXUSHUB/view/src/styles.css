@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+/* ─── Google Fonts Material Symbols Rounded ─── */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded', sans-serif;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+
+
 :root {
   --color-primary: #3b6ef4;
   --color-primary-hover: #1b52dd;
@@ -264,4 +276,44 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.academic-importance-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--border-radius-sm);
+  padding: 20px;
+  margin-top: 20px;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+}
+
+body.dark-mode .academic-importance-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: #243349;
+}
+
+.academic-importance-box .importance-icon {
+  font-size: 32px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.academic-importance-box .importance-info-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.academic-importance-box .importance-info-text p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin: 0;
 }

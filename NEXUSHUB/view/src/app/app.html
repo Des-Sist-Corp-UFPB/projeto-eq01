@@ -1,18 +1,13 @@
-<div class="app-layout">
-  <header class="main-header animate-fade-in">
+<div class="app-layout" [class.logged-in-layout]="isLoggedIn()">
+  
+  <!-- 1. HEADER (Only for Guests / Public Landing Page) -->
+  <header class="main-header animate-fade-in" *ngIf="!isLoggedIn()">
     <div class="header-container">
       <a class="brand" routerLink="/" (click)="closeMobileMenu()">
-        <svg class="logo-svg" viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="14" fill="#3B6EF4" />
-          <circle cx="50" cy="18" r="5.5" fill="#0B1D3A" />
-          <circle cx="72.6" cy="27.4" r="5.5" fill="#0B1D3A" />
-          <circle cx="82" cy="50" r="5.5" fill="#0B1D3A" />
-          <circle cx="72.6" cy="72.6" r="5.5" fill="#0B1D3A" />
-          <circle cx="50" cy="82" r="5.5" fill="#0B1D3A" />
-          <circle cx="27.4" cy="72.6" r="5.5" fill="#0B1D3A" />
-          <circle cx="18" cy="50" r="5.5" fill="#0B1D3A" />
-          <circle cx="27.4" cy="27.4" r="5.5" fill="#0B1D3A" />
-        </svg>
+        <div class="brand-logo-wrapper">
+          <img src="logo-icon-light.png" alt="NexusHub Logo" class="brand-logo logo-light-theme" />
+          <img src="logo-icon-dark.png" alt="NexusHub Logo" class="brand-logo logo-dark-theme" />
+        </div>
         <h1>NEXUS<span>HUB</span></h1>
       </a>
 
@@ -25,68 +20,188 @@
       <div class="nav-wrapper" [class.mobile-open]="isMobileMenuOpen()">
         <nav class="main-nav">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">
-            Inicio
+            Início
           </a>
-          <a routerLink="/grupos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
-            Grupos
-          </a>
-          <a routerLink="/loja" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
-            Loja
-          </a>
-          <a routerLink="/perfil" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn()" (click)="closeMobileMenu()">
-            Meu Perfil
-          </a>
-          <a routerLink="/privacidade" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn()" (click)="closeMobileMenu()">Privacidade</a>
-          <a routerLink="/admin" routerLinkActive="active" class="nav-link" *ngIf="isAdmin()" (click)="closeMobileMenu()">Admin</a>
         </nav>
 
         <div class="header-actions">
           <button class="btn btn-secondary theme-toggle-btn" (click)="toggleTheme(); closeMobileMenu()" [title]="isDarkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="theme-icon" *ngIf="isDarkMode()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="theme-icon" *ngIf="isDarkMode()">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="theme-icon" *ngIf="!isDarkMode()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="theme-icon" *ngIf="!isDarkMode()">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
             </svg>
           </button>
 
-          <ng-container *ngIf="!isLoggedIn()">
-            <button class="btn btn-secondary" routerLink="/login" (click)="closeMobileMenu()">Entrar</button>
-            <button class="btn btn-primary" routerLink="/cadastro" (click)="closeMobileMenu()">Cadastrar-se</button>
-          </ng-container>
-
-          <ng-container *ngIf="isLoggedIn() && currentUser()">
-            <div class="user-greeting" routerLink="/perfil" (click)="closeMobileMenu()">
-              <span class="avatar-small" *ngIf="currentUser()?.fotoUrl; else smallInitials">
-                <img [src]="currentUser()?.fotoUrl" alt="Avatar" class="header-avatar-img" />
-              </span>
-              <ng-template #smallInitials>
-                <span class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</span>
-              </ng-template>
-              <span class="greeting-text">Ola, <strong>{{ currentUser()?.nome?.split(' ')?.at(0) }}</strong></span>
-            </div>
-
-            <button class="btn btn-secondary logout-btn" (click)="logout(); closeMobileMenu()">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="logout-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-              </svg>
-            </button>
-          </ng-container>
+          <button class="btn btn-secondary" routerLink="/login" (click)="closeMobileMenu()">Entrar</button>
+          <button class="btn btn-primary" routerLink="/cadastro" (click)="closeMobileMenu()">Cadastrar-se</button>
         </div>
       </div>
     </div>
   </header>
 
+  <!-- 2. MOBILE HEADER (Only for Logged-In Users on Mobile) -->
+  <div class="mobile-top-bar" *ngIf="isLoggedIn()">
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen()" aria-label="Menu principal">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <span class="mobile-brand-title">NEXUS<span>HUB</span></span>
+    <div class="mobile-profile-pic" routerLink="/perfil" (click)="closeMobileMenu()">
+      <img *ngIf="currentUser()?.fotoUrl" [src]="currentUser()?.fotoUrl" alt="Perfil" />
+      <span *ngIf="!currentUser()?.fotoUrl" class="mobile-initials">{{ currentUser()?.nome?.charAt(0) }}</span>
+    </div>
+  </div>
+
+  <!-- 3. SIDEBAR NAVIGATION (Only for Logged-In Users) -->
+  <aside class="app-sidebar" *ngIf="isLoggedIn()" [class.mobile-open]="isMobileMenuOpen()">
+    <div class="sidebar-top">
+      
+      <!-- DEFAULT BRAND LOGO (NON-ADMIN ROUTES) -->
+      <a class="brand" routerLink="/" (click)="closeMobileMenu()" *ngIf="!isAdminRoute()">
+        <div class="brand-logo-wrapper">
+          <img src="logo-icon-light.png" alt="NexusHub Logo" class="brand-logo" />
+        </div>
+        <h1>NEXUS<span>HUB</span></h1>
+      </a>
+
+      <!-- ADMIN SLOTH LOGO BRAND (ADMIN ROUTES) -->
+      <div class="brand-sloth-wrapper" *ngIf="isAdminRoute()" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; text-align: center; width: 100%;">
+        <img src="sloth-avatar.png" alt="NexusHub Admin Sloth Mascot" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #00b4d8; box-shadow: 0 4px 10px rgba(0, 180, 216, 0.2);" />
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 16px; font-weight: 800; color: #ffffff;">NexusHub</span>
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00b4d8; letter-spacing: 1px;">Admin Panel</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <!-- 3A. STANDARD SIDEBAR NAV (NON-ADMIN ROUTES) -->
+        <ng-container *ngIf="!isAdminRoute()">
+          <!-- Início (Feed) -->
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon feed-link-icon">home</span>
+            <span>Início (Feed)</span>
+          </a>
+
+          <!-- Projetos -->
+          <a routerLink="/projetos" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">folder_open</span>
+            <span>Projetos</span>
+          </a>
+
+          <!-- Grupos -->
+          <a routerLink="/grupos" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">groups</span>
+            <span>Grupos</span>
+          </a>
+
+          <!-- Loja -->
+          <a routerLink="/loja" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">storefront</span>
+            <span>Loja</span>
+          </a>
+
+          <!-- Admin -->
+          <a routerLink="/admin" routerLinkActive="active" class="sidebar-link" *ngIf="isAdmin()" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
+            <span>Admin</span>
+          </a>
+        </ng-container>
+
+        <!-- 3B. INTEGRATED ADMIN SIDEBAR NAV (ADMIN ROUTES) -->
+        <ng-container *ngIf="isAdminRoute()">
+          <!-- Voltar ao Hub -->
+          <a routerLink="/" class="sidebar-link" (click)="closeMobileMenu()" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 8px;">
+            <span class="material-symbols-rounded nav-icon" style="color: #00b4d8;">arrow_back</span>
+            <span style="color: #00b4d8;">Voltar ao Hub</span>
+          </a>
+
+          <!-- Usuários -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'users' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">group</span>
+            <span>Usuários</span>
+          </a>
+
+          <!-- Segurança -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'security' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">security</span>
+            <span>Segurança</span>
+          </a>
+
+          <!-- Conteúdo -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'content' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">article</span>
+            <span>Conteúdo</span>
+          </a>
+
+          <!-- Gamificação -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'gamification' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">military_tech</span>
+            <span>Gamificação</span>
+          </a>
+
+          <!-- Instituições -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'institutions' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">school</span>
+            <span>Instituições</span>
+          </a>
+
+          <!-- Denúncias -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'reports' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">campaign</span>
+            <span>Denúncias</span>
+          </a>
+        </ng-container>
+      </nav>
+    </div>
+
+    <!-- User Profile Panel at the Bottom of Sidebar -->
+    <div class="sidebar-footer" *ngIf="currentUser()">
+      <div class="sidebar-user-info" routerLink="/perfil" (click)="closeMobileMenu()">
+        <div class="avatar-small" *ngIf="currentUser()?.fotoUrl; else sideInitials">
+          <img [src]="currentUser()?.fotoUrl" alt="Avatar" class="sidebar-avatar-img" />
+        </div>
+        <ng-template #sideInitials>
+          <span class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</span>
+        </ng-template>
+        <div class="user-text">
+          <span class="user-name">{{ currentUser()?.nome?.split(' ')?.at(0) }}</span>
+          <span class="user-role">{{ currentUser()?.userType || 'Estudante' }}</span>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <!-- Edit Profile shortcut -->
+        <a class="sidebar-footer-btn" routerLink="/perfil" title="Editar Perfil" (click)="closeMobileMenu()">
+          <span class="material-symbols-rounded footer-icon">manage_accounts</span>
+        </a>
+        <!-- Theme Toggle -->
+        <button class="sidebar-footer-btn theme-toggle" (click)="toggleTheme()" [title]="isDarkMode() ? 'Modo Claro' : 'Modo Escuro'">
+          <span class="material-symbols-rounded footer-icon" *ngIf="isDarkMode()">light_mode</span>
+          <span class="material-symbols-rounded footer-icon" *ngIf="!isDarkMode()">dark_mode</span>
+        </button>
+        <!-- Logout Button -->
+        <button class="sidebar-footer-btn logout" (click)="logout(); closeMobileMenu()" title="Sair">
+          <span class="material-symbols-rounded footer-icon">logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 4. MAIN PAGE CONTAINER -->
   <main class="page-container">
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="app-footer">
+  <!-- 5. FOOTER (Only for Guests) -->
+  <footer class="app-footer" *ngIf="!isLoggedIn()">
     <div class="footer-container">
       <p>&copy; 2026 NEXUS HUB. Desenvolvido para a UFPB.</p>
       <div class="footer-links">
+        <a routerLink="/privacidade">Termos de Privacidade e Uso</a>
         <a href="#">Sobre a plataforma</a>
-        <a href="#">Termos de uso</a>
         <a href="#">Contato</a>
       </div>
     </div>

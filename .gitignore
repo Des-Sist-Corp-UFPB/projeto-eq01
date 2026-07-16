@@ -74,3 +74,10 @@ out/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 5. FERRAMENTAS E AMBIENTES LOCAIS (Locais/Temporários)
+venv_graphify/
+graphify-out/
+apache-maven-3.9.6/
+logs.txt
+package-lock.json

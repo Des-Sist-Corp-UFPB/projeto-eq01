@@ -8,9 +8,7 @@
         <!-- Search and Action Bar -->
         <div class="action-bar">
           <div class="search-container">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
-            </svg>
+            <span class="material-symbols-rounded search-icon">search</span>
             <input 
               type="text" 
               placeholder="Buscar grupos por nome ou descrição..."
@@ -20,9 +18,7 @@
             />
           </div>
           <button class="btn-create-group" (click)="toggleCreateForm()">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="plus-icon">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+            <span class="material-symbols-rounded plus-icon">add</span>
             {{ showCreateForm() ? 'Fechar Cadastro' : 'Criar Novo Grupo' }}
           </button>
         </div>
@@ -76,9 +72,7 @@
                     class="file-input-hidden"
                   />
                   <label for="logoUpload" class="file-upload-trigger">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-small">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 3.375 0 11-.75 0 .375 3.375 0 01.75 0z" />
-                    </svg>
+                    <span class="material-symbols-rounded upload-icon-small">upload</span>
                     <span>Selecionar foto local...</span>
                   </label>
                 </div>
@@ -131,9 +125,7 @@
                   <div class="card-meta">
                     <span class="group-name">GRUPO {{ (newGroup.area || 'Institucional') | uppercase }}</span>
                     <button class="like-button" type="button">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
-                        <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                      </svg>
+                      <span class="material-symbols-rounded heart-icon">favorite</span>
                       <span class="likes-count">0</span>
                     </button>
                   </div>
@@ -153,9 +145,7 @@
                     </div>
                     
                     <div class="members-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="users-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
-                      </svg>
+                      <span class="material-symbols-rounded users-icon">group</span>
                       <span>0 Proj.</span>
                     </div>
                   </div>
@@ -171,14 +161,14 @@
         <!-- 1. Institutional -->
         <section class="category-section" *ngIf="getFilteredByCategory('Institucional').length > 0">
           <div class="section-title">
-            <span class="section-emoji">ðŸ«</span>
+            <span class="section-emoji">👥</span>
             <h3>Grupos Institucionais</h3>
             <span class="count-badge">{{ getFilteredByCategory('Institucional').length }}</span>
           </div>
           
           <div class="carousel-container">
             <button class="carousel-nav-btn prev" (click)="scroll(instTrack, -350)">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+              <span class="material-symbols-rounded">chevron_left</span>
             </button>
             <div class="carousel-track" #instTrack>
               <article class="project-card" *ngFor="let gp of getFilteredByCategory('Institucional')" [routerLink]="['/grupos', gp.id]">
@@ -199,14 +189,10 @@
                         title="Excluir grupo"
                         (click)="excluirGrupoLista(gp)"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="trash-icon-small">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
+                        <span class="material-symbols-rounded trash-icon-small">delete</span>
                       </button>
                       <button class="like-button" [class.liked]="isGroupFavorited(gp.id)" (click)="toggleFavoriteGroup(gp, $event)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
-                          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                        </svg>
+                        <span class="material-symbols-rounded heart-icon">favorite</span>
                         <span class="likes-count">{{ getGroupLikesCount(gp) }}</span>
                       </button>
                     </div>
@@ -227,9 +213,7 @@
                     </div>
                     
                     <div class="members-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="users-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
-                      </svg>
+                      <span class="material-symbols-rounded users-icon">group</span>
                       <span>{{ getLinkedProjects(gp.nome).length }} Proj.</span>
                     </div>
                   </div>
@@ -237,7 +221,7 @@
               </article>
             </div>
             <button class="carousel-nav-btn next" (click)="scroll(instTrack, 350)">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              <span class="material-symbols-rounded">chevron_right</span>
             </button>
           </div>
         </section>
@@ -245,7 +229,7 @@
         <!-- 2. Community -->
         <section class="category-section" *ngIf="getFilteredByCategory('Comunidade').length > 0">
           <div class="section-title">
-            <span class="section-emoji">ðŸ‘¥</span>
+            <span class="section-emoji">👥</span>
             <h3>Grupos da Comunidade</h3>
             <span class="count-badge">{{ getFilteredByCategory('Comunidade').length }}</span>
           </div>
@@ -273,14 +257,10 @@
                         title="Excluir grupo"
                         (click)="excluirGrupoLista(gp)"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="trash-icon-small">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
+                        <span class="material-symbols-rounded trash-icon-small">delete</span>
                       </button>
                       <button class="like-button" [class.liked]="isGroupFavorited(gp.id)" (click)="toggleFavoriteGroup(gp, $event)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
-                          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                        </svg>
+                        <span class="material-symbols-rounded heart-icon">favorite</span>
                         <span class="likes-count">{{ getGroupLikesCount(gp) }}</span>
                       </button>
                     </div>
@@ -301,9 +281,7 @@
                     </div>
                     
                     <div class="members-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="users-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
-                      </svg>
+                      <span class="material-symbols-rounded users-icon">group</span>
                       <span>{{ getLinkedProjects(gp.nome).length }} Proj.</span>
                     </div>
                   </div>
@@ -319,7 +297,7 @@
         <!-- 3. External -->
         <section class="category-section" *ngIf="getFilteredByCategory('Externo').length > 0">
           <div class="section-title">
-            <span class="section-emoji">ðŸ¢</span>
+            <span class="section-emoji">🏢</span>
             <h3>Grupos Externos</h3>
             <span class="count-badge">{{ getFilteredByCategory('Externo').length }}</span>
           </div>
@@ -347,14 +325,10 @@
                         title="Excluir grupo"
                         (click)="excluirGrupoLista(gp)"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="trash-icon-small">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
+                        <span class="material-symbols-rounded trash-icon-small">delete</span>
                       </button>
                       <button class="like-button" [class.liked]="isGroupFavorited(gp.id)" (click)="toggleFavoriteGroup(gp, $event)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
-                          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                        </svg>
+                        <span class="material-symbols-rounded heart-icon">favorite</span>
                         <span class="likes-count">{{ getGroupLikesCount(gp) }}</span>
                       </button>
                     </div>
@@ -375,9 +349,7 @@
                     </div>
                     
                     <div class="members-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="users-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
-                      </svg>
+                      <span class="material-symbols-rounded users-icon">group</span>
                       <span>{{ getLinkedProjects(gp.nome).length }} Proj.</span>
                     </div>
                   </div>

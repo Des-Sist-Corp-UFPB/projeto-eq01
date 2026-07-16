@@ -1,4 +1,4 @@
-﻿.groups-container {
+.groups-container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 40px 24px;
@@ -49,8 +49,7 @@
       min-width: 280px;
     }
     .search-icon {
-      width: 18px;
-      height: 18px;
+      font-size: 18px;
       position: absolute;
       left: 14px;
       top: 50%;
@@ -92,8 +91,7 @@
       box-shadow: 0 4px 12px rgba(31, 122, 224, 0.2);
     }
     .plus-icon {
-      width: 16px;
-      height: 16px;
+      font-size: 18px;
     }
 
     /* Create Panel */
@@ -178,8 +176,7 @@
       background: #eff6ff;
     }
     .upload-icon-small {
-      width: 16px;
-      height: 16px;
+      font-size: 18px;
       color: var(--color-muted);
     }
     .url-input-fallback {
@@ -337,9 +334,8 @@
     .carousel-nav-btn.next {
       right: -18px;
     }
-    .carousel-nav-btn svg {
-      width: 16px;
-      height: 16px;
+    .carousel-nav-btn span {
+      font-size: 18px;
       color: var(--color-text);
     }
 
@@ -426,8 +422,7 @@
       transition: var(--transition);
     }
     .heart-icon {
-      width: 12px;
-      height: 12px;
+      font-size: 13px;
       color: #ef4444;
     }
     .likes-count {
@@ -511,8 +506,7 @@
       color: var(--color-muted);
     }
     .users-icon {
-      width: 14px;
-      height: 14px;
+      font-size: 15px;
     }
     .empty-groups {
       text-align: center;
@@ -555,7 +549,6 @@
       transform: scale(1.1);
     }
     .trash-icon-small {
-      width: 14px;
-      height: 14px;
+      font-size: 16px;
     }
 

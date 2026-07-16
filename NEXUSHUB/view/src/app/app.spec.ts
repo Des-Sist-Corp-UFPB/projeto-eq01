@@ -5,11 +5,14 @@ import { AppComponent } from './app';
 import { AuthService } from './core/auth/auth.service';
 
 describe('AppComponent', () => {
-  const currentUser = signal(null);
+  const isLoggedInSignal = signal(false);
+  const isAdminSignal = signal(false);
+  const currentUser = signal<any>(null);
+  
   const authStub = {
     currentUser,
-    isLoggedIn: computed(() => false),
-    isAdmin: computed(() => false),
+    isLoggedIn: computed(() => isLoggedInSignal()),
+    isAdmin: computed(() => isAdminSignal()),
     logout: vi.fn()
   };
 
@@ -70,5 +73,42 @@ describe('AppComponent', () => {
     
     app.logout();
     expect(authStub.logout).toHaveBeenCalled();
+  });
+
+  it('should render navigation links when logged in', async () => {
+    isLoggedInSignal.set(true);
+    currentUser.set({ nome: 'John Doe', email: 'john@example.com', cargo: 'USER' });
+    
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('a[routerLink="/projetos"]')).toBeTruthy();
+    expect(compiled.querySelector('a[routerLink="/grupos"]')).toBeTruthy();
+    expect(compiled.querySelector('a[routerLink="/loja"]')).toBeTruthy();
+    expect(compiled.textContent).toContain('Olá, John');
+    
+    // Reset
+    isLoggedInSignal.set(false);
+    currentUser.set(null);
+  });
+
+  it('should render admin link when logged in as admin', async () => {
+    isLoggedInSignal.set(true);
+    isAdminSignal.set(true);
+    currentUser.set({ nome: 'Admin User', email: 'admin@example.com', cargo: 'ADMIN' });
+    
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('a[routerLink="/admin"]')).toBeTruthy();
+    
+    // Reset
+    isLoggedInSignal.set(false);
+    isAdminSignal.set(false);
+    currentUser.set(null);
   });
 });

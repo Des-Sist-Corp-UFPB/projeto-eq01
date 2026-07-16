@@ -1,0 +1,85 @@
+<div class="onboarding-container animate-fade-in">
+  <div class="onboarding-card">
+    <header class="onboarding-header">
+      <svg class="logo-svg" viewBox="0 0 100 100" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="14" fill="#3B6EF4" />
+        <circle cx="50" cy="18" r="5.5" fill="#0B1D3A" />
+        <circle cx="72.6" cy="27.4" r="5.5" fill="#0B1D3A" />
+        <circle cx="82" cy="50" r="5.5" fill="#0B1D3A" />
+        <circle cx="72.6" cy="72.6" r="5.5" fill="#0B1D3A" />
+        <circle cx="50" cy="82" r="5.5" fill="#0B1D3A" />
+        <circle cx="27.4" cy="72.6" r="5.5" fill="#0B1D3A" />
+        <circle cx="18" cy="50" r="5.5" fill="#0B1D3A" />
+        <circle cx="27.4" cy="27.4" r="5.5" fill="#0B1D3A" />
+      </svg>
+      <h2>Boas-vindas ao NEXUS<span>HUB</span>!</h2>
+      <p>Antes de navegar pela plataforma, precisamos completar o seu cadastro básico.</p>
+    </header>
+
+    <div class="alert alert-danger" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #onboardingForm="ngForm">
+      <div class="form-group">
+        <label for="nome">Nome Completo *</label>
+        <input type="text" id="nome" name="nome" [(ngModel)]="nome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
+        <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="birthDate">Data de Nascimento *</label>
+          <input type="date" id="birthDate" name="birthDate" [(ngModel)]="birthDate" required #birthInput="ngModel" />
+          <span class="error-msg" *ngIf="birthInput.invalid && birthInput.touched">A data de nascimento é obrigatória.</span>
+        </div>
+
+        <div class="form-group toggle-group">
+          <label class="toggle-container">
+            <input type="checkbox" name="showBirthday" [(ngModel)]="showBirthday" />
+            <span class="checkmark"></span>
+            Mostrar data de nascimento no perfil
+          </label>
+          <span class="info-text">Se desativado, o ano de nascimento ficará oculto para terceiros.</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="course">Curso *</label>
+          <select id="course" name="course" [(ngModel)]="course" required #courseInput="ngModel" class="select-control">
+            <option value="" disabled selected>Selecione seu curso</option>
+            <optgroup label="Campus IV - Rio Tinto">
+              <option value="Antropologia">Antropologia</option>
+              <option value="Ciência da Computação">Ciência da Computação</option>
+              <option value="Design">Design</option>
+              <option value="Ecologia">Ecologia</option>
+              <option value="Matemática">Matemática</option>
+              <option value="Sistemas de Informação">Sistemas de Informação</option>
+            </optgroup>
+            <optgroup label="Campus IV - Mamanguape">
+              <option value="Administração">Administração</option>
+              <option value="Ciências Contábeis">Ciências Contábeis</option>
+              <option value="Letras - Língua Portuguesa">Letras - Língua Portuguesa</option>
+              <option value="Pedagogia">Pedagogia</option>
+              <option value="Secretariado Executivo Bilíngue">Secretariado Executivo Bilíngue</option>
+              <option value="Letras - Espanhol (EaD)">Letras - Espanhol (EaD)</option>
+              <option value="Letras - Inglês (EaD)">Letras - Inglês (EaD)</option>
+            </optgroup>
+          </select>
+          <span class="error-msg" *ngIf="courseInput.invalid && courseInput.touched">O curso é obrigatório.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="period">Período Atual *</label>
+          <input type="number" id="period" name="period" [(ngModel)]="period" required min="1" max="20" placeholder="Ex: 5" #periodInput="ngModel" />
+          <span class="error-msg" *ngIf="periodInput.invalid && periodInput.touched">Período inválido (1-20).</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="onboardingForm.invalid || isSaving()">
+        {{ isSaving() ? 'Salvando...' : 'Concluir Onboarding e Entrar' }}
+      </button>
+    </form>
+  </div>
+</div>

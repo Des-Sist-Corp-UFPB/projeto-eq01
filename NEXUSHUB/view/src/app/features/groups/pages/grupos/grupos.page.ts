@@ -71,14 +71,37 @@ export class GruposPageComponent implements OnInit {
     this.showCreateForm.update(val => !val);
   }
 
-  // Handle Logo Upload and convert to Base64 DataURL
+  // Handle Logo Upload and convert to Base64 DataURL (with Canvas compression)
   onLogoUpload(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
+      if (!file.type.startsWith('image/')) return;
+
       const reader = new FileReader();
-      reader.onload = () => {
-        this.newGroup.logo = reader.result as string;
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            this.newGroup.logo = canvas.toDataURL('image/jpeg', 0.7);
+          }
+        };
+        img.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     }

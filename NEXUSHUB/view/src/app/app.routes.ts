@@ -1,4 +1,4 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { DashboardPageComponent } from './features/projects/pages/dashboard/dashboard.page';
 import { LoginPageComponent } from './features/auth/pages/login/login.page';
 import { CadastroPageComponent } from './features/auth/pages/cadastro/cadastro.page';
@@ -10,19 +10,33 @@ import { GrupoDetalhePageComponent } from './features/groups/pages/grupo-detalhe
 import { LojaPageComponent } from './features/store/pages/loja/loja.page';
 import { AdminPageComponent } from './features/administration/pages/admin/admin.page';
 import { PrivacyPageComponent } from './features/privacy/pages/privacy/privacy.page';
+import { OnboardingPageComponent } from './features/auth/pages/onboarding/onboarding.page';
+import { onboardingGuard } from './core/auth/onboarding.guard';
+import { authGuard } from './core/auth/auth.guard';
+import { adminGuard } from './core/auth/admin.guard';
+import { ProjetosPageComponent } from './features/projects/pages/projetos/projetos.page';
 
 export const routes: Routes = [
-  { path: '', component: DashboardPageComponent },
   { path: 'login', component: LoginPageComponent },
   { path: 'cadastro', component: CadastroPageComponent },
   { path: 'esqueci-senha', component: EsqueciSenhaPageComponent },
-  { path: 'perfil', component: PerfilPageComponent },
-  { path: 'projetos/:id', component: ProjetoDetalhePageComponent },
-  { path: 'grupos', component: GruposPageComponent },
-  { path: 'grupos/:id', component: GrupoDetalhePageComponent },
-  { path: 'loja', component: LojaPageComponent },
-  { path: 'admin', component: AdminPageComponent },
-  { path: 'privacidade', component: PrivacyPageComponent },
+  { path: 'onboarding', component: OnboardingPageComponent },
+  {
+    path: '',
+    canActivate: [onboardingGuard],
+    children: [
+      { path: '', component: DashboardPageComponent },
+      { path: 'projetos', component: ProjetosPageComponent, canActivate: [authGuard] },
+      { path: 'perfil', component: PerfilPageComponent, canActivate: [authGuard] },
+      { path: 'perfil/:username', component: PerfilPageComponent, canActivate: [authGuard] },
+      { path: 'projetos/:id', component: ProjetoDetalhePageComponent, canActivate: [authGuard] },
+      { path: 'grupos', component: GruposPageComponent, canActivate: [authGuard] },
+      { path: 'grupos/:id', component: GrupoDetalhePageComponent, canActivate: [authGuard] },
+      { path: 'loja', component: LojaPageComponent, canActivate: [authGuard] },
+      { path: 'admin', component: AdminPageComponent, canActivate: [adminGuard] },
+      { path: 'privacidade', component: PrivacyPageComponent }
+    ]
+  },
   { path: '**', redirectTo: '' }
 ];
 

@@ -86,10 +86,34 @@
             <span class="error-msg" *ngIf="confirmarSenha !== senha && confirmInput.touched">As senhas não coincidem.</span>
           </div>
 
-          <button type="submit" class="btn btn-primary w-full" [disabled]="cadForm.invalid || senha !== confirmarSenha || isLoading()">
+          <!-- Consentimento LGPD -->
+          <div class="form-group checkbox-group" style="display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; margin-bottom: 16px;">
+            <input 
+              type="checkbox" 
+              id="lgpdConsent" 
+              name="lgpdConsent" 
+              [(ngModel)]="lgpdConsent" 
+              required 
+              #lgpdInput="ngModel"
+              style="margin-top: 3px; width: auto; flex-shrink: 0;"
+            />
+            <label for="lgpdConsent" style="font-size: 13px; font-weight: normal; line-height: 1.4; color: var(--color-muted); cursor: pointer;">
+              Estou ciente e aceito os <a routerLink="/privacidade" target="_blank" style="color: var(--color-primary); font-weight: 600;">Termos de Uso e Política de Privacidade</a> em conformidade com a LGPD para o tratamento dos meus dados cadastrais. *
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="cadForm.invalid || senha !== confirmarSenha || !lgpdConsent || isLoading()">
             {{ isLoading() ? 'Cadastrando...' : 'Registrar Conta' }}
           </button>
         </form>
+
+        <div class="auth-divider" *ngIf="!successMessage()">
+          <span>ou continue com</span>
+        </div>
+
+        <div class="social-login-container" *ngIf="!successMessage()">
+          <div id="google-btn"></div>
+        </div>
 
         <div class="success-actions animate-fade-in" *ngIf="successMessage()">
           <button class="btn btn-primary w-full" routerLink="/login">Ir para o Login</button>

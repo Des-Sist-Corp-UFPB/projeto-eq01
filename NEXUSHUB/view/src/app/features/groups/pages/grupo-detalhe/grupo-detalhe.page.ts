@@ -2,9 +2,12 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { GrupoService, Grupo } from '../../services/grupo.service';
 import { ProjectService, Projeto } from '../../../projects/services/project.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { apiUrl } from '../../../../core/config/api.config';
 import { ProjectCardComponent } from '../../../../shared/components/project-card/project-card.component';
 
 export interface Membro {
@@ -21,6 +24,32 @@ export interface Vaga {
   candidatos: string[]; // List of member names who applied
 }
 
+export interface FeedComment {
+  id: string;
+  content: string;
+  authorName: string;
+  authorPhotoUrl?: string;
+  authorUsername?: string;
+  timestamp: string;
+  likesCount?: number;
+  likedByCurrentUser?: boolean;
+}
+
+export interface FeedPost {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  authorId: string;
+  authorName: string;
+  authorPhotoUrl?: string;
+  authorUsername?: string;
+  likesCount: number;
+  likedByCurrentUser: boolean;
+  timestamp: string;
+  comments: FeedComment[];
+  postType?: string;
+}
+
 @Component({
   selector: 'app-grupo-detalhe-page',
   standalone: true,
@@ -34,6 +63,8 @@ export class GrupoDetalhePageComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+  private readonly toastService = inject(ToastService);
 
   // Fallback cover image
   protected readonly fallbackCover = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200';
@@ -51,6 +82,18 @@ export class GrupoDetalhePageComponent implements OnInit {
   protected novaVagaCargo = '';
   protected novaVagaTipo = 'Bolsista';
   protected novaVagaRequisitos = '';
+
+  // Tab State
+  protected readonly activeTab = signal<'info' | 'feed'>('info');
+
+  // Group Feed Signals
+  protected readonly groupFeedPosts = signal<FeedPost[]>([]);
+  protected readonly isFeedLoading = signal<boolean>(false);
+  protected readonly newPostContent = signal<string>('');
+  protected readonly newPostImageUrl = signal<string>('');
+  protected readonly isCreatingPost = signal<boolean>(false);
+  protected readonly dragOverActive = signal<boolean>(false);
+  protected commentInputs: { [postId: string]: string } = {};
 
   // Logged in user session
   protected readonly currentUser = this.authService.currentUser;
@@ -128,7 +171,7 @@ export class GrupoDetalhePageComponent implements OnInit {
     if (parsedMembers.length > 0) {
       this.members.set(parsedMembers);
     } else {
-      // Default members list
+      // Default members list (only the coordinator responsible, no mocks)
       const defaultMembers: Membro[] = [];
       if (responsavel) {
         defaultMembers.push({
@@ -137,13 +180,6 @@ export class GrupoDetalhePageComponent implements OnInit {
           fotoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
         });
       }
-      
-      // Default mocks
-      defaultMembers.push(
-        { nome: 'Ana Costa', papel: 'Pesquisadora Auxiliar', fotoUrl: this.mockAvatars[0] },
-        { nome: 'Bruno Lima', papel: 'Desenvolvedor Angular', fotoUrl: this.mockAvatars[1] },
-        { nome: 'Carla Dias', papel: 'Designer UI/UX', fotoUrl: this.mockAvatars[2] }
-      );
       
       localStorage.setItem(`nexushub_group_members_${grupoId}`, JSON.stringify(defaultMembers));
       this.members.set(defaultMembers);
@@ -154,25 +190,36 @@ export class GrupoDetalhePageComponent implements OnInit {
     if (cachedVagas) {
       this.vagas.set(JSON.parse(cachedVagas));
     } else {
-      const defaultVagas: Vaga[] = [
-        {
-          id: `vaga_${grupoId}_1`,
-          cargo: 'Desenvolvedor Frontend Angular',
-          tipo: 'Bolsista',
-          requisitos: 'Experiência prévia com desenvolvimento Web (HTML/CSS), TypeScript e interesse em aprender Angular + RxJS.',
-          candidatos: ['Carla Dias']
-        },
-        {
-          id: `vaga_${grupoId}_2`,
-          cargo: 'Pesquisador em Machine Learning',
-          tipo: 'Voluntário',
-          requisitos: 'Conhecimentos intermediários de Python, bibliotecas como NumPy/Pandas e lógica de modelagem de dados.',
-          candidatos: []
-        }
-      ];
+      // Empty list for newly created groups
+      const defaultVagas: Vaga[] = [];
       localStorage.setItem(`nexushub_group_vacancies_${grupoId}`, JSON.stringify(defaultVagas));
       this.vagas.set(defaultVagas);
     }
+  }
+
+  setTab(tab: 'info' | 'feed') {
+    this.activeTab.set(tab);
+    if (tab === 'feed') {
+      this.loadGroupFeed();
+    }
+  }
+
+  loadGroupFeed() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    this.isFeedLoading.set(true);
+    this.http.get<FeedPost[]>(apiUrl(`/api/feed/grupo/${id}?page=0&size=20`)).subscribe({
+      next: (posts) => {
+        this.groupFeedPosts.set(posts);
+        this.isFeedLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao buscar feed do grupo', err);
+        this.isFeedLoading.set(false);
+        this.toastService.show('Erro ao carregar o feed do grupo.', 'error');
+      }
+    });
   }
 
   isCoordinator(): boolean {
@@ -310,7 +357,147 @@ export class GrupoDetalhePageComponent implements OnInit {
       });
     }
   }
+
+  // --- Group Feed Post Actions ---
+
+  onCreateGroupPost() {
+    const content = this.newPostContent().trim();
+    if (!content) return;
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    this.isCreatingPost.set(true);
+
+    const payload = {
+      content: content,
+      imageUrl: this.newPostImageUrl().trim() || undefined,
+      postType: 'COMMUNITY',
+      groupId: id
+    };
+
+    this.http.post(apiUrl('/api/feed'), payload).subscribe({
+      next: () => {
+        this.newPostContent.set('');
+        this.newPostImageUrl.set('');
+        this.isCreatingPost.set(false);
+        this.loadGroupFeed();
+        this.toastService.show('Publicação criada no grupo!', 'success');
+      },
+      error: (err) => {
+        this.isCreatingPost.set(false);
+        this.toastService.show('Não foi possível publicar no grupo.', 'error');
+      }
+    });
+  }
+
+  onToggleLike(post: FeedPost) {
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.show('Faça login para curtir.', 'error');
+      return;
+    }
+    this.http.post<{ liked: boolean }>(apiUrl(`/api/feed/${post.id}/like`), {}).subscribe({
+      next: (res) => {
+        post.likedByCurrentUser = res.liked;
+        post.likesCount += res.liked ? 1 : -1;
+      },
+      error: () => {
+        this.toastService.show('Falha ao curtir publicação.', 'error');
+      }
+    });
+  }
+
+  onToggleCommentLike(post: FeedPost, comment: FeedComment) {
+    if (!this.authService.isLoggedIn()) return;
+    this.http.post<{ liked: boolean }>(apiUrl(`/api/feed/comentarios/${comment.id}/like`), {}).subscribe({
+      next: (res) => {
+        comment.likedByCurrentUser = res.liked;
+        comment.likesCount = res.liked ? (comment.likesCount || 0) + 1 : Math.max(0, (comment.likesCount || 0) - 1);
+      },
+      error: () => {
+        this.toastService.show('Falha ao curtir comentário.', 'error');
+      }
+    });
+  }
+
+  onAddComment(postId: string) {
+    const commentText = (this.commentInputs[postId] || '').trim();
+    if (!commentText) return;
+
+    const payload = {
+      content: commentText
+    };
+
+    this.http.post<FeedComment>(apiUrl(`/api/feed/${postId}/comentarios`), payload).subscribe({
+      next: (newComment) => {
+        this.commentInputs[postId] = '';
+        const posts = this.groupFeedPosts().map(p => {
+          if (p.id === postId) {
+            return {
+              ...p,
+              comments: [...p.comments, newComment]
+            };
+          }
+          return p;
+        });
+        this.groupFeedPosts.set(posts);
+        this.toastService.show('Comentário adicionado!', 'success');
+      },
+      error: () => {
+        this.toastService.show('Falha ao adicionar comentário.', 'error');
+      }
+    });
+  }
+
+  triggerFileSelect(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.handleFile(input.files[0]);
+    }
+  }
+
+  onFileDropped(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      this.handleFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  private handleFile(file: File) {
+    if (!file.type.startsWith('image/')) {
+      this.toastService.show('Selecione apenas arquivos de imagem.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          this.newPostImageUrl.set(canvas.toDataURL('image/jpeg', 0.8));
+          this.toastService.show('Imagem anexada!', 'success');
+        }
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
 }
-
-
-

@@ -1,4 +1,4 @@
-﻿.auth-wrapper {
+.auth-wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -145,4 +145,38 @@
       font-weight: 700;
     }
     .auth-footer a:hover { text-decoration: underline; }
+
+    /* Divider and Social Login */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--color-muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .auth-divider::before {
+      margin-right: .5em;
+    }
+
+    .auth-divider::after {
+      margin-left: .5em;
+    }
+
+    .social-login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 8px;
+    }
 

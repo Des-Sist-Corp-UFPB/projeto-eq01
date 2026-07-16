@@ -32,11 +32,11 @@ projeto-eq01
 ```
 
 ### Links Rápidos dos Componentes:
-* [Módulo Model](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model)
-* [Módulo Controller](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller)
-* [Módulo Frontend (Angular)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/view)
-* [Script de Instalação](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/instalar.sh)
-* [Configuração do Docker Compose](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docker-compose.yml)
+* [Módulo Model](NEXUSHUB/model)
+* [Módulo Controller](NEXUSHUB/controller)
+* [Módulo Frontend (Angular)](NEXUSHUB/view)
+* [Script de Instalação](NEXUSHUB/instalar.sh)
+* [Configuração do Docker Compose](NEXUSHUB/docker-compose.yml)
 
 ---
 
@@ -114,10 +114,10 @@ chmod +x instalar.sh
 ## 📄 Documentação
 
 Para mais detalhes sobre as regras de negócio, marketing, identidade visual e planejamento de desenvolvimento, consulte a pasta de documentos:
-* [Arquitetura (ARCHITECTURE.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/ARCHITECTURE.md)
-* [Produto (PRODUCT.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/PRODUCT.md)
-* [Roadmap (ROADMAP.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/ROADMAP.md)
-* [Identidade Visual (manual_identidade_visual.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/manual_identidade_visual.md)
+* [Arquitetura (ARCHITECTURE.md)](NEXUSHUB/docs/ARCHITECTURE.md)
+* [Produto (PRODUCT.md)](NEXUSHUB/docs/PRODUCT.md)
+* [Roadmap (ROADMAP.md)](NEXUSHUB/docs/ROADMAP.md)
+* [Identidade Visual (manual_identidade_visual.md)](NEXUSHUB/docs/manual_identidade_visual.md)
 
 ---
 
@@ -148,12 +148,12 @@ O sistema possui um módulo dedicado para registrar e monitorar ações sensíve
 * **Como foi implementado:**
   * Implementado através de um serviço Spring dedicado (`AuditService`) que é injetado e acionado explicitamente nos controladores REST (`UsuarioRestController` e `PrivacyRestController`) nas rotas de operações sensíveis.
 * **Classes e arquivos participantes:**
-  * Entidade JPA: [AuditLog.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/domain/AuditLog.java)
-  * Repositório Spring Data: [AuditLogRepository.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/repository/AuditLogRepository.java)
-  * Serviço de Auditoria: [AuditService.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/service/AuditService.java)
-  * Controladores de Registro e Login: [UsuarioRestController.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/UsuarioRestController.java)
-  * Controlador de Privacidade: [PrivacyRestController.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/PrivacyRestController.java)
-  * Script de Migração do Banco: [V3__compliance_administration_payments.sql](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/resources/db/migration/V3__compliance_administration_payments.sql)
+  * Entidade JPA: [AuditLog.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/domain/AuditLog.java)
+  * Repositório Spring Data: [AuditLogRepository.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/repository/AuditLogRepository.java)
+  * Serviço de Auditoria: [AuditService.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/service/AuditService.java)
+  * Controladores de Registro e Login: [UsuarioRestController.java](NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/UsuarioRestController.java)
+  * Controlador de Privacidade: [PrivacyRestController.java](NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/PrivacyRestController.java)
+  * Script de Migração do Banco: [V3__compliance_administration_payments.sql](NEXUSHUB/controller/src/main/resources/db/migration/V3__compliance_administration_payments.sql)
 
 ---
 
@@ -169,11 +169,11 @@ O NexusHub integra-se com a API de pagamentos do **Mercado Pago** para possibili
   * `MERCADO_PAGO_WEBHOOK_SECRET`: Chave secreta de autenticação do webhook para validação das notificações recebidas.
   * `MERCADO_PAGO_BASE_URL`: URL base das APIs do Mercado Pago (default: `https://api.mercadopago.com`).
 * **Classes e arquivos participantes:**
-  * Abstração do Gateway: [PaymentGateway.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentGateway.java)
-  * Implementação da API do Mercado Pago: [MercadoPagoGateway.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/payments/MercadoPagoGateway.java)
-  * Serviço de Negócio de Pagamento: [PaymentService.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentService.java)
-  * Entidade de Transações: [PaymentOrder.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/domain/PaymentOrder.java)
-  * Arquivo de propriedades: [application.yml](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/resources/application.yml)
+  * Abstração do Gateway: [PaymentGateway.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentGateway.java)
+  * Implementação da API do Mercado Pago: [MercadoPagoGateway.java](NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/payments/MercadoPagoGateway.java)
+  * Serviço de Negócio de Pagamento: [PaymentService.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentService.java)
+  * Entidade de Transações: [PaymentOrder.java](NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/domain/PaymentOrder.java)
+  * Arquivo de propriedades: [application.yml](NEXUSHUB/controller/src/main/resources/application.yml)
 
 ---
 
@@ -181,10 +181,10 @@ O NexusHub integra-se com a API de pagamentos do **Mercado Pago** para possibili
 
 Os relatórios de cobertura de testes automatizados foram gerados para ambos os módulos e encontram-se commitados no repositório:
 
-* **Módulo Backend (Java):** **89.00%** de linhas cobertas (JaCoCo).
-  * Relatório em: [cobertura/backend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/cobertura/backend/index.html)
-* **Módulo Frontend (Angular/Vitest):** **85.71%** de linhas cobertas (v8).
-  * Relatório em: [cobertura/frontend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/cobertura/frontend/index.html)
+* **Módulo Backend (Java):** **93.08%** de linhas cobertas (JaCoCo).
+  * Relatório em: [cobertura/backend/index.html](cobertura/backend/index.html)
+* **Módulo Frontend (Angular/Vitest):** **93.91%** de linhas cobertas (v8).
+  * Relatório em: [cobertura/frontend/index.html](cobertura/frontend/index.html)
 
 ---
 

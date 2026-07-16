@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record PerfilUpdateRequest(
+        String username,
         String nome,
         String email,
         String senha,
@@ -16,8 +17,10 @@ public record PerfilUpdateRequest(
         String course,
         Integer period,
         String matricula,
-        Integer ingressPeriod,
-        Integer conclusionPeriod,
+        @jakarta.validation.constraints.Pattern(regexp = "^$|^\\d{4}\\.[12]$", message = "Período de ingresso deve estar no formato YYYY.Semestre (ex: 2023.1)")
+        String ingressPeriod,
+        @jakarta.validation.constraints.Pattern(regexp = "^$|^\\d{4}\\.[12]$", message = "Período de conclusão deve estar no formato YYYY.Semestre (ex: 2024.2)")
+        String conclusionPeriod,
         String whatsapp,
         String githubUrl,
         String instagramUrl,

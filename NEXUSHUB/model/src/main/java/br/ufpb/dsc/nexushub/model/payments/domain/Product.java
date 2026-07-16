@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.*;
-@Entity @Table(name="pay_product") @Getter @NoArgsConstructor(access=AccessLevel.PROTECTED)
+@Entity(name="PaymentProduct") @Table(name="pay_product") @Getter @NoArgsConstructor(access=AccessLevel.PROTECTED)
 public class Product {
  @Id @GeneratedValue(strategy=GenerationType.UUID) @Column(name="idproduct") private UUID id;
  @Column(name="nmproduct",nullable=false) private String name;
