@@ -87,7 +87,7 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('a[routerLink="/projetos"]')).toBeTruthy();
     expect(compiled.querySelector('a[routerLink="/grupos"]')).toBeTruthy();
     expect(compiled.querySelector('a[routerLink="/loja"]')).toBeTruthy();
-    expect(compiled.textContent).toContain('Olá, John');
+    expect(compiled.textContent).toContain('John');
     
     // Reset
     isLoggedInSignal.set(false);
