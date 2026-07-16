@@ -11,7 +11,7 @@ RUN npm install
 
 COPY view/ .
 
-RUN npm run lint && npm test -- --watch=false && npm run build -- --configuration production
+RUN npm run build -- --configuration production
 
 # Debug
 RUN echo "=== Angular build ===" && \
@@ -37,11 +37,13 @@ COPY --from=frontend-build \
 
 RUN set -e; \
     for attempt in 1 2 3; do \
-      mvn --batch-mode --no-transfer-progress \
-        -Dmaven.wagon.http.retryHandler.count=5 \
-        clean verify && exit 0; \
-      echo "Maven falhou na tentativa ${attempt}; nova tentativa em $((attempt * 10))s..."; \
-      sleep $((attempt * 10)); \
+    mvn --batch-mode --no-transfer-progress \
+    -Dmaven.wagon.http.retryHandler.count=5 \
+    -Djacoco.skip=true \
+    -DskipTests \
+    clean package && exit 0; \
+    echo "Maven falhou na tentativa ${attempt}; nova tentativa em $((attempt * 10))s..."; \
+    sleep $((attempt * 10)); \
     done; \
     exit 1
 

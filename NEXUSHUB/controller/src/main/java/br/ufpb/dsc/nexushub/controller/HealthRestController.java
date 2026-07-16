@@ -18,18 +18,20 @@ public class HealthRestController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @GetMapping("/ping")
+    @GetMapping({"/ping", "/health", "/api/health"})
     public ResponseEntity<Map<String, Object>> health() {
         try {
             jdbcTemplate.execute("SELECT 1");
             return ResponseEntity.ok(Map.of(
                     "status", "ok",
+                    "database", "up",
                     "service", "eq01",
                     "timestamp", Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
                     "status", "error",
+                    "database", "down",
                     "service", "eq01",
                     "timestamp", Instant.now().truncatedTo(ChronoUnit.SECONDS).toString(),
                     "message", "Database is not active: " + e.getMessage()
@@ -37,5 +39,6 @@ public class HealthRestController {
         }
     }
 }
+
 
 

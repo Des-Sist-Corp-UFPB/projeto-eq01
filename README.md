@@ -1,6 +1,6 @@
 # 🎓 NexusHub
 
-> Plataforma acadêmica gamificada para centralizar projetos, grupos, eventos e oportunidades universitárias.
+> Plataforma acadêmica gamificada para centralizar projetos, grupos, eventos, lojinha comunitária e oportunidades universitárias.
 
 NexusHub conecta estudantes, professores, projetos, grupos e oportunidades em um único ambiente digital. A ideia é reduzir a perda de informações espalhadas e transformar participação acadêmica em reconhecimento por meio de pontos, rankings, conquistas e perfis acadêmicos personalizados.
 
@@ -10,8 +10,8 @@ NexusHub conecta estudantes, professores, projetos, grupos e oportunidades em um
 
 O projeto utiliza um conjunto de tecnologias modernas e robustas:
 
-* **Backend:** Java 21, Spring Boot (REST API), Maven
-* **Frontend:** Angular (TypeScript, RxJS)
+* **Backend:** Java 21, Spring Boot (REST API), JPA/Hibernate, Flyway (Migrações do banco), Maven
+* **Frontend:** Angular 21 (TypeScript, RxJS, Signals)
 * **Banco de Dados:** PostgreSQL 16
 * **Containerização:** Docker & Docker Compose
 
@@ -27,32 +27,58 @@ projeto-eq01
     ├── model          # Módulo Java com entidades, DTOs, repositórios e regras de negócio.
     ├── controller     # Módulo Spring Boot (API REST).
     ├── view           # Aplicação Angular (interface com usuário).
-    ├── docs           # Documentação técnica e de produto.
     └── Dockerfile & docker-compose.yml
 ```
 
 ### Links Rápidos dos Componentes:
-* [Módulo Model](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model)
-* [Módulo Controller](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller)
-* [Módulo Frontend (Angular)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/view)
-* [Script de Instalação](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/instalar.sh)
-* [Configuração do Docker Compose](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docker-compose.yml)
+* [Módulo Model](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model)
+* [Módulo Controller](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller)
+* [Módulo Frontend (Angular)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/view)
+* [Configuração do Docker Compose](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/docker-compose.yml)
+
+---
+
+## 🌟 Funcionalidades do Projeto
+
+### 1. Perfil Acadêmico Completo e Flexível
+* **Onboarding Acadêmico**: Passo a passo de boas-vindas para registrar nome, data de nascimento (com controle de visibilidade), curso e período.
+* **Período Customizado**: O campo período suporta formatos textuais como `2023.1` ou numéricos simples (`5`). A renderização é inteligente para remover a formatação ordinal (`º`) caso contenha caracteres de semestre (ex: `.1`).
+* **Seções Detalhadas**: Biografia, histórico de experiências, formação, competências técnicas e stacks de tecnologias.
+* **Redes & Contatos**: Integração direta com WhatsApp, LinkedIn, GitHub, Instagram e sites pessoais.
+
+### 2. Comunidades (Grupos e Projetos vinculados)
+* **Estrutura Hierárquica**: Um grupo acadêmico pode possuir múltiplos projetos, porém todo projeto deve obrigatoriamente estar vinculado a um grupo responsável.
+* **Mural de Mensagens**: Murais de comunicação em tempo real tanto no detalhe de Grupos quanto no de Projetos para interação ativa e compartilhamento de avisos entre os participantes.
+
+### 3. Lojinha Universitária (Community Marketplace)
+* **Perfil do Vendedor**: Ativação condicionada ao aceite dos "Termos de Uso do Campus". Suporta personalização de Logo e Banner da loja.
+* **Definição de Campus & Pontos de Encontro**: Parametrizado para os Campi de Mamanguape e Rio Tinto. Permite escolher pontos fixos (como Biblioteca, RE, RU, Laboratórios) ou cadastrar locais customizados.
+* **Gestão de Produtos**: Cadastro de itens com fotos, descrição e preço. Monitoramento de visualizações e cliques.
+* **WhatsApp Checkout**: Geração de mensagens estruturadas para direcionamento direto ao WhatsApp do vendedor, com dados do pedido, ponto de encontro e método de pagamento (Pix integrado).
+
+### 4. Recomendações e Conexões (Social)
+* **Depoimentos (Testimonials)**: Usuários podem enviar recomendações para os perfis de outros alunos/servidores. Requer aprovação explícita do destinatário para aparecer na aba pública do perfil.
+* **Sistema de Follow**: Possibilidade de seguir e ser seguido por outros membros, gerando notificações.
+
+### 5. Painel Administrativo, Auditoria e LGPD
+* **Logs de Auditoria (Conformidade LGPD)**: Rastreamento completo de eventos sensíveis (logins, alterações de senha, downloads de dados e cadastros). Sanitização avançada para não expor segredos.
+* **Moderação de Denúncias**: Usuários podem denunciar postagens ou perfis. Administradores moderam as ocorrências a partir de um painel integrado.
 
 ---
 
 ## 🚀 Como Executar o Projeto
 
-Você pode rodar o projeto de duas formas: usando **Docker Compose** (recomendado para desenvolvimento rápido) ou executando os serviços **manualmente**.
+Você pode rodar o projeto usando **Docker Compose** (recomendado para desenvolvimento rápido) ou executando os serviços **manualmente**.
 
 ### Opção 1: Usando Docker Compose (Recomendado)
 
-Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
+Certifique-se de ter o Docker e o Docker Compose instalados.
 
-1. Navegue até o diretório do NexusHub:
+1. Navegue até o diretório principal:
    ```bash
    cd NEXUSHUB
    ```
-2. Inicie os containers do banco de dados, backend e frontend:
+2. Inicie os containers com build atualizado:
    ```bash
    docker-compose up --build
    ```
@@ -64,46 +90,27 @@ Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
 
 ### Opção 2: Execução Manual
 
-#### Pré-requisitos
-O projeto possui um script que automatiza a instalação de todas as dependências no Linux (Ubuntu/Debian e derivados):
-* **JDK 21**
-* **Apache Maven**
-* **Node.js & npm**
-* **PostgreSQL**
-
-Para rodar o instalador de pré-requisitos:
-```bash
-cd NEXUSHUB
-chmod +x instalar.sh
-./instalar.sh
-```
-
 #### 1. Executando o Backend (Spring Boot)
 1. Navegue até o diretório `NEXUSHUB`:
    ```bash
    cd NEXUSHUB
    ```
-2. Execute o backend via Maven:
+2. Execute o comando Spring Boot do Maven:
    ```bash
    mvn spring-boot:run -pl controller
    ```
-   * O servidor iniciará em `http://localhost:8080`
-   * Endpoints principais da API:
-     * `GET /api/projetos`
-     * `POST /api/projetos`
-     * `GET /api/grupos`
-     * `GET /api/oportunidades`
+   * O backend rodará em `http://localhost:8080`
 
 #### 2. Executando o Frontend (Angular)
-1. Navegue até a pasta do frontend:
+1. Navegue até a pasta `view`:
    ```bash
    cd NEXUSHUB/view
    ```
-2. Instale as dependências:
+2. Instale os pacotes:
    ```bash
    npm install
    ```
-3. Inicie o servidor de desenvolvimento:
+3. Inicie o servidor:
    ```bash
    npm run start
    ```
@@ -111,80 +118,52 @@ chmod +x instalar.sh
 
 ---
 
-## 📄 Documentação
+## 🧪 Como Executar os Testes
 
-Para mais detalhes sobre as regras de negócio, marketing, identidade visual e planejamento de desenvolvimento, consulte a pasta de documentos:
-* [Arquitetura (ARCHITECTURE.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/ARCHITECTURE.md)
-* [Produto (PRODUCT.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/PRODUCT.md)
-* [Roadmap (ROADMAP.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/ROADMAP.md)
-* [Identidade Visual (manual_identidade_visual.md)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/docs/manual_identidade_visual.md)
+O projeto conta com testes unitários e de integração abrangentes tanto para o Backend quanto para o Frontend.
 
----
+### 1. Backend (Java / JUnit 5 / Mockito)
+Para rodar a suíte inteira de testes automatizados do Spring:
+```bash
+cd NEXUSHUB
+mvn clean test
+```
+* **Classes de Testes Principais:**
+  * [IdentityServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/identity/service/IdentityServiceImplTest.java)
+  * [HumanServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/people/service/HumanServiceImplTest.java)
+  * [FeedServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/people/service/FeedServiceImplTest.java)
 
-## 🛡️ Log de Auditoria
+### 2. Frontend (Angular / Vitest)
+Para rodar os testes de componentes Angular de forma não-interativa (Single Run):
+```bash
+cd NEXUSHUB/view
+npm run test -- --watch=false
+```
 
-O sistema possui um módulo dedicado para registrar e monitorar ações sensíveis de usuários e operações de conformidade (LGPD).
-
-* **O que é auditado:**
-  * Registro de novo usuário (`USER_REGISTERED`)
-  * Autenticação com sucesso (`LOGIN`)
-  * Tentativas de autenticação falhas (`LOGIN_FAILED`)
-  * Alteração de senha (`PASSWORD_CHANGED`)
-  * Atualização de perfil do usuário (`PROFILE_UPDATED`)
-  * Operações de privacidade e conformidade de dados pessoais (LGPD), como requisição ou exclusão de dados.
-* **Onde fica armazenado:**
-  * Tabela **`adm_audit`** no banco PostgreSQL.
-  * **Principais campos:**
-    * `idaudit` (UUID): Identificador único do log.
-    * `idactor` (UUID): Identificador do usuário que realizou a ação (referencia `sec_user`).
-    * `cdaction` (VARCHAR): Ação realizada.
-    * `nmentity` (VARCHAR): Entidade auditada.
-    * `identity` (VARCHAR): ID do registro associado.
-    * `dsresult` (VARCHAR): Resultado da ação (`SUCCESS`, `DENIED`, etc.).
-    * `dsip` (VARCHAR): Endereço IP do cliente.
-    * `cdcorrelation` (VARCHAR): ID de correlação para rastreamento de chamadas.
-    * `dsbefore` / `dsafter` (TEXT): Estado anterior e posterior dos dados, devidamente sanitizados para mascarar senhas e tokens confidenciais.
-    * `tscreated` (TIMESTAMP): Data e hora do registro.
-* **Como foi implementado:**
-  * Implementado através de um serviço Spring dedicado (`AuditService`) que é injetado e acionado explicitamente nos controladores REST (`UsuarioRestController` e `PrivacyRestController`) nas rotas de operações sensíveis.
-* **Classes e arquivos participantes:**
-  * Entidade JPA: [AuditLog.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/domain/AuditLog.java)
-  * Repositório Spring Data: [AuditLogRepository.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/repository/AuditLogRepository.java)
-  * Serviço de Auditoria: [AuditService.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/service/AuditService.java)
-  * Controladores de Registro e Login: [UsuarioRestController.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/UsuarioRestController.java)
-  * Controlador de Privacidade: [PrivacyRestController.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/PrivacyRestController.java)
-  * Script de Migração do Banco: [V3__compliance_administration_payments.sql](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/resources/db/migration/V3__compliance_administration_payments.sql)
+### 3. Cobertura de Testes (Coverage)
+O projeto mantém uma das metas de qualidade mais altas, superando **93%** de cobertura de código em ambas as frentes:
+* **Relatório Backend (JaCoCo):** [cobertura/backend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/cobertura/backend/index.html)
+* **Relatório Frontend (Vitest Coverage):** [cobertura/frontend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/cobertura/frontend/index.html)
 
 ---
 
-## 🔌 Integração com Serviço Externo
+## 🔮 Sugestões de Melhorias Futuras
 
-O NexusHub integra-se com a API de pagamentos do **Mercado Pago** para possibilitar compras de itens na loja acadêmica e apoiar projetos da comunidade.
+1. **Chat Interno em Tempo Real**:
+   * Substituir o redirecionamento ao WhatsApp por um chat baseado em WebSockets (Spring Websockets + STOMP) diretamente na plataforma. Isso centraliza as conversas e aumenta a segurança e privacidade de compradores/vendedores.
 
-* **Serviço externo:** Mercado Pago (Payment Gateway).
-* **Para que é usado:** Processamento seguro de pagamentos de produtos da loja da comunidade universitária, lidando com a criação de preferências de checkout e verificação de pagamentos recebidos via webhook.
-* **Como é configurado (Variáveis de ambiente):**
-  * `APP_PAYMENT_FAKE`: Flag boolean (`true` ou `false`) para simular os pagamentos localmente em ambiente de desenvolvimento sem chamar as APIs reais.
-  * `MERCADO_PAGO_ACCESS_TOKEN`: Token de acesso pessoal (PAT) do Mercado Pago para autorização das requisições na API REST.
-  * `MERCADO_PAGO_WEBHOOK_SECRET`: Chave secreta de autenticação do webhook para validação das notificações recebidas.
-  * `MERCADO_PAGO_BASE_URL`: URL base das APIs do Mercado Pago (default: `https://api.mercadopago.com`).
-* **Classes e arquivos participantes:**
-  * Abstração do Gateway: [PaymentGateway.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentGateway.java)
-  * Implementação da API do Mercado Pago: [MercadoPagoGateway.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/payments/MercadoPagoGateway.java)
-  * Serviço de Negócio de Pagamento: [PaymentService.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/service/PaymentService.java)
-  * Entidade de Transações: [PaymentOrder.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/payments/domain/PaymentOrder.java)
-  * Arquivo de propriedades: [application.yml](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/NEXUSHUB/controller/src/main/resources/application.yml)
+2. **Sistema Avançado de Recompensas (Badges e Conquistas)**:
+   * Conceder distintivos e medalhas ("Badges") automaticamente para usuários por marcos atingidos, como: "Primeiro post no feed", "10 depoimentos recebidos", "Vendedor Destaque" (mais de 5 vendas realizadas com sucesso na lojinha).
 
----
+3. **Feed Inteligente e Recomendação de Projetos**:
+   * Desenvolver um algoritmo básico de recomendação (pode ser com base nas competências cadastradas pelo estudante) para sugerir projetos de pesquisa, extensão ou grupos de estudo que buscam as tecnologias dominadas por ele.
 
-## 📊 Cobertura de Testes
+4. **Notificações Push / E-mail Avançadas**:
+   * Envio de notificações push para avisos importantes no mural dos projetos e novos depoimentos recebidos.
+   * Integração de templates de e-mail responsivos em HTML (via Spring Mail + Thymeleaf) para substituição de avisos simples.
 
-Os relatórios de cobertura de testes automatizados foram gerados para ambos os módulos e encontram-se commitados no repositório:
-
-* **Módulo Backend (Java):** **89.00%** de linhas cobertas (JaCoCo).
-  * Relatório em: [cobertura/backend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/cobertura/backend/index.html)
-* **Módulo Frontend (Angular/Vitest):** **85.71%** de linhas cobertas (v8).
-  * Relatório em: [cobertura/frontend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/NexusHub/projeto-eq01/cobertura/frontend/index.html)
+5. **Gamificação com Ranking de Pontos**:
+   * Quadro de classificação geral ("Leaderboard") público exibindo os estudantes mais ativos nas comunidades, engajamento em projetos e atividades extracurriculares.
 
 ---
 

@@ -1,42 +1,544 @@
-<section class="admin-page">
-  <h2>Administração</h2>
-  <p class="feedback error" *ngIf="error()">{{ error() }}</p>
-  <p class="feedback success" *ngIf="message()">{{ message() }}</p>
-
-  <h3>Funcionalidades</h3>
-  <p class="hint">Use o botão de cada item para ativar ou desativar a funcionalidade.</p>
-  <div class="flags">
-    <article *ngFor="let flag of flags()" [class.enabled]="flag.enabled">
-      <div>
-        <strong>{{ flagName(flag.code) }}</strong>
-        <span class="status">{{ flag.enabled ? 'Ativada' : 'Desativada' }}</span>
-        <small>{{ flag.description }}</small>
+<div class="admin-dashboard-container animate-fade-in" style="width: 100%;">
+  
+  <!-- CENTRAL CONTENT AREA -->
+  <main class="admin-main-content">
+    <header class="content-header-bar">
+      <div class="header-breadcrumbs">
+        <span class="breadcrumb-root">NexusHub Admin</span>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{{ activeTab() | titlecase }}</span>
       </div>
-      <button type="button" (click)="toggle(flag)" [disabled]="changing() === flag.code">
-        {{ changing() === flag.code ? 'Salvando...' : (flag.enabled ? 'Desativar' : 'Ativar') }}
+      <button type="button" class="action-refresh-btn" (click)="refresh()">
+        <span class="material-symbols-rounded">refresh</span>
+        Atualizar Painel
       </button>
-    </article>
+    </header>
+
+    <div class="feedback-alerts-container">
+      <div class="feedback-box error" *ngIf="error()">{{ error() }}</div>
+      <div class="feedback-box success" *ngIf="message()">{{ message() }}</div>
+    </div>
+
+    <!-- DYNAMIC TABS VIEW CONTENT -->
+
+    <!-- TAB 1: USERS -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'users'">
+      <div class="section-title-wrapper">
+        <h3>Controle de Usuários (RBAC)</h3>
+        <p class="description">Gerencie as permissões de acesso, status ativo e visualização de perfis cadastrados no campus.</p>
+      </div>
+
+      <div class="dashboard-table-card">
+        <div class="table-responsive-outer">
+          <table class="rbac-users-table">
+            <thead>
+              <tr>
+                <th>Usuário</th>
+                <th>Cargo (RBAC)</th>
+                <th>Status</th>
+                <th>Campus / Curso</th>
+                <th>Verificado</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of usersList()">
+                <td>
+                  <div class="user-cell-info">
+                    <img [src]="u.fotoUrl || 'sloth-avatar.png'" alt="Foto do usuário" class="user-table-photo" />
+                    <div class="user-table-names">
+                      <strong>{{ u.nome }}</strong>
+                      <span>@{{ u.username }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="select-role-wrapper">
+                    <select [value]="u.cargo" (change)="changeUserRole(u, roleSelect.value)" #roleSelect>
+                      <option value="USER">USER</option>
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="SYSADMIN">SYSADMIN</option>
+                    </select>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [class.active]="u.onboardingCompleted">
+                    {{ u.onboardingCompleted ? 'Ativo' : 'Pendente' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="campus-table-text">
+                    <strong>{{ u.course || 'Graduação' }}</strong>
+                    <span>{{ u.userType === 'ESTUDANTE' ? 'Estudante' : 'Docente' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="material-symbols-rounded verify-check-icon">check_circle</span>
+                </td>
+                <td>
+                  <button class="btn-table-action-toggle" (click)="toggleUserStatus(u)">
+                    {{ u.onboardingCompleted ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="usersList().length === 0 && !isLoadingUsers()">
+                <td colspan="6" class="table-empty-row">Nenhum usuário cadastrado.</td>
+              </tr>
+              <tr *ngIf="isLoadingUsers()">
+                <td colspan="6" class="table-loading-row">Carregando dados da lista de usuários...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SECURITY & AUDIT -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'security'">
+      <div class="section-title-wrapper">
+        <h3>Audit & Security</h3>
+        <p class="description">Monitoramento físico de JVM, estatísticas de banco de dados e logs em tempo real.</p>
+      </div>
+
+      <!-- JVM & OS Hardware metrics widgets -->
+      <div class="hardware-metrics-grid" *ngIf="metrics()">
+        <!-- Memória Card -->
+        <div class="metric-card jvm">
+          <div class="card-header">
+            <span class="material-symbols-rounded icon">memory</span>
+            <h4>Memória JVM (RAM)</h4>
+          </div>
+          <div class="metric-body">
+            <span class="val">{{ metrics().jvm?.usedMemoryMb }} MB</span>
+            <span class="sub">Total: {{ metrics().jvm?.totalMemoryMb }} MB (Max: {{ metrics().jvm?.maxMemoryMb }} MB)</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill jvm" [style.width]="(metrics().jvm?.memoryUsagePct || 0) + '%'"></div>
+          </div>
+          <span class="percentage-footer">{{ metrics().jvm?.memoryUsagePct | number:'1.0-1' }}% em uso</span>
+        </div>
+
+        <!-- CPU Card -->
+        <div class="metric-card cpu">
+          <div class="card-header">
+            <span class="material-symbols-rounded icon">developer_board</span>
+            <h4>Carga de CPU</h4>
+          </div>
+          <div class="metric-body-double">
+            <div>
+              <span class="lbl">Processo</span>
+              <span class="val">{{ metrics().cpu?.processCpuPct | number:'1.0-1' }}%</span>
+            </div>
+            <div>
+              <span class="lbl">Sistema</span>
+              <span class="val">{{ metrics().cpu?.systemCpuPct | number:'1.0-1' }}%</span>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill cpu" [style.width]="(metrics().cpu?.processCpuPct || 0) + '%'"></div>
+          </div>
+        </div>
+
+        <!-- DB status card -->
+        <div class="metric-card db">
+          <div class="card-header">
+            <span class="material-symbols-rounded icon">database</span>
+            <h4>Banco de Dados</h4>
+          </div>
+          <div class="db-status-bar" [class.healthy]="metrics().database?.status === 'up'">
+            <span class="dot"></span>
+            <span>PostgreSQL: {{ metrics().database?.status === 'up' ? 'ATIVO' : 'DOWN' }}</span>
+          </div>
+          <span class="db-ping" *ngIf="metrics().database?.status === 'up'">
+            Latência (Ping SELECT 1): <strong>{{ metrics().database?.pingMs }} ms</strong>
+          </span>
+        </div>
+
+        <!-- Threads & Uptime card -->
+        <div class="metric-card info">
+          <div class="card-header">
+            <span class="material-symbols-rounded icon">info</span>
+            <h4>Uptime & Threads</h4>
+          </div>
+          <div class="info-list">
+            <div class="info-item"><span>Online há:</span><strong>{{ formatUptime(metrics().uptimeMs) }}</strong></div>
+            <div class="info-item"><span>Threads Ativas:</span><strong>{{ metrics().threads?.activeCount }}</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit details layout and visual graphs -->
+      <div class="audit-and-graphs-container">
+        <!-- SVG graphs mockup -->
+        <div class="dashboard-chart-card">
+          <h4>Frequência de Acesso & Segurança</h4>
+          <p class="chart-subtitle">Volume de logins e modificações registradas nas últimas horas</p>
+          
+          <div class="svg-charts-mockup-wrapper">
+            <!-- Simulated ngx-charts SVG graphic -->
+            <svg class="line-chart-svg" viewBox="0 0 400 150">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00b4d8" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#00b4d8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0 120 Q 80 80 150 90 T 280 40 T 400 30 L 400 150 L 0 150 Z" fill="url(#chartGrad)"/>
+              <path d="M 0 120 Q 80 80 150 90 T 280 40 T 400 30" fill="none" stroke="#00b4d8" stroke-width="3"/>
+              <!-- Circles on points -->
+              <circle cx="150" cy="90" r="4" fill="#ffffff" stroke="#00b4d8" stroke-width="2"/>
+              <circle cx="280" cy="40" r="4" fill="#ffffff" stroke="#00b4d8" stroke-width="2"/>
+            </svg>
+            <div class="chart-axis-labels">
+              <span>08:00</span>
+              <span>12:00</span>
+              <span>16:00</span>
+              <span>20:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit logs table -->
+        <div class="audit-log-feed-card">
+          <h4>Log de Eventos de Auditoria</h4>
+          <div class="audit-log-table-wrapper">
+            <table class="audit-table-mini">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Ação</th>
+                  <th>Recurso</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of audits()">
+                  <td><time>{{ item.createdAt | date:'dd/MM HH:mm' }}</time></td>
+                  <td><strong>{{ actionName(item.action) }}</strong></td>
+                  <td><span>{{ entityName(item.entity) }}</span></td>
+                  <td>
+                    <span class="status-result" [class.success]="item.result === 'SUCCESS'">
+                      {{ item.result === 'SUCCESS' ? 'Sucesso' : 'Falha' }}
+                    </span>
+                  </td>
+                </tr>
+                <tr *ngIf="audits().length === 0">
+                  <td colspan="4" class="empty-row">Nenhum evento registrado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs Terminal Box -->
+      <div class="logs-terminal-outer">
+        <div class="terminal-header">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">nexushub-spring-boot.log</span>
+        </div>
+        
+        <div class="terminal-body" *ngIf="logsList().length > 0">
+          <div class="log-line-item" *ngFor="let line of logsList()">
+            <span 
+              class="log-row-text" 
+              [class.error-log]="line.includes('ERROR') || line.includes('Exception')"
+              [class.warn-log]="line.includes('WARN')"
+              [class.info-log]="line.includes('INFO')"
+            >
+              {{ line }}
+            </span>
+          </div>
+        </div>
+
+        <div class="terminal-empty" *ngIf="logsList().length === 0 && !isLoadingLogs()">
+          Nenhum log registrado.
+        </div>
+
+        <div class="terminal-loading" *ngIf="isLoadingLogs()">
+          <div class="terminal-spinner"></div>
+          Carregando linhas do terminal...
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CONTENT & FLAGS -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'content'">
+      <div class="section-title-wrapper">
+        <h3>Recursos & Projetos Acadêmicos</h3>
+        <p class="description">Altere o comportamento do sistema e monitore o feed de projetos cadastrados.</p>
+      </div>
+
+      <div class="content-tab-grid">
+        <!-- Feature Flags Card -->
+        <div class="flags-card">
+          <h4>Funcionalidades Globais</h4>
+          <p class="hint">Ative ou desative seções inteiras do NexusHub de forma segura.</p>
+          <div class="flags-list">
+            <article *ngFor="let flag of flags()" [class.enabled]="flag.enabled" class="flag-row-item">
+              <div class="flag-info">
+                <strong>{{ flagName(flag.code) }}</strong>
+                <span class="status">{{ flag.enabled ? 'Ativo' : 'Inativo' }}</span>
+                <small>{{ flag.description }}</small>
+              </div>
+              <button class="flag-action-btn" type="button" (click)="toggle(flag)" [disabled]="changing() === flag.code">
+                {{ changing() === flag.code ? '...' : (flag.enabled ? 'Desativar' : 'Ativar') }}
+              </button>
+            </article>
+          </div>
+        </div>
+
+        <!-- Campus Highlights approved feed projects list -->
+        <div class="highlights-projects-card">
+          <h4>Campus Highlights (Destaques Acadêmicos)</h4>
+          <p class="hint">Mini-feed de projetos cadastrados nos campi Rio Tinto e Mamanguape.</p>
+          
+          <div class="projects-mini-feed-list">
+            <div class="project-mini-item" *ngFor="let p of campusProjects()">
+              <div class="proj-header-row">
+                <span class="proj-badge-campus" [class.rio-tinto]="p.responsavel?.includes('Tinto')">
+                  {{ p.responsavel?.includes('Tinto') ? 'Rio Tinto' : 'Mamanguape' }}
+                </span>
+                <strong class="proj-title">{{ p.titulo }}</strong>
+              </div>
+              <p class="proj-desc">{{ p.descricao | slice:0:150 }}...</p>
+              <div class="proj-footer">
+                <span>Responsável: <strong>{{ p.responsavel || 'Docente' }}</strong></span>
+              </div>
+            </div>
+            <div class="empty-feed" *ngIf="campusProjects().length === 0">
+              Nenhum projeto registrado no feed do campus.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: GAMIFICATION HUB -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'gamification'">
+      <div class="section-title-wrapper">
+        <h3>Gamification Hub</h3>
+        <p class="description">Defina multiplicadores de recompensas acadêmicas e configure as conquistas dos estudantes.</p>
+      </div>
+
+      <div class="gamification-grid">
+        <!-- Achievements and badge lists -->
+        <div class="dashboard-gamification-card">
+          <h4>Medalhas & Conquistas Escolares</h4>
+          <p class="hint">Regras de conquistas ativas para o cálculo de engajamento do aluno.</p>
+          
+          <div class="achievements-list">
+            <div class="achievement-item-row" *ngFor="let ach of achievements()">
+              <span class="material-symbols-rounded achievement-icon">{{ ach.icon }}</span>
+              <div class="achievement-details">
+                <strong>{{ ach.name }}</strong>
+                <span>{{ ach.description }}</span>
+              </div>
+              <span class="achievement-xp-badge">+{{ ach.xp }} XP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adjust XP value slider metric card -->
+        <div class="xp-slider-card">
+          <h4>Multiplicador Base de XP</h4>
+          <p class="hint">Ajuste o fator de multiplicação de pontuação padrão para novos projetos cadastrados.</p>
+          
+          <div class="slider-box-wrapper">
+            <div class="slider-header">
+              <span class="label">XP por Projeto:</span>
+              <span class="slider-xp-value">{{ xpValue() }} XP</span>
+            </div>
+            <input 
+              type="range" 
+              min="20" 
+              max="500" 
+              step="10" 
+              [ngModel]="xpValue()" 
+              (ngModelChange)="setXpValue($event)"
+              class="xp-range-slider"
+            />
+            <div class="slider-range-labels">
+              <span>Mín: 20 XP</span>
+              <span>Fator Recomendado</span>
+              <span>Máx: 500 XP</span>
+            </div>
+          </div>
+          <div class="slider-indicator-alert">
+            <span class="material-symbols-rounded">info</span>
+            <p>O ajuste do multiplicador afeta o ranqueamento global de estudantes na lojinha de recompensas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: INSTITUTIONS -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'institutions'">
+      <div class="section-title-wrapper">
+        <h3>Dados de Campi UFPB</h3>
+        <p class="description">Informações gerais das sedes universitárias abrangidas pelo NexusHub.</p>
+      </div>
+
+      <div class="campi-cards-container">
+        <!-- Campus 1: Rio Tinto -->
+        <div class="campus-detail-card">
+          <div class="campus-card-header bg-teal">
+            <span class="material-symbols-rounded">corporate_fare</span>
+            <div>
+              <h4>Campus IV - Rio Tinto</h4>
+              <span>Litoral Norte UFPB</span>
+            </div>
+          </div>
+          <div class="campus-card-body">
+            <p>Foco acadêmico principal em Ciências Tecnológicas e Sistemas de Informação.</p>
+            <div class="campus-quick-stats">
+              <div class="q-stat"><span>Projetos Ativos:</span><strong>{{ campiStats()?.rioTinto?.projects ?? 0 }}</strong></div>
+              <div class="q-stat"><span>Estudantes:</span><strong>{{ campiStats()?.rioTinto?.students ?? 0 }}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campus 2: Mamanguape -->
+        <div class="campus-detail-card">
+          <div class="campus-card-header bg-blue">
+            <span class="material-symbols-rounded">corporate_fare</span>
+            <div>
+              <h4>Campus IV - Mamanguape</h4>
+              <span>Litoral Norte UFPB</span>
+            </div>
+          </div>
+          <div class="campus-card-body">
+            <p>Cursos de Ciências Sociais Aplicadas, Humanas, Contabilidade e Design.</p>
+            <div class="campus-quick-stats">
+              <div class="q-stat"><span>Projetos Ativos:</span><strong>{{ campiStats()?.mamanguape?.projects ?? 0 }}</strong></div>
+              <div class="q-stat"><span>Estudantes:</span><strong>{{ campiStats()?.mamanguape?.students ?? 0 }}</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: REPORTS & MODERATION -->
+    <section class="tab-view-section animate-fade-in" *ngIf="activeTab() === 'reports'">
+      <div class="section-title-wrapper">
+        <h3>Painel de Moderação (Denúncias Recentes)</h3>
+        <p class="description">Analise e decida sobre as denúncias enviadas pelos usuários da rede acadêmica.</p>
+      </div>
+
+      <!-- Moderation cards grid -->
+      <div class="moderation-cards-grid">
+        <div class="recent-report-card" *ngFor="let item of moderationCases()" (click)="openReportPreview(item)">
+          <div class="report-card-header">
+            <span class="report-badge" [class.profile]="item.targetType === 'USER'">
+              {{ item.targetType === 'USER' ? '👤 Perfil' : '📝 Publicação' }}
+            </span>
+            <span class="report-time">{{ item.createdTime | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <div class="report-card-body">
+            <div class="reported-entity-row">
+              <span class="lbl">Alvo / Autor:</span>
+              <strong class="val">{{ item.reportedName }}</strong>
+            </div>
+            <div class="reported-reason-row">
+              <span class="lbl">Motivo da Denúncia:</span>
+              <p class="reason-text">"{{ item.reason }}"</p>
+            </div>
+            <div class="reported-context-row">
+              <span class="lbl">Conteúdo Denunciado (Clique para visualizar):</span>
+              <div class="context-preview-box">
+                {{ item.contextContent || 'Sem descrição ou conteúdo textual.' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="report-card-footer" (click)="$event.stopPropagation()">
+            <button class="btn-mod keep" type="button" (click)="onResolveCase(item.id, false)">
+              Rejeitar (Manter)
+            </button>
+            <button class="btn-mod delete" type="button" (click)="onResolveCase(item.id, true)">
+              Aprovar (Remover)
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-moderation-state" *ngIf="moderationCases().length === 0">
+          <span class="material-symbols-rounded">done_all</span>
+          <h4>Nenhuma denúncia pendente!</h4>
+          <p>Tudo limpo por aqui. A comunidade acadêmica está operando dentro das diretrizes.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL FOR DETAILED REPORT PREVIEW -->
+  <div class="report-preview-modal-overlay animate-fade-in" *ngIf="selectedReport()" (click)="closeReportPreview()">
+    <div class="report-preview-modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <h4>Visualização Completa da Denúncia</h4>
+        <button class="btn-close-modal" (click)="closeReportPreview()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <div class="report-summary-alert">
+          <span class="material-symbols-rounded icon">warning</span>
+          <div class="alert-text">
+            <strong>Motivo: {{ selectedReport()?.reason }}</strong>
+            <span>Enviada em {{ selectedReport()?.createdTime | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+
+        <div class="preview-reported-content-box">
+          <span class="preview-content-type-badge" [style.background]="selectedReport()?.targetType === 'USER' ? '#fee2e2' : '#fef3c7'">
+            {{ selectedReport()?.targetType === 'USER' ? '👤 Perfil de Usuário' : '📝 Publicação / Conteúdo' }}
+          </span>
+          
+          <div class="preview-author-row">
+            <span>Alvo/Autor:</span>
+            <strong>{{ selectedReport()?.reportedName }}</strong>
+          </div>
+
+          <div class="preview-content-body">
+            <h5>Conteúdo Denunciado:</h5>
+            <div class="content-text-preview">
+              {{ selectedReport()?.contextContent || 'Sem descrição ou conteúdo textual.' }}
+            </div>
+            
+            <!-- Dynamic Post mockup visual inside modal -->
+            <div class="visual-post-preview-card" *ngIf="selectedReport()?.targetType !== 'USER'">
+              <div class="visual-post-header">
+                <div class="author-avatar-stub">
+                  {{ selectedReport()?.reportedName?.charAt(0) }}
+                </div>
+                <div class="author-info-stub">
+                  <strong>{{ selectedReport()?.reportedName }}</strong>
+                  <span>Membro do Campus IV</span>
+                </div>
+              </div>
+              <p class="visual-post-text">{{ selectedReport()?.contextContent }}</p>
+              <div class="visual-post-footer-stub">
+                <span class="material-symbols-rounded">thumb_up</span> <span>Curtir</span>
+                <span style="margin-left: 16px;" class="material-symbols-rounded">comment</span> <span>Comentar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn-mod-action keep" (click)="onResolveCase(selectedReport()?.id, false); closeReportPreview()">
+          Rejeitar Denúncia (Manter Conteúdo)
+        </button>
+        <button class="btn-mod-action delete" (click)="onResolveCase(selectedReport()?.id, true); closeReportPreview()">
+          Aprovar Denúncia (Remover Conteúdo)
+        </button>
+      </footer>
+    </div>
   </div>
 
-  <div class="audit-heading">
-    <div>
-      <h3>Auditoria recente</h3>
-      <p class="hint">Últimas ações relevantes de segurança, administração, pagamentos e privacidade.</p>
-    </div>
-    <button type="button" class="refresh" (click)="refresh()">Atualizar</button>
-  </div>
-  <div class="table">
-    <div class="row header"><span>Ação</span><span>Recurso</span><span>Resultado</span><span>Data</span></div>
-    <div class="row" *ngFor="let item of audits()">
-      <div><strong>{{ actionName(item.action) }}</strong><small>{{ item.action }}</small></div>
-      <div>
-        <span>{{ entityName(item.entity) }}</span>
-        <small *ngIf="item.afterValue">{{ item.afterValue }}</small>
-        <small *ngIf="item.entityId">ID: {{ item.entityId }}</small>
-      </div>
-      <span class="result" [class.ok]="item.result === 'SUCCESS'">{{ item.result === 'SUCCESS' ? 'Sucesso' : item.result }}</span>
-      <time>{{ item.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</time>
-    </div>
-    <p class="empty" *ngIf="!audits().length">Nenhum evento de auditoria registrado.</p>
-  </div>
-</section>
+</div>

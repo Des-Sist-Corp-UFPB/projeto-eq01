@@ -50,6 +50,9 @@ public class User extends AuditableEntity implements Persistable<UUID> {
     @Column(name = "stemail", nullable = false)
     private Integer emailStatus = 0;
 
+    @Column(name = "flonboarding", nullable = false)
+    private boolean onboardingCompleted = false;
+
     @Column(name = "dhlastaccess")
     private LocalDateTime lastAccessAt;
 
@@ -77,6 +80,11 @@ public class User extends AuditableEntity implements Persistable<UUID> {
 
     public void registerAccess() {
         this.lastAccessAt = LocalDateTime.now();
+    }
+
+    public void completeOnboarding(UUID updatedById) {
+        this.onboardingCompleted = true;
+        touch(updatedById);
     }
 
     public void changeRole(Role role, UUID updatedById) {

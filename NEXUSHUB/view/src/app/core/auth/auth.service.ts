@@ -6,9 +6,36 @@ import { apiUrl } from '../config/api.config';
 export interface UsuarioResponse {
   id: string;
   nome: string;
+  username?: string;
   email: string;
   cargo: string;
   fotoUrl?: string;
+  onboardingCompleted: boolean;
+  userType?: string;
+  showBirthday?: boolean;
+  bio?: string;
+  birthDate?: string;
+  genderType?: number;
+  genderOther?: string;
+  course?: string;
+  period?: string;
+  matricula?: string;
+  ingressPeriod?: number;
+  conclusionPeriod?: number;
+  whatsapp?: string;
+  githubUrl?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  websiteUrl?: string;
+  notifRecommendations?: boolean;
+  notifApplications?: boolean;
+  notifAnnouncements?: boolean;
+  notifEdicts?: boolean;
+  notifAdmin?: boolean;
+  experience?: string;
+  education?: string;
+  certification?: string;
+  technologies?: string[];
 }
 
 export interface LoginRequest {
@@ -73,10 +100,26 @@ export class AuthService {
     return this.http.post<void>(`${this.apiUrl}/esqueci-senha`, request);
   }
 
-  atualizarPerfil(id: string, usuario: AtualizarPerfilRequest): Observable<UsuarioResponse> {
+  atualizarPerfil(id: string, usuario: any): Observable<UsuarioResponse> {
     return this.http.put<UsuarioResponse>(`${this.apiUrl}/perfil/${id}`, usuario).pipe(
       tap(updatedUser => {
         this.currentUser.set(updatedUser);
+      })
+    );
+  }
+
+  completarOnboarding(id: string, onboardingData: any): Observable<UsuarioResponse> {
+    return this.http.post<UsuarioResponse>(`${this.apiUrl}/onboarding/${id}`, onboardingData).pipe(
+      tap(updatedUser => {
+        this.currentUser.set(updatedUser);
+      })
+    );
+  }
+
+  loginComGoogle(token: string): Observable<UsuarioResponse> {
+    return this.http.post<UsuarioResponse>(`${this.apiUrl}/login-google`, { token }).pipe(
+      tap(user => {
+        this.currentUser.set(user);
       })
     );
   }

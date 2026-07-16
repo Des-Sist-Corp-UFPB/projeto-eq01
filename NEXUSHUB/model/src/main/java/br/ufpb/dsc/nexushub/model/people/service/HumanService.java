@@ -8,7 +8,7 @@ public interface HumanService {
 
     Optional<Human> findById(UUID humanId);
 
-    Human updateAcademicProfile(UUID humanId, String bio, String course, Integer period, UUID updatedById);
+    Human updateAcademicProfile(UUID humanId, String bio, String course, String period, UUID updatedById);
 
     void addInterest(UUID humanId, UUID interestId, UUID updatedById);
 }

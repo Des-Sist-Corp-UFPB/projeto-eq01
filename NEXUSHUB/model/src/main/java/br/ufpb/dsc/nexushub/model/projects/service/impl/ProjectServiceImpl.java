@@ -124,7 +124,11 @@ public class ProjectServiceImpl implements ProjectService {
     public Project createProject(UUID ownerHumanId, UUID groupId, String name, String resume, String goals, Integer type, UUID updatedById) {
         Human owner = humanRepository.findById(ownerHumanId)
                 .orElseThrow(() -> new IllegalArgumentException("Responsavel do projeto nao encontrado."));
-        Group group = groupId == null ? null : groupRepository.findById(groupId).orElse(null);
+        if (groupId == null) {
+            throw new IllegalArgumentException("O projeto deve estar associado a um grupo.");
+        }
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo associado não encontrado."));
         Project project = new Project(group, owner, name, resume, goals, type == null ? 1 : type, updatedById);
         project.publish(updatedById);
         Project saved = projectRepository.save(project);

@@ -18,7 +18,11 @@ public class AdminRestController {
   User actor=actor(principal);User changed=admin.active(id,body.enabled(),actor.getId());audit(actor,"USER_STATUS",id,req,String.valueOf(body.enabled()));return UsuarioResponse.from(changed);
  }
  @PatchMapping("/usuarios/{id}/papel") public UsuarioResponse role(@PathVariable UUID id,@RequestBody RoleBody body,Principal principal,HttpServletRequest req){
-  User actor=actor(principal);User changed=admin.role(id,body.role(),actor.getId());audit(actor,"USER_ROLE",id,req,body.role());return UsuarioResponse.from(changed);
+  User actor=actor(principal);
+  if (!"ADMIN".equals(actor.getRole().getName()) && !"SYSADMIN".equals(actor.getRole().getName())) {
+      throw new org.springframework.security.access.AccessDeniedException("Apenas administradores podem alterar o cargo.");
+  }
+  User changed=admin.role(id,body.role(),actor.getId());audit(actor,"USER_ROLE",id,req,body.role());return UsuarioResponse.from(changed);
  }
  @GetMapping("/auditoria") public Page<AuditLog> audit(@RequestParam(required=false)String action,@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size){
   return audits.list(action,PageRequest.of(page,Math.min(size,100),Sort.by(Sort.Direction.DESC,"createdAt")));

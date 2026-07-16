@@ -1,11 +1,720 @@
-<section class="store-page animate-fade-in">
-  <header><span class="eyebrow">LOJA NEXUSHUB</span><h2>Apoie a comunidade acadêmica</h2><p>Pagamento seguro processado pelo Mercado Pago.</p></header>
-  <p class="notice" *ngIf="message()">{{ message() }}</p>
-  <div class="products">
-    <article class="product" *ngFor="let product of products()">
-      <h3>{{ product.name }}</h3><p>{{ product.description }}</p>
-      <strong>{{ product.price | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
-      <button class="btn btn-primary" [disabled]="loading()" (click)="buy(product)">Pagar com Mercado Pago</button>
-    </article>
+<div class="marketplace-wrapper animate-fade-in">
+  <!-- 1. HEADER SECTION -->
+  <div class="dashboard-page-header">
+    <div class="header-content">
+      <h2 class="dashboard-title">Lojinha</h2>
+      <p class="dashboard-subtitle">Compre produtos, alimentos e serviços diretamente de alunos e professores da universidade.</p>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="filter-chips" *ngIf="isLoggedIn()" style="margin-top: 16px;">
+      <button class="filter-chip" [class.active]="activeTab() === 'compra'" (click)="setTab('compra')">
+        Comprar Itens
+      </button>
+      <button class="filter-chip" [class.active]="activeTab() === 'venda'" (click)="setTab('venda')">
+        Meu Painel de Vendas
+      </button>
+    </div>
   </div>
-</section>
+
+  <!-- 2. BUYER MODE -->
+  <div *ngIf="activeTab() === 'compra'" class="buyer-section">
+    <!-- Filter bar -->
+    <div class="filter-bar card">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" placeholder="O que você está procurando hoje?" [ngModel]="filterSearch()" (ngModelChange)="filterSearch.set($event); loadProducts()" />
+      </div>
+
+      <div class="filter-dropdowns">
+        <div class="dropdown-wrapper">
+          <label>Campus</label>
+          <select [ngModel]="filterCampus()" (ngModelChange)="filterCampus.set($event); loadProducts()">
+            <option value="Todos">Todos os Campi</option>
+            <option value="Rio Tinto">Rio Tinto</option>
+            <option value="Mamanguape">Mamanguape</option>
+          </select>
+        </div>
+
+        <div class="dropdown-wrapper">
+          <label>Categoria</label>
+          <select [ngModel]="filterCategory()" (ngModelChange)="filterCategory.set($event); loadProducts()">
+            <option value="Todos">Todas as Categorias</option>
+            <option value="Alimentos">Alimentos</option>
+            <option value="Eletrônicos">Eletrônicos</option>
+            <option value="Serviços">Serviços</option>
+            <option value="Livros">Livros</option>
+            <option value="Vestuário">Vestuário</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products grid -->
+    <div class="loading-wrapper" *ngIf="loadingProducts()">
+      <div class="spinner"></div>
+      <p>Carregando anúncios do campus...</p>
+    </div>
+
+    <div class="empty-state card" *ngIf="!loadingProducts() && products().length === 0">
+      <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+      <h3>Ué, cadê os doces? 🍫</h3>
+      <p>A lojinha está mais deserta do que o campus numa sexta-feira à noite. Nenhum produto foi anunciado ainda!</p>
+    </div>
+
+    <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
+      <article class="product-card card" *ngFor="let p of products()" (click)="openPurchaseModal(p)">
+        <div class="product-badge" [class.online]="p.active" [class.offline]="!p.active">
+          {{ p.active ? 'Online' : 'Offline' }}
+        </div>
+        
+        <div class="product-image-container">
+          <img *ngIf="p.photos" [src]="p.photos.split(';')[0]" alt="{{ p.title }}" />
+          <div *ngIf="!p.photos" class="no-image-placeholder">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="product-details">
+          <span class="product-category">{{ p.category }}</span>
+          <h3 class="product-title">{{ p.title }}</h3>
+          
+          <div class="vendor-link" *ngIf="p.shopName">
+            <span class="vendor-shop-tag">Loja: {{ p.shopName }}</span>
+          </div>
+          <div class="vendor-link" *ngIf="!p.shopName">
+            <span class="vendor-profile-tag">Vendedor: {{ p.sellerName }}</span>
+          </div>
+
+          <div class="product-footer">
+            <strong class="product-price">{{ p.price | currency:'BRL' }}</strong>
+            <span class="product-location">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              {{ p.campus }}
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- 3. SELLER MODE -->
+  <div *ngIf="activeTab() === 'venda'" class="seller-section">
+    <!-- Seller Dashboard Header -->
+    <div class="seller-dashboard-header card" [style.background-image]="myShop()?.banner ? 'linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(' + myShop()?.banner + ')' : 'none'" style="background-size: cover; background-position: center; transition: background 0.3s ease;">
+      <div class="seller-shop-profile" *ngIf="myShop()">
+        <img *ngIf="myShop()?.logo" [src]="myShop()?.logo" class="shop-logo-img" alt="Logo da loja" />
+        <div *ngIf="!myShop()?.logo" class="shop-logo-placeholder">
+          {{ myShop()?.name?.substring(0,2)?.toUpperCase() }}
+        </div>
+        <div class="shop-profile-info">
+          <div class="shop-title-status">
+            <h3>{{ myShop()?.name }}</h3>
+            <span class="shop-status-badge" [class.online]="myShop()?.active">
+              {{ myShop()?.active ? 'Aberta' : 'Fechada' }}
+            </span>
+          </div>
+          <p>{{ myShop()?.description || 'Nenhuma descrição adicionada.' }}</p>
+          <span class="shop-campus-detail">
+            <span class="material-symbols-rounded font-icon-inline">pin_drop</span>
+            Campus: {{ myShop()?.campus }}
+          </span>
+        </div>
+      </div>
+
+      <div class="seller-no-shop" *ngIf="!myShop()">
+        <div class="no-shop-info">
+          <h3>Você vende de forma avulsa</h3>
+          <p>Seus produtos serão vinculados diretamente ao seu perfil pessoal acadêmico. Deseja criar uma página de loja estruturada com logotipo?</p>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="seller-actions-group">
+        <!-- Quick Online/Offline Toggle Button -->
+        <button *ngIf="myShop()" type="button" class="btn status-toggle-btn" 
+                [class.online]="myShop()?.active" [class.offline]="!myShop()?.active" 
+                (click)="quickToggleShopActive()" [disabled]="savingShop()">
+          <span class="material-symbols-rounded">
+            {{ myShop()?.active ? 'toggle_on' : 'toggle_off' }}
+          </span>
+          Lojinha: {{ myShop()?.active ? 'Online' : 'Offline' }}
+        </button>
+
+        <button class="btn btn-secondary" (click)="toggleShopSettings()" [class.active]="showShopSettings()">
+          <span class="material-symbols-rounded">settings</span>
+          {{ myShop() ? 'Configurações' : 'Estruturar Lojinha' }}
+        </button>
+        <button class="btn btn-primary" (click)="openCreateProduct()">
+          <span class="material-symbols-rounded">add_circle</span>
+          Anunciar Item
+        </button>
+      </div>
+    </div>
+
+    <!-- Inline Shop Settings Form -->
+    <div class="shop-settings-inline card animate-fade-in" *ngIf="showShopSettings() && myShop()">
+      <div class="settings-header">
+        <h4><span class="material-symbols-rounded">storefront</span> Configurações da Lojinha</h4>
+        <button class="btn-close-inline" (click)="showShopSettings.set(false)">&times;</button>
+      </div>
+
+      <form (submit)="saveShop(); $event.preventDefault()" class="inline-settings-form">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Nome da Loja *</label>
+            <input type="text" [(ngModel)]="shopFormName" name="name" required placeholder="Ex: Doces da Carol" />
+          </div>
+
+          <div class="form-group">
+            <label>Campus de Operação *</label>
+            <select [(ngModel)]="shopFormCampus" name="campus">
+              <option value="Rio Tinto">Rio Tinto</option>
+              <option value="Mamanguape">Mamanguape</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição / Informações de contato e entrega</label>
+          <textarea [(ngModel)]="shopFormDescription" name="description" rows="2" placeholder="Ex: Entregas no bloco A pela manhã. Aceito encomendas via WhatsApp..."></textarea>
+        </div>
+
+        <div class="form-grid-2 align-center">
+          <div class="form-group">
+            <label>Logotipo da Loja</label>
+            <input type="file" (change)="onLogoUpload($event)" accept="image/*" class="file-input-modern" />
+            <div class="logo-preview-inline" *ngIf="shopFormLogo">
+              <img [src]="shopFormLogo" alt="Logo preview" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Banner da Loja</label>
+            <input type="file" (change)="onBannerUpload($event)" accept="image/*" class="file-input-modern" />
+            <div class="banner-preview-inline" *ngIf="shopFormBanner" style="margin-top: 8px;">
+              <img [src]="shopFormBanner" alt="Banner preview" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Locations Selection -->
+        <div class="form-group" style="margin-top: 15px;">
+          <label style="font-weight: 700; color: var(--color-text);">Pontos de Encontro Atendidos no Campus *</label>
+          <div class="meeting-locations-checkboxes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+            <label *ngFor="let loc of getMeetLocationsForCampus(shopFormCampus)" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--color-text); cursor: pointer;">
+              <input type="checkbox" [checked]="isLocationSelected(loc)" (change)="toggleLocationSelection(loc)" />
+              {{ loc }}
+            </label>
+          </div>
+          
+          <div class="custom-location-add" style="display: flex; gap: 8px; margin-top: 12px;">
+            <input type="text" [(ngModel)]="customLocationInput" name="customLocationInput" placeholder="Outro local personalizado..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px;" />
+            <button type="button" class="btn btn-secondary" style="padding: 8px 16px;" (click)="addCustomLocation()">Adicionar</button>
+          </div>
+
+          <!-- Selected Locations Summary Chips -->
+          <div class="selected-locations-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+            <span *ngFor="let selLoc of getSelectedLocationsList()" class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              {{ selLoc }}
+              <button type="button" (click)="toggleLocationSelection(selLoc)" style="background: none; border: none; padding: 0; color: #1d4ed8; font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1;">&times;</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group-modern" style="margin-top: 15px;">
+          <label class="toggle-container-modern">
+            <input type="checkbox" [(ngModel)]="shopFormActive" name="active" />
+            <span class="checkmark-modern"></span>
+            Lojinha está aberta para receber pedidos (Online)
+          </label>
+        </div>
+
+        <div class="settings-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="savingShop()">
+            {{ savingShop() ? 'Salvando...' : 'Salvar Alterações' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="showShopSettings.set(false)">Fechar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Seller Metrics Dashboard (6 Cards) -->
+    <div class="seller-metrics-grid">
+      
+      <div class="metric-card card">
+        <div class="metric-icon-box blue">
+          <span class="material-symbols-rounded">inventory</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Anúncios Ativos</span>
+          <strong class="metric-value">{{ totalAds() }} un.</strong>
+        </div>
+      </div>
+
+      <div class="metric-card card">
+        <div class="metric-icon-box purple">
+          <span class="material-symbols-rounded">visibility</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Visualizações de Itens</span>
+          <strong class="metric-value">{{ totalViews() }} views</strong>
+        </div>
+      </div>
+
+      <div class="metric-card card">
+        <div class="metric-icon-box orange">
+          <span class="material-symbols-rounded">ads_click</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Intenções de Compra</span>
+          <strong class="metric-value">{{ totalClicks() }} cliques</strong>
+        </div>
+      </div>
+
+      <div class="metric-card card">
+        <div class="metric-icon-box teal">
+          <span class="material-symbols-rounded">percent</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Taxa de Conversão</span>
+          <strong class="metric-value">{{ conversionRate() }}%</strong>
+        </div>
+      </div>
+
+      <div class="metric-card card">
+        <div class="metric-icon-box gold">
+          <span class="material-symbols-rounded">attach_money</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Preço Médio</span>
+          <strong class="metric-value">{{ averagePrice() | currency:'BRL' }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card card">
+        <div class="metric-icon-box green">
+          <span class="material-symbols-rounded">layers</span>
+        </div>
+        <div class="metric-info-box">
+          <span class="metric-label">Estoque Total</span>
+          <strong class="metric-value">{{ totalStock() }} un.</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Seller products list -->
+    <div class="seller-products-section card">
+      <div class="section-header-title">
+        <h3>Meus Produtos Cadastrados</h3>
+      </div>
+
+      <div class="loading-wrapper" *ngIf="loadingSellerData()">
+        <div class="spinner"></div>
+        <p>Carregando inventário...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingSellerData() && myProducts().length === 0">
+        <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h4>Sua prateleira está pegando poeira! 🕸️</h4>
+        <p>Você ainda não cadastrou nenhum produto. Que tal começar a vender aquele bolo de pote maravilhoso ou aquele resumo salvador de vidas?</p>
+      </div>
+
+      <div class="seller-table-container" *ngIf="!loadingSellerData() && myProducts().length > 0">
+        <table class="seller-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Preço</th>
+              <th>Estoque</th>
+              <th>Métricas</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of myProducts()">
+              <td>
+                <div class="table-product-cell">
+                  <img *ngIf="p.photos" [src]="p.photos.split(';')[0]" class="table-product-thumb" alt="Miniatura do produto" />
+                  <div *ngIf="!p.photos" class="table-product-thumb-placeholder"></div>
+                  <div class="table-product-info">
+                    <span class="table-product-title">{{ p.title }}</span>
+                    <span class="table-product-category">{{ p.category }} - {{ p.campus }}</span>
+                  </div>
+                </div>
+              </td>
+              <td><strong>{{ p.price | currency:'BRL' }}</strong></td>
+              <td>{{ p.stock }} un.</td>
+              <td>
+                <div class="table-metrics">
+                  <span><span class="material-symbols-rounded" style="font-size:14px;color:#7c3aed">visibility</span> {{ p.views }}</span>
+                  <span><span class="material-symbols-rounded" style="font-size:14px;color:#f97316">ads_click</span> {{ p.clicks }}</span>
+                </div>
+              </td>
+              <td>
+                <button class="status-toggle-btn" [class.online]="p.active" (click)="toggleProductActive(p)">
+                  {{ p.active ? 'Online' : 'Offline' }}
+                </button>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn edit" (click)="openEditProduct(p)" aria-label="Editar">
+                    <span class="material-symbols-rounded">edit</span>
+                  </button>
+                  <button class="action-btn delete" (click)="deleteProduct(p.id)" aria-label="Deletar">
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODALS -->
+
+  <!-- BUYER: PURCHASE MODAL -->
+  <div class="modal-backdrop" *ngIf="showPurchaseModal()">
+    <div class="modal-card product-detail-modal">
+      <header class="modal-header">
+        <h3>Detalhes do Produto</h3>
+        <button class="modal-close-btn" (click)="closePurchaseModal()">&times;</button>
+      </header>
+
+      <div class="modal-body product-detail-content" *ngIf="selectedProduct() as product">
+        <!-- Photo carousel -->
+        <div class="modal-product-gallery">
+          <img *ngIf="product.photos" [src]="product.photos.split(';')[0]" class="gallery-main-img" alt="Foto do produto" />
+          <div *ngIf="!product.photos" class="gallery-placeholder">
+            Sem Foto
+          </div>
+        </div>
+
+        <!-- Info details -->
+        <div class="modal-product-info">
+          <span class="info-category">{{ product.category }} - Campus {{ product.campus }}</span>
+          <h2>{{ product.title }}</h2>
+          <strong class="info-price">{{ product.price | currency:'BRL' }}</strong>
+          
+          <p class="info-description">{{ product.description || 'Nenhuma descrição adicionada.' }}</p>
+
+          <div class="vendor-box card">
+            <span class="vendor-box-title">Dados do Vendedor</span>
+            <strong class="vendor-box-name">{{ product.sellerName }}</strong>
+            <span class="vendor-box-origin" *ngIf="product.shopName">Loja: {{ product.shopName }}</span>
+          </div>
+
+          <!-- Checkout Form -->
+          <div class="checkout-form card" *ngIf="product.active">
+            <h4>Selecione os Detalhes da Compra</h4>
+            
+            <div class="form-group">
+              <label>Quantidade (Estoque: {{ product.stock }})</label>
+              <div class="quantity-selector">
+                <button (click)="purchaseQuantity = purchaseQuantity > 1 ? purchaseQuantity - 1 : 1">-</button>
+                <span>{{ purchaseQuantity }}</span>
+                <button (click)="purchaseQuantity = purchaseQuantity < product.stock ? purchaseQuantity + 1 : product.stock">+</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="purchase-location">Local de Encontro Selecionado *</label>
+              <select id="purchase-location" [(ngModel)]="purchaseLocation">
+                <option value="" disabled selected>Escolha onde retirar</option>
+                <option *ngFor="let loc of getMeetingLocationsForProduct(product)" [value]="loc">
+                  {{ loc }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Forma de Pagamento</label>
+              <div class="payment-methods-selector">
+                <label class="radio-label">
+                  <input type="radio" name="paymethod" value="Pix" [(ngModel)]="purchasePaymentMethod" />
+                  Pix
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="paymethod" value="Dinheiro" [(ngModel)]="purchasePaymentMethod" />
+                  Dinheiro / Presencial
+                </label>
+              </div>
+            </div>
+
+            <!-- Pix copy key area -->
+            <div class="pix-key-area card" *ngIf="purchasePaymentMethod === 'Pix' && product.pixKey">
+              <span class="pix-label">Chave Pix do Vendedor:</span>
+              <div class="pix-key-row">
+                <code>{{ product.pixKey }}</code>
+                <button class="btn btn-secondary btn-sm" (click)="copyPixKey()">Copiar Chave</button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100 mt-3" (click)="checkoutWhatsApp()">
+              Solicitar Compra via WhatsApp
+            </button>
+          </div>
+
+          <div class="product-offline-warning" *ngIf="!product.active">
+            ⚠️ Este produto ou vendedor está offline no momento. Compras estão desabilitadas.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELLER: SHOP CREATION/EDITION MODAL -->
+  <div class="modal-backdrop" *ngIf="showShopModal()">
+    <div class="modal-card">
+      <header class="modal-header">
+        <h3>Configurações da Minha Lojinha</h3>
+        <button class="modal-close-btn" (click)="closeShopModal()">&times;</button>
+      </header>
+
+      <form (submit)="saveShop(); $event.preventDefault()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="shop-name">Nome da Loja *</label>
+            <input type="text" id="shop-name" [(ngModel)]="shopFormName" name="name" required placeholder="Ex: Pastelaria do Campus" />
+          </div>
+
+          <div class="form-group">
+            <label for="shop-desc">Descrição / Biografia</label>
+            <textarea id="shop-desc" [(ngModel)]="shopFormDescription" name="description" rows="3" placeholder="Fale sobre seus produtos, horários de entrega..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="shop-campus">Campus de Operação *</label>
+            <select id="shop-campus" [(ngModel)]="shopFormCampus" name="campus">
+              <option value="Rio Tinto">Rio Tinto</option>
+              <option value="Mamanguape">Mamanguape</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="shop-logo">Logotipo da Loja (Upload de imagem)</label>
+            <input type="file" id="shop-logo" (change)="onLogoUpload($event)" accept="image/*" />
+            <div class="logo-preview-container" *ngIf="shopFormLogo">
+              <img [src]="shopFormLogo" class="uploaded-logo-preview" alt="Prévia da logo" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="shop-banner">Banner da Loja (Upload de imagem)</label>
+            <input type="file" id="shop-banner" (change)="onBannerUpload($event)" accept="image/*" />
+            <div class="banner-preview-container" *ngIf="shopFormBanner" style="margin-top: 8px;">
+              <img [src]="shopFormBanner" class="uploaded-banner-preview" alt="Prévia do banner" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px;" />
+            </div>
+          </div>
+
+          <!-- Locations Selection -->
+          <div class="form-group" style="margin-top: 15px;">
+            <label style="font-weight: 700; color: var(--color-text);">Pontos de Encontro Atendidos no Campus *</label>
+            <div class="meeting-locations-checkboxes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+              <label *ngFor="let loc of getMeetLocationsForCampus(shopFormCampus)" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--color-text); cursor: pointer;">
+                <input type="checkbox" [checked]="isLocationSelected(loc)" (change)="toggleLocationSelection(loc)" />
+                {{ loc }}
+              </label>
+            </div>
+            
+            <div class="custom-location-add" style="display: flex; gap: 8px; margin-top: 12px;">
+              <input type="text" [(ngModel)]="customLocationInput" name="customLocationInput" placeholder="Outro local personalizado..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px;" />
+              <button type="button" class="btn btn-secondary" style="padding: 8px 16px;" (click)="addCustomLocation()">Adicionar</button>
+            </div>
+
+            <!-- Selected Locations Summary Chips -->
+            <div class="selected-locations-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+              <span *ngFor="let selLoc of getSelectedLocationsList()" class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                {{ selLoc }}
+                <button type="button" (click)="toggleLocationSelection(selLoc)" style="background: none; border: none; padding: 0; color: #1d4ed8; font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1;">&times;</button>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" [(ngModel)]="shopFormActive" name="active" />
+              Lojinha está aberta para receber pedidos (Online)
+            </label>
+          </div>
+
+          <!-- Terms of Use Acceptance -->
+          <div class="form-group terms-acceptance-wrapper" *ngIf="!myShop()" style="border-top: 1px dashed var(--color-border); padding-top: 16px; margin-top: 16px;">
+            <div class="terms-text-box" style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; font-size: 12px; color: var(--color-muted); max-height: 100px; overflow-y: auto; margin-bottom: 10px;">
+              <strong>Termos de Uso do Marketplace Acadêmico (NexusHub)</strong>
+              <p>Ao ativar sua lojinha no NexusHub, você concorda que:</p>
+              <ul>
+                <li>Todas as negociações de venda, entrega e pagamento são de inteira responsabilidade do vendedor e do comprador.</li>
+                <li>Não é permitida a venda de itens ilícitos, drogas, bebidas alcoólicas, armas, ou qualquer outro produto que viole as regras do regimento acadêmico.</li>
+                <li>Você concorda em fornecer informações verídicas e manter o estoque de seus produtos atualizado.</li>
+              </ul>
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--color-text); cursor: pointer;">
+              <input type="checkbox" [(ngModel)]="termsAccepted" name="termsAccepted" required />
+              Li e concordo com os Termos de Uso do Campus
+            </label>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeShopModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="savingShop() || (!myShop() && !termsAccepted)">
+            {{ savingShop() ? 'Salvando...' : 'Salvar Loja' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- SELLER: PRODUCT CREATION/EDITION MODAL -->
+  <div class="modal-backdrop" *ngIf="showProductModal()">
+    <div class="modal-card large-modal">
+      <header class="modal-header">
+        <h3>{{ editingProductId() ? 'Editar Anúncio' : 'Novo Anúncio' }}</h3>
+        <button class="modal-close-btn" (click)="closeProductModal()">&times;</button>
+      </header>
+
+      <form (submit)="saveProduct(); $event.preventDefault()">
+        <div class="modal-body">
+          <div class="modal-body-split">
+            <!-- Form Side -->
+            <div class="form-side">
+              <div class="form-group">
+                <label for="prod-title">Título do Anúncio *</label>
+                <input type="text" id="prod-title" [(ngModel)]="productFormTitle" name="title" required placeholder="Ex: Bolo de Pote de Chocolate" />
+              </div>
+
+              <div class="form-group">
+                <label for="prod-desc">Descrição Detalhada</label>
+                <textarea id="prod-desc" [(ngModel)]="productFormDescription" name="description" rows="2" placeholder="Ingredientes, tamanho, peso..."></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prod-category">Categoria *</label>
+                  <select id="prod-category" [(ngModel)]="productFormCategory" name="category">
+                    <option value="Alimentos">Alimentos</option>
+                    <option value="Eletrônicos">Eletrônicos</option>
+                    <option value="Serviços">Serviços</option>
+                    <option value="Livros">Livros</option>
+                    <option value="Vestuário">Vestuário</option>
+                    <option value="Outros">Outros</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="prod-campus">Campus de Entrega *</label>
+                  <select id="prod-campus" [(ngModel)]="productFormCampus" name="campus">
+                    <option value="Rio Tinto">Rio Tinto</option>
+                    <option value="Mamanguape">Mamanguape</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prod-price">Preço R$ *</label>
+                  <input type="number" id="prod-price" [(ngModel)]="productFormPrice" name="price" required step="0.01" min="0.05" placeholder="Ex: 5.50" />
+                </div>
+
+                <div class="form-group">
+                  <label for="prod-stock">Estoque Inicial un. *</label>
+                  <input type="number" id="prod-stock" [(ngModel)]="productFormStock" name="stock" required min="1" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="prod-pay">Métodos de Pagamento Aceitos</label>
+                <select id="prod-pay" [(ngModel)]="productFormPaymentMethods" name="paymentMethods">
+                  <option value="Pix">Apenas Pix</option>
+                  <option value="Dinheiro">Apenas Dinheiro / Presencial</option>
+                  <option value="Pix; Dinheiro">Pix e Dinheiro</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="productFormPaymentMethods.includes('Pix')">
+                <label for="prod-pix">Chave Pix para Recebimento *</label>
+                <input type="text" id="prod-pix" [(ngModel)]="productFormPixKey" name="pixKey" placeholder="E-mail, celular, CPF ou chave aleatória" />
+              </div>
+
+              <div class="form-group">
+                <label for="prod-locs">Locais de Encontro Comuns</label>
+                <input type="text" id="prod-locs" [(ngModel)]="productFormMeetLocations" name="meetLocations" placeholder="Ex: Cantina do Bloco A; Estacionamento Central" />
+              </div>
+
+              <div class="form-group">
+                <label for="prod-photos">Fotos do Produto (Upload)</label>
+                <input type="file" id="prod-photos" (change)="onProductPhotosUpload($event)" accept="image/*" multiple />
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label>
+                  <input type="checkbox" [(ngModel)]="productFormActive" name="active" />
+                  Anúncio está visível para compradores (Online)
+                </label>
+              </div>
+            </div>
+
+            <!-- Preview Side -->
+            <div class="preview-side">
+              <h4>Pré-visualização do Anúncio</h4>
+              <div class="preview-card-wrapper-shop">
+                <article class="product-card card">
+                  <div class="product-badge" [class.online]="productFormActive" [class.offline]="!productFormActive">
+                    {{ productFormActive ? 'Online' : 'Offline' }}
+                  </div>
+                  
+                  <div class="product-image-container">
+                    <img *ngIf="productFormPhotos" [src]="productFormPhotos.split(';')[0]" alt="Foto do produto" />
+                    <div *ngIf="!productFormPhotos" class="no-image-placeholder">
+                      <span class="material-symbols-rounded">image</span>
+                    </div>
+                  </div>
+
+                  <div class="product-details">
+                    <span class="product-category">{{ productFormCategory || 'Categoria' }}</span>
+                    <h3 class="product-title">{{ productFormTitle || 'Título do Produto' }}</h3>
+                    
+                    <div class="vendor-link">
+                      <span class="vendor-profile-tag">Vendedor: {{ currentUser()?.nome || 'Você' }}</span>
+                    </div>
+
+                    <div class="product-footer">
+                      <strong class="product-price">{{ (productFormPrice || 0) | currency:'BRL' }}</strong>
+                      <span class="product-location">
+                        <span class="material-symbols-rounded" style="font-size: 14px; vertical-align: middle; margin-right: 2px;">location_on</span>
+                        {{ productFormCampus || 'Campus' }}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeProductModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="savingProduct()">
+            {{ savingProduct() ? 'Enviando...' : 'Publicar Anúncio' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>

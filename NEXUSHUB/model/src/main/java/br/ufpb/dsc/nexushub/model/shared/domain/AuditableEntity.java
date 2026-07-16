@@ -19,12 +19,12 @@ public abstract class AuditableEntity {
     @Column(name = "tsupdated", nullable = false)
     protected LocalDateTime updatedAt = LocalDateTime.now();
 
-    protected void touch(UUID updatedById) {
+    public void touch(UUID updatedById) {
         this.updatedById = updatedById;
         this.updatedAt = LocalDateTime.now();
     }
 
-    protected void deactivate(UUID updatedById) {
+    public void deactivate(UUID updatedById) {
         this.recordStatus = 0;
         touch(updatedById);
     }

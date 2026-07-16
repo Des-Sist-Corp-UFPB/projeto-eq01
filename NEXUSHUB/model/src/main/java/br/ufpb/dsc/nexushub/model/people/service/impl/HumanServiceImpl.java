@@ -37,7 +37,7 @@ public class HumanServiceImpl implements HumanService {
 
     @Override
     @Transactional
-    public Human updateAcademicProfile(UUID humanId, String bio, String course, Integer period, UUID updatedById) {
+    public Human updateAcademicProfile(UUID humanId, String bio, String course, String period, UUID updatedById) {
         Human human = humanRepository.findById(humanId)
                 .orElseThrow(() -> new IllegalArgumentException("Pessoa nao encontrada."));
         human.updateProfile(human.getName(), human.getEmail(), bio, course, period, updatedById);

@@ -20,6 +20,10 @@ export class AppComponent implements OnInit {
   protected readonly isMobileMenuOpen = signal(false);
   protected readonly isDarkMode = signal(false);
 
+  isAdminRoute() {
+    return this.router.url.includes('/admin');
+  }
+
   ngOnInit() {
     this.applyTheme();
     

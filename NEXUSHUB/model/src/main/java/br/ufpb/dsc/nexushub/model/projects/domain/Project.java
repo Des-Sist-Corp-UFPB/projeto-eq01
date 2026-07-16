@@ -31,8 +31,8 @@ public class Project extends AuditableEntity {
     @EqualsAndHashCode.Include
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "idgroup")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idgroup", nullable = false)
     private Group group;
 
     @ManyToOne
@@ -70,6 +70,9 @@ public class Project extends AuditableEntity {
     private Integer points = 0;
 
     public Project(Group group, Human owner, String name, String resume, String goals, Integer type, UUID updatedById) {
+        if (group == null) {
+            throw new IllegalArgumentException("O projeto deve estar associado a um grupo.");
+        }
         this.group = group;
         this.owner = owner;
         this.name = name;

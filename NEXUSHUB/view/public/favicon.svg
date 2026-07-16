@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%">
+  <defs>
+    <linearGradient id="darkModeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="24" height="24" rx="6" fill="#0f172a" />
+  <!-- Crescent Moon -->
+  <path d="M12.3 4.9c-.4-.1-.7.3-.5.7C12.8 7.3 14 9.1 14 11c0 3.3-2.7 6-6 6-.7 0-1.4-.1-2-.4-.4-.2-.8.2-.6.6 1.8 3 5 4.8 8.6 4.8 5.5 0 10-4.5 10-10 0-4.3-2.7-8.1-6.7-7.1z" 
+        fill="url(#darkModeGrad)" filter="url(#glow)"/>
+</svg>
