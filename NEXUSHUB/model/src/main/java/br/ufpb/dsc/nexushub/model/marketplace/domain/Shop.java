@@ -43,12 +43,20 @@ public class Shop extends AuditableEntity {
     @Column(name = "dsmeetlocations", columnDefinition = "TEXT")
     private String meetLocations;
 
-    public void update(String name, String description, String logo, String banner, String meetLocations, String campus, boolean active, UUID updatedById) {
+    @Column(name = "dspaymentmethods", length = 100)
+    private String paymentMethods;
+
+    @Column(name = "dspixkey", length = 255)
+    private String pixKey;
+
+    public void update(String name, String description, String logo, String banner, String meetLocations, String paymentMethods, String pixKey, String campus, boolean active, UUID updatedById) {
         this.name = name;
         this.description = description;
         this.logo = logo;
         this.banner = banner;
         this.meetLocations = meetLocations;
+        this.paymentMethods = paymentMethods;
+        this.pixKey = pixKey;
         this.campus = campus;
         this.active = active;
         touch(updatedById);

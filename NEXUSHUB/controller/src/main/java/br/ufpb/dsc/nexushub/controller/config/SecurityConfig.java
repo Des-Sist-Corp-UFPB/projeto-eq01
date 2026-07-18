@@ -60,9 +60,9 @@ public class SecurityConfig {
                         "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .requestMatchers("/login", "/cadastro", "/esqueci-senha", "/perfil",
                         "/projetos/**", "/grupos", "/grupos/**", "/loja", "/admin",
-                        "/privacidade").permitAll()
+                        "/privacidade", "/pessoas").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/projetos/**", "/api/grupos/**",
-                        "/api/oportunidades/**").permitAll()
+                        "/api/oportunidades/**", "/api/usuarios/comunidade").permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SYSADMIN")
                 .anyRequest().authenticated()
             )

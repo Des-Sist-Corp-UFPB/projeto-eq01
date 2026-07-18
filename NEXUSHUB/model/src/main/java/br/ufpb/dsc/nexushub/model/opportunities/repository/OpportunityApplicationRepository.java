@@ -13,4 +13,6 @@ public interface OpportunityApplicationRepository extends JpaRepository<Opportun
     List<OpportunityApplication> findByOpportunity(Opportunity opportunity);
 
     Optional<OpportunityApplication> findByOpportunityAndHuman(Opportunity opportunity, Human human);
+
+    List<OpportunityApplication> findByOpportunityIdAndRecordStatus(UUID opportunityId, Integer recordStatus);
 }

@@ -97,13 +97,25 @@ public class DataSeeder implements CommandLineRunner {
                 500
         ));
 
-        opportunityService.createOpportunity(
-                john.getHuman().getId(),
-                innovationLab.getId(),
-                mapProject.getId(),
+        var oppReq = new br.ufpb.dsc.nexushub.model.dto.OportunidadeCadastroRequest(
                 "Selecao de membros para projeto piloto",
                 "Chamada para estudantes interessados em testar e evoluir o NEXUS HUB.",
                 4,
+                innovationLab.getId(),
+                mapProject.getId(),
+                1, // tagType = EDITAL
+                false, // paid
+                null, // remuneration
+                false, // useForm
+                null, // contactPhone
+                null, // deadline
+                null, // applyUrl
+                null // questions
+        );
+
+        opportunityService.createOpportunity(
+                john.getHuman().getId(),
+                oppReq,
                 john.getId()
         );
 
@@ -114,6 +126,8 @@ public class DataSeeder implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1544816155-12df9643f363?w=150",
                 null,
                 "Cantina; Auditório; Biblioteca",
+                "PIX; Dinheiro",
+                "rodrigo@nexushub.com",
                 "Campus I",
                 true
         );
@@ -126,6 +140,8 @@ public class DataSeeder implements CommandLineRunner {
                 "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=150",
                 "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
                 "Laboratórios; Biblioteca; RU",
+                "PIX; Cartão",
+                "john@nexushub.com",
                 "Rio Tinto",
                 true
         );

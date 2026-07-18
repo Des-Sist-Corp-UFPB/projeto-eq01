@@ -1,7 +1,17 @@
 <div class="onboarding-container animate-fade-in">
   <div class="onboarding-card">
     <header class="onboarding-header">
-      <img src="logo-icon-light.png" alt="NexusHub Logo" class="logo-svg" style="width: 48px; height: 48px; object-fit: contain;" />
+      <svg class="nexus-logo-svg logo-svg" viewBox="0 0 1024 1024" style="width: 48px; height: 48px; object-fit: contain;">
+        <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+        <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+      </svg>
       <h2>Boas-vindas ao NEXUS<span>HUB</span>!</h2>
       <p>Antes de navegar pela plataforma, precisamos completar o seu cadastro básico.</p>
     </header>
@@ -19,18 +29,18 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="birthDate">Data de Nascimento *</label>
-          <input type="date" id="birthDate" name="birthDate" [(ngModel)]="birthDate" required #birthInput="ngModel" />
-          <span class="error-msg" *ngIf="birthInput.invalid && birthInput.touched">A data de nascimento é obrigatória.</span>
+          <label for="birthDate">Data de Aniversário *</label>
+          <input type="text" id="birthDate" name="birthDate" [(ngModel)]="birthDateInput" (input)="onBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" required #birthInput="ngModel" />
+          <span class="error-msg" *ngIf="birthInput.invalid && birthInput.touched">A data de aniversário é obrigatória (use DD/MM/AAAA).</span>
         </div>
 
         <div class="form-group toggle-group">
           <label class="toggle-container">
             <input type="checkbox" name="showBirthday" [(ngModel)]="showBirthday" />
             <span class="checkmark"></span>
-            Mostrar data de nascimento no perfil
+            Mostrar data de aniversário no perfil
           </label>
-          <span class="info-text">Se desativado, o ano de nascimento ficará oculto para terceiros.</span>
+          <span class="info-text">Se desativado, o ano do seu aniversário ficará oculto para terceiros.</span>
         </div>
       </div>
 

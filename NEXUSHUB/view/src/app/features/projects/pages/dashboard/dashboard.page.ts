@@ -8,6 +8,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
 import { NewProjectModalComponent } from '../../../../shared/components/new-project-modal/new-project-modal.component';
 import { ProjectCardComponent } from '../../../../shared/components/project-card/project-card.component';
+import { LoginPageComponent } from '../../../auth/pages/login/login.page';
 import { apiUrl } from '../../../../core/config/api.config';
 import { ToastService } from '../../../../core/services/toast.service';
 import { GrupoService, Grupo } from '../../../groups/services/grupo.service';
@@ -41,7 +42,7 @@ export interface FeedPost {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, RouterLink, NewProjectModalComponent, ProjectCardComponent],
+  imports: [CommonModule, FormsModule, RouterModule, RouterLink, NewProjectModalComponent, ProjectCardComponent, LoginPageComponent],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.css'
 })
@@ -370,6 +371,7 @@ export class DashboardPageComponent implements OnInit {
   }
 
   protected getGroupGradient(name: string): string {
+    if (!name) return 'linear-gradient(135deg, #64748b 0%, #475569 100%)';
     const gradients = [
       'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', // Blue
       'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)', // Purple

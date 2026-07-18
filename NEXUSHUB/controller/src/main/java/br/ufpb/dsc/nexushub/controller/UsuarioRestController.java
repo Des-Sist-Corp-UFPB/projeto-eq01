@@ -40,6 +40,8 @@ public class UsuarioRestController {
     private final br.ufpb.dsc.nexushub.model.people.repository.FollowRepository followRepository;
     private final br.ufpb.dsc.nexushub.model.people.repository.NotificationRepository notificationRepository;
     private final br.ufpb.dsc.nexushub.model.privacy.service.PrivacyService privacyService;
+    private final br.ufpb.dsc.nexushub.model.people.repository.HumanRepository humanRepository;
+    private final br.ufpb.dsc.nexushub.model.projects.repository.ProjectHumanMemberRepository projectHumanMemberRepository;
     private final String googleClientId;
 
     public UsuarioRestController(IdentityService identityService, AuditService auditService, 
@@ -49,6 +51,8 @@ public class UsuarioRestController {
                                  br.ufpb.dsc.nexushub.model.people.repository.FollowRepository followRepository,
                                  br.ufpb.dsc.nexushub.model.people.repository.NotificationRepository notificationRepository,
                                  br.ufpb.dsc.nexushub.model.privacy.service.PrivacyService privacyService,
+                                 br.ufpb.dsc.nexushub.model.people.repository.HumanRepository humanRepository,
+                                 br.ufpb.dsc.nexushub.model.projects.repository.ProjectHumanMemberRepository projectHumanMemberRepository,
                                  @Value("${app.google.client-id}") String googleClientId) {
         this.identityService = identityService;
         this.auditService = auditService;
@@ -58,6 +62,8 @@ public class UsuarioRestController {
         this.followRepository = followRepository;
         this.notificationRepository = notificationRepository;
         this.privacyService = privacyService;
+        this.humanRepository = humanRepository;
+        this.projectHumanMemberRepository = projectHumanMemberRepository;
         this.googleClientId = googleClientId;
     }
 
@@ -208,6 +214,51 @@ public class UsuarioRestController {
                 .map(br.ufpb.dsc.nexushub.model.people.domain.Technology::getName)
                 .toList();
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/comunidade")
+    public ResponseEntity<List<br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse>> listarComunidade(java.security.Principal principal) {
+        UUID currentHumanId = null;
+        if (principal != null) {
+            User currentUser = identityService.findByEmail(principal.getName());
+            if (currentUser != null && currentUser.getHuman() != null) {
+                currentHumanId = currentUser.getHuman().getId();
+            }
+        }
+
+        final UUID loggedInHumanId = currentHumanId;
+
+        List<br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse> result = humanRepository.findAll().stream()
+            .map(h -> {
+                br.ufpb.dsc.nexushub.model.identity.domain.User u = identityService.findByUsername(h.getUsername());
+                if (u == null || !u.isOnboardingCompleted()) return null;
+
+                long projetosCount = projectHumanMemberRepository.countByHumanId(h.getId());
+                long seguidoresCount = followRepository.countByFollowingId(h.getId());
+                boolean isFollowing = false;
+                if (loggedInHumanId != null) {
+                    isFollowing = followRepository.existsByFollowerIdAndFollowingId(loggedInHumanId, h.getId());
+                }
+                
+                String cargo = u.getRole() != null ? u.getRole().getName() : "USER";
+                return new br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse(
+                        h.getId(),
+                        h.getName(),
+                        h.getUsername(),
+                        cargo,
+                        h.getUserType(),
+                        h.getPhotoUrl(),
+                        h.getCourse(),
+                        h.getPeriod(),
+                        projetosCount,
+                        seguidoresCount,
+                        isFollowing
+                );
+            })
+            .filter(java.util.Objects::nonNull)
+            .toList();
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/username/{username}")

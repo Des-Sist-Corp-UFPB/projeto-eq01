@@ -1,12 +1,21 @@
 <div class="app-layout" [class.logged-in-layout]="isLoggedIn()">
   
   <!-- 1. HEADER (Only for Guests / Public Landing Page) -->
-  <header class="main-header animate-fade-in" *ngIf="!isLoggedIn()">
+  <header class="main-header animate-fade-in" *ngIf="!isLoggedIn() && !isHomeRoute()">
     <div class="header-container">
       <a class="brand" routerLink="/" (click)="closeMobileMenu()">
         <div class="brand-logo-wrapper">
-          <img src="logo-icon-light.png" alt="NexusHub Logo" class="brand-logo logo-light-theme" />
-          <img src="logo-icon-dark.png" alt="NexusHub Logo" class="brand-logo logo-dark-theme" />
+          <svg class="nexus-logo-svg brand-logo" viewBox="0 0 1024 1024">
+            <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+            <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+          </svg>
         </div>
         <h1>NEXUS<span>HUB</span></h1>
       </a>
@@ -22,6 +31,13 @@
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">
             Início
           </a>
+          <!-- Added dynamically for authenticated users, but if it's here we can add it -->
+          <ng-container *ngIf="isLoggedIn()">
+            <a routerLink="/projetos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Projetos</a>
+            <a routerLink="/pessoas" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Pessoas</a>
+            <a routerLink="/grupos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Grupos</a>
+            <a routerLink="/oportunidades" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Editais</a>
+          </ng-container>
         </nav>
 
         <div class="header-actions">
@@ -62,7 +78,17 @@
       <!-- DEFAULT BRAND LOGO (NON-ADMIN ROUTES) -->
       <a class="brand" routerLink="/" (click)="closeMobileMenu()" *ngIf="!isAdminRoute()">
         <div class="brand-logo-wrapper">
-          <img src="logo-icon-light.png" alt="NexusHub Logo" class="brand-logo" />
+          <svg class="nexus-logo-svg brand-logo" viewBox="0 0 1024 1024">
+            <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+            <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+          </svg>
         </div>
         <h1>NEXUS<span>HUB</span></h1>
       </a>
@@ -91,6 +117,12 @@
             <span>Projetos</span>
           </a>
 
+          <!-- Pessoas -->
+          <a routerLink="/pessoas" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">group</span>
+            <span>Pessoas</span>
+          </a>
+
           <!-- Grupos -->
           <a routerLink="/grupos" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
             <span class="material-symbols-rounded nav-icon">groups</span>
@@ -101,6 +133,12 @@
           <a routerLink="/loja" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
             <span class="material-symbols-rounded nav-icon">storefront</span>
             <span>Loja</span>
+          </a>
+
+          <!-- Oportunidades -->
+          <a routerLink="/oportunidades" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">campaign</span>
+            <span>Oportunidades</span>
           </a>
 
           <!-- Admin -->
@@ -196,14 +234,5 @@
   </main>
 
   <!-- 5. FOOTER (Only for Guests) -->
-  <footer class="app-footer" *ngIf="!isLoggedIn()">
-    <div class="footer-container">
-      <p>&copy; 2026 NEXUS HUB. Desenvolvido para a UFPB.</p>
-      <div class="footer-links">
-        <a routerLink="/privacidade">Termos de Privacidade e Uso</a>
-        <a href="#">Sobre a plataforma</a>
-        <a href="#">Contato</a>
-      </div>
-    </div>
-  </footer>
+  <app-footer *ngIf="!isLoggedIn()"></app-footer>
 </div>

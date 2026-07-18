@@ -1,0 +1,160 @@
+.pessoas-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Action bar */
+.action-bar-pessoas {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters-container select {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Grid */
+.pessoas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+/* Card */
+.pessoa-card {
+  background-color: #1a2233; /* Dark mode strictly based on the screenshot */
+  border: 1px solid #2a3449;
+  border-radius: 12px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #ffffff;
+}
+
+body.dark-mode .pessoa-card {
+  background-color: #1a2233;
+  border-color: #2a3449;
+}
+
+.pessoa-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.pessoa-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border: 2px solid #2a3449;
+}
+
+.pessoa-nome {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #eaf1fb;
+}
+
+.pessoa-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge-role {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.badge-role.PROFESSOR {
+  background-color: #7c3aed;
+  color: #fff;
+}
+.badge-role.STUDENT, .badge-role.USER {
+  background-color: #3b82f6;
+  color: #fff;
+  opacity: 0.8;
+}
+.badge-role.TECNICO, .badge-role.ADMIN, .badge-role.SYSADMIN {
+  background-color: #64748b;
+  color: #fff;
+}
+
+.badge-stats {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.pessoa-course {
+  margin-bottom: 16px;
+}
+
+.badge-course {
+  display: inline-block;
+  background-color: #dc2626; /* SI red badge */
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+
+.badge-period {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.pessoa-footer {
+  margin-top: auto;
+  width: 100%;
+}
+
+.btn-seguir {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-seguir:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.btn-seguir.following {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-seguir.following:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}

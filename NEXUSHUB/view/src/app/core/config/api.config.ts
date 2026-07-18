@@ -1,4 +1,4 @@
-const LOCAL_BACKEND_URL = 'http://localhost:8085';
+const LOCAL_BACKEND_URL = 'http://localhost:8080';
 
 const productionHosts = new Set([
   'dsc.rodrigor.com',

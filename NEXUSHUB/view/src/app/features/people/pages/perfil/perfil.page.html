@@ -123,7 +123,7 @@
               <h5>Dados Pessoais & Contato</h5>
               <ul class="linkedin-detail-list">
                 <li><strong>Gênero:</strong> <span>{{ getGenderName(profileUser()?.genderType, profileUser()?.genderOther) }}</span></li>
-                <li><strong>Nascimento:</strong> <span>{{ formatBirthdate(profileUser()?.birthDate) }}</span></li>
+                <li><strong>Aniversário:</strong> <span>{{ formatBirthdate(profileUser()?.birthDate) }}</span></li>
                 <li *ngIf="profileUser()?.whatsapp"><strong>WhatsApp:</strong> <span>{{ profileUser()?.whatsapp }}</span></li>
                 <li *ngIf="profileUser()?.githubUrl"><strong>GitHub:</strong> <a [href]="profileUser()?.githubUrl" target="_blank">{{ profileUser()?.githubUrl }}</a></li>
                 <li *ngIf="profileUser()?.linkedinUrl"><strong>LinkedIn:</strong> <a [href]="profileUser()?.linkedinUrl" target="_blank">{{ profileUser()?.linkedinUrl }}</a></li>
@@ -475,8 +475,8 @@
           </div>
 
           <div class="form-group">
-            <label for="birthDate">Data de Nascimento</label>
-            <input type="date" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDate" />
+            <label for="birthDate">Data de Aniversário</label>
+            <input type="text" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDateInput" (input)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
           </div>
         </div>
 
@@ -500,9 +500,9 @@
           <label class="toggle-container">
             <input type="checkbox" name="showBirthday" [(ngModel)]="editShowBirthday" />
             <span class="checkmark"></span>
-            Mostrar data de nascimento no perfil
+            Mostrar data de aniversário no perfil
           </label>
-          <span class="info-text">(Se desativado, o ano de nascimento ficará oculto para terceiros)</span>
+          <span class="info-text">(Se desativado, o ano do seu aniversário ficará oculto para terceiros)</span>
         </div>
 
         <div class="form-group">

@@ -371,9 +371,10 @@
 
     .author-info {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      gap: 6px;
       flex-grow: 1;
+      flex-wrap: wrap;
     }
 
     .author-info h5 {
@@ -383,9 +384,24 @@
       margin: 0;
     }
 
-    .post-time {
-      font-size: 11px;
+    .post-separator {
+      font-size: 12px;
       color: var(--color-muted);
+      font-weight: 800;
+    }
+
+    .post-time {
+      font-size: 12px;
+      color: var(--color-muted);
+    }
+
+    .post-system-tag {
+      font-size: 10px;
+      background: #2a3449;
+      color: #94a3b8;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 4px;
     }
 
     .post-body {
@@ -600,6 +616,11 @@
       border-color: #334155;
     }
 
+    body.dark-mode .comment-input-wrapper {
+      background: rgba(31, 122, 224, 0.05);
+      border-color: transparent;
+    }
+
     body.dark-mode .action-btn:hover {
       background: #334155;
       color: #f8fafc;
@@ -668,38 +689,77 @@
       border-color: var(--color-primary);
     }
 
-    /* Landing Page for Guest View */
-    .landing-page-wrapper {
+    /* New Split Landing Page for Guest View */
+    .landing-split-layout {
       display: flex;
-      flex-direction: column;
-      gap: 56px;
-      padding: 0;
       width: 100%;
-      overflow-x: hidden;
+      min-height: 100vh;
+      background: var(--color-background);
     }
-    .landing-hero {
-      position: relative;
-      padding: 96px 24px;
-      text-align: center;
-      background: radial-gradient(circle at top, rgba(31, 122, 224, 0.08) 0%, rgba(31, 122, 224, 0) 70%);
-      overflow: hidden;
-    }
-    .landing-hero-bg {
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 70% 30%, rgba(31, 122, 224, 0.05) 0%, rgba(19, 163, 124, 0.03) 100%);
-      z-index: -1;
-    }
-    .landing-hero-content {
-      max-width: 800px;
-      margin: 0 auto;
+    
+    .landing-content-side {
+      flex: 1;
+      padding: 64px;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, rgba(31, 122, 224, 0.08) 0%, rgba(31, 122, 224, 0) 70%);
+      border-right: 1px solid var(--color-border);
     }
+    
+    .landing-login-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--color-surface);
+    }
+    
+    .landing-brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    
+    .landing-brand-logo img {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .animate-logo-spin {
+      animation: logoSpin 12s linear infinite;
+    }
+    @keyframes logoSpin {
+      0% {
+        transform: rotate(0deg);
+        filter: drop-shadow(0 0 10px rgba(31, 122, 224, 0.4));
+      }
+      50% {
+        filter: drop-shadow(0 0 20px rgba(31, 122, 224, 0.8));
+      }
+      100% {
+        transform: rotate(360deg);
+        filter: drop-shadow(0 0 10px rgba(31, 122, 224, 0.4));
+      }
+    }
+    
+    .landing-brand-logo span {
+      color: var(--color-text);
+    }
+    
+    .landing-brand-logo span span {
+      color: var(--color-primary);
+    }
+    
+    .landing-text-content {
+      max-width: 540px;
+    }
+    
     .landing-eyebrow {
       color: var(--color-primary);
       font-size: 13px;
@@ -707,274 +767,103 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 16px;
+      display: block;
     }
-    .landing-hero h1 {
-      font-size: 48px;
+    
+    .landing-text-content h1 {
+      font-size: 42px;
       font-weight: 900;
       color: var(--color-text);
       margin-bottom: 20px;
-      letter-spacing: -1px;
       line-height: 1.15;
-    }
-    .landing-hero h1 span {
-      color: var(--color-primary);
-    }
-    .landing-lead {
-      font-size: 18px;
-      color: var(--color-muted);
-      line-height: 1.6;
-      margin-bottom: 32px;
-    }
-    .landing-cta-group {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .landing-btn-primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-      color: white !important;
-      padding: 14px 32px;
-      border-radius: var(--border-radius-md);
-      font-weight: 700;
-      text-decoration: none;
-      transition: var(--transition);
-      box-shadow: 0 4px 15px rgba(31, 122, 224, 0.35);
-      border: 1px solid transparent;
-    }
-    .landing-btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(31, 122, 224, 0.45);
-    }
-    .landing-btn-secondary {
-      background: transparent;
-      border: 1.5px solid var(--color-border);
-      color: var(--color-text) !important;
-      padding: 14px 32px;
-      border-radius: var(--border-radius-md);
-      font-weight: 700;
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    .landing-btn-secondary:hover {
-      background: rgba(148, 163, 184, 0.08);
-      border-color: var(--color-primary);
-      transform: translateY(-2px);
+      letter-spacing: -1px;
     }
     
-    /* Features Section */
-    .landing-features {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
+    .landing-text-content h1 span {
+      color: var(--color-primary);
     }
-    .landing-section-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .landing-section-header h2 {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--color-text);
-      margin-bottom: 8px;
-    }
-    .landing-section-header p {
-      font-size: 15px;
+    
+    .landing-lead {
+      font-size: 17px;
       color: var(--color-muted);
+      line-height: 1.6;
+      margin-bottom: 48px;
     }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    
+    .landing-feature-list {
+      display: flex;
+      flex-direction: column;
       gap: 24px;
     }
-    .feature-card {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      padding: 28px;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
     }
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-      border-color: #cbd5e1;
-    }
+    
     .feature-icon {
       width: 48px;
       height: 48px;
+      min-width: 48px;
       border-radius: 12px;
-      font-size: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      font-size: 24px;
     }
-    .feature-icon.bg-blue { background: #eff6ff; }
-    .feature-icon.bg-purple { background: #faf5ff; }
-    .feature-icon.bg-green { background: #ecfdf5; }
-    .feature-icon.bg-yellow { background: #fefbeb; }
-    .feature-card h3 {
-      font-size: 18px;
+    
+    .feature-icon.bg-green { background: #ecfdf5; color: #10b981; }
+    .feature-icon.bg-blue { background: #eff6ff; color: #3b82f6; }
+    .feature-icon.bg-yellow { background: #fefbeb; color: #f59e0b; }
+    
+    .feature-item div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .feature-item strong {
+      font-size: 16px;
       font-weight: 700;
       color: var(--color-text);
-      margin-bottom: 10px;
     }
-    .feature-card p {
-      font-size: 13.5px;
-      color: var(--color-muted);
-      line-height: 1.6;
-    }
-
-    /* Mission Section */
-    .landing-mission {
-      background: #f8fafc;
-      border-top: 1px solid var(--color-border);
-      border-bottom: 1px solid var(--color-border);
-      padding: 80px 24px;
-    }
-    .mission-content-box {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 48px;
-      align-items: center;
-    }
-    .mission-text {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .mission-eyebrow {
-      color: var(--color-primary);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-    .landing-mission h2 {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--color-text);
-      line-height: 1.25;
-    }
-    .landing-mission p {
-      font-size: 15px;
-      color: var(--color-muted);
-      line-height: 1.65;
-    }
-    .pt-2 { padding-top: 8px; }
-    .mission-visual {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      padding: 24px;
-      box-shadow: var(--shadow-sm);
-      position: relative;
-    }
-    .visual-badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: var(--color-primary);
-      color: white;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-    .visual-gamified-mock {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .mock-header {
+    
+    .feature-item span:not(.material-symbols-rounded) {
       font-size: 14px;
-      font-weight: 700;
-      color: var(--color-text);
-      margin-bottom: 4px;
+      color: var(--color-muted);
+      line-height: 1.5;
     }
-    .mock-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f1f5f9;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--color-text);
-    }
-    .mock-row strong { color: var(--color-primary); }
-
-    @media (max-width: 768px) {
-      .mission-content-box {
-        grid-template-columns: 1fr;
-        gap: 32px;
+    
+    @media (max-width: 1024px) {
+      .landing-split-layout {
+        flex-direction: column;
       }
-      .landing-hero h1 {
+      .landing-content-side {
+        padding: 48px 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .landing-login-side {
+        padding: 48px 24px;
+      }
+      .landing-text-content h1 {
         font-size: 32px;
       }
+      .landing-brand-logo {
+        font-size: 28px;
+        gap: 12px;
+      }
+      .landing-brand-logo svg {
+        width: 56px !important;
+        height: 56px !important;
+      }
     }
-
-    /* Dark mode overrides for landing page */
-    body.dark-mode .feature-card,
-    body.dark-mode .mission-visual {
-      background: #1e293b;
-      border-color: rgba(255, 255, 255, 0.05);
-    }
-    body.dark-mode .landing-mission {
-      background: #0f172a;
-      border-color: rgba(255, 255, 255, 0.05);
-    }
-    body.dark-mode .mock-row {
-      background: #1e293b;
-    }
-    body.dark-mode .badge-user {
-      background-color: #334155;
-      color: #e2e8f0;
-    }
-    body.dark-mode .post-type-select {
-      background-color: #1e293b;
-      border-color: #334155;
-    }
-
-    /* Landing Logo styles */
-    .landing-hero-logo-container {
-      margin-bottom: 32px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .landing-hero-icon-wrapper {
-      width: 160px;
-      height: 160px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .landing-hero-icon {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .logo-dark-theme {
-      display: none;
-    }
-
-    body.dark-mode .logo-light-theme {
-      display: none;
-    }
-
-    body.dark-mode .logo-dark-theme {
-      display: block;
-    }
+    
+    /* Dark Mode overwrites */
+    body.dark-mode .feature-icon.bg-green { background: rgba(16, 185, 129, 0.15); }
+    body.dark-mode .feature-icon.bg-blue { background: rgba(59, 130, 246, 0.15); }
+    body.dark-mode .feature-icon.bg-yellow { background: rgba(245, 158, 11, 0.15); }
 
     @keyframes logoRotatePulse {
       0% {

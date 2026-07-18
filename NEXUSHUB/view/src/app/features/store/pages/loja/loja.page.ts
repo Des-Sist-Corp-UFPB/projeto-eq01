@@ -101,7 +101,12 @@ export class LojaPageComponent implements OnInit {
   protected shopFormLogo = '';
   protected shopFormBanner = '';
   protected shopFormMeetLocations: string[] = [];
+  protected shopFormPaymentMethods = 'Pix; Dinheiro';
+  protected shopFormPixKey = '';
+  protected currentShopStep = 1;
   protected customLocationInput = '';
+  protected showProductTypeModal = signal(false);
+  protected creatingAsShop = signal(false);
   protected termsAccepted = false;
   protected shopFormCampus = 'Rio Tinto';
   protected shopFormActive = true;
@@ -298,11 +303,22 @@ export class LojaPageComponent implements OnInit {
       this.shopFormLogo = '';
       this.shopFormBanner = '';
       this.shopFormMeetLocations = [];
+      this.shopFormPaymentMethods = 'Pix; Dinheiro';
+      this.shopFormPixKey = '';
       this.shopFormCampus = 'Rio Tinto';
       this.shopFormActive = true;
       this.termsAccepted = false;
     }
+    this.currentShopStep = 1;
     this.showShopModal.set(true);
+  }
+
+  nextShopStep() {
+    if (this.currentShopStep < 3) this.currentShopStep++;
+  }
+
+  prevShopStep() {
+    if (this.currentShopStep > 1) this.currentShopStep--;
   }
 
   closeShopModal() {
@@ -339,6 +355,8 @@ export class LojaPageComponent implements OnInit {
       logo: this.shopFormLogo,
       banner: this.shopFormBanner,
       meetLocations: this.shopFormMeetLocations.join(';'),
+      paymentMethods: this.shopFormPaymentMethods,
+      pixKey: this.shopFormPixKey,
       campus: this.shopFormCampus,
       active: this.shopFormActive
     };
@@ -369,6 +387,8 @@ export class LojaPageComponent implements OnInit {
       logo: shop.logo || '',
       banner: shop.banner || '',
       meetLocations: shop.meetLocations || '',
+      paymentMethods: (shop as any).paymentMethods || 'Pix; Dinheiro',
+      pixKey: (shop as any).pixKey || '',
       campus: shop.campus,
       active: !shop.active
     };
@@ -388,10 +408,22 @@ export class LojaPageComponent implements OnInit {
   }
 
   openCreateProduct() {
-    if (!this.currentUser()?.whatsapp) {
-      this.toastService.showWarning('Você precisa cadastrar seu WhatsApp no seu perfil para poder anunciar produtos.');
+    if (this.myShop()) {
+      this.showProductTypeModal.set(true);
+    } else {
+      this.startCreateProduct(false);
+    }
+  }
+
+  startCreateProduct(asShop: boolean) {
+    this.creatingAsShop.set(asShop);
+    
+    if (!asShop && !this.currentUser()?.whatsapp) {
+      this.toastService.showWarning('Você precisa cadastrar seu WhatsApp no seu perfil para poder anunciar itens avulsos.');
+      this.showProductTypeModal.set(false);
       return;
     }
+
     this.editingProductId.set(null);
     this.productFormTitle = '';
     this.productFormDescription = '';
@@ -399,15 +431,27 @@ export class LojaPageComponent implements OnInit {
     this.productFormPrice = null;
     this.productFormStock = 1;
     this.productFormPhotos = '';
-    this.productFormPaymentMethods = 'Pix';
-    this.productFormPixKey = '';
-    this.productFormMeetLocations = this.myShop()?.meetLocations || '';
-    this.productFormCampus = this.myShop()?.campus || 'Rio Tinto';
+
+    if (asShop && this.myShop()) {
+      this.productFormPaymentMethods = (this.myShop() as any).paymentMethods || 'Pix; Dinheiro';
+      this.productFormPixKey = (this.myShop() as any).pixKey || '';
+      this.productFormMeetLocations = this.myShop()?.meetLocations || '';
+      this.productFormCampus = this.myShop()?.campus || 'Rio Tinto';
+    } else {
+      this.productFormPaymentMethods = 'Pix';
+      this.productFormPixKey = '';
+      this.productFormMeetLocations = '';
+      this.productFormCampus = 'Rio Tinto';
+    }
+
     this.productFormActive = true;
+    
+    this.showProductTypeModal.set(false);
     this.showProductModal.set(true);
   }
 
   openEditProduct(product: Product) {
+    this.creatingAsShop.set(!!(product as any).shopId);
     this.editingProductId.set(product.id);
     this.productFormTitle = product.title;
     this.productFormDescription = product.description || '';
@@ -464,7 +508,7 @@ export class LojaPageComponent implements OnInit {
     this.savingProduct.set(true);
     const shop = this.myShop();
     const payload = {
-      shopId: shop ? shop.id : null,
+      shopId: this.creatingAsShop() && shop ? shop.id : null,
       title: this.productFormTitle.trim(),
       description: this.productFormDescription.trim(),
       category: this.productFormCategory,

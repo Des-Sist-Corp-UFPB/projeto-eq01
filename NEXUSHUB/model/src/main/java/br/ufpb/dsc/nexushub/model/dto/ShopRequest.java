@@ -9,6 +9,8 @@ public record ShopRequest(
         String logo,
         String banner,
         String meetLocations,
+        String paymentMethods,
+        String pixKey,
         @NotBlank(message = "Campus de operação não pode ser vazio") String campus,
         @NotNull boolean active
 ) {}

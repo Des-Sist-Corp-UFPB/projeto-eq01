@@ -58,7 +58,7 @@ export class PerfilPageComponent implements OnInit {
   protected editSenha = '';
   protected editFotoUrl = '';
   protected editBio = '';
-  protected editBirthDate = '';
+  protected editBirthDateInput = '';
   protected editGenderType = 1;
   protected editGenderOther = '';
   protected editShowBirthday = true;
@@ -326,7 +326,18 @@ export class PerfilPageComponent implements OnInit {
       this.editSenha = '';
       this.editFotoUrl = user.fotoUrl || '';
       this.editBio = user.bio || '';
-      this.editBirthDate = user.birthDate || '';
+      
+      if (user.birthDate) {
+        const parts = user.birthDate.split('-');
+        if (parts.length === 3) {
+          this.editBirthDateInput = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        } else {
+          this.editBirthDateInput = user.birthDate;
+        }
+      } else {
+        this.editBirthDateInput = '';
+      }
+
       this.editGenderType = user.genderType || 1;
       this.editGenderOther = user.genderOther || '';
       this.editShowBirthday = user.showBirthday !== false;
@@ -370,6 +381,19 @@ export class PerfilPageComponent implements OnInit {
       value = `(${value}`;
     }
     this.editWhatsapp = value;
+  }
+
+  onEditBirthDateInput(event: Event) {
+    let value = (event.target as HTMLInputElement).value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    
+    if (value.length >= 5) {
+      this.editBirthDateInput = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+    } else if (value.length >= 3) {
+      this.editBirthDateInput = `${value.slice(0, 2)}/${value.slice(2)}`;
+    } else {
+      this.editBirthDateInput = value;
+    }
   }
 
   addTechnology(techName: string) {
@@ -418,7 +442,7 @@ export class PerfilPageComponent implements OnInit {
       senha: this.editSenha || undefined,
       fotoUrl: this.editFotoUrl || undefined,
       bio: this.editBio,
-      birthDate: this.editBirthDate || undefined,
+      birthDate: undefined as string | undefined,
       genderType: this.editGenderType,
       genderOther: this.editGenderOther,
       showBirthday: this.editShowBirthday,
@@ -442,6 +466,11 @@ export class PerfilPageComponent implements OnInit {
       certification: this.editCertification,
       technologies: this.editTechnologies
     };
+
+    if (this.editBirthDateInput.length === 10) {
+      const parts = this.editBirthDateInput.split('/');
+      payload.birthDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
 
     this.http.put<any>(apiUrl(`/api/usuarios/perfil/${user.id}?shareOnFeed=${this.shareOnFeed}`), payload).subscribe({
       next: (updatedUser) => {

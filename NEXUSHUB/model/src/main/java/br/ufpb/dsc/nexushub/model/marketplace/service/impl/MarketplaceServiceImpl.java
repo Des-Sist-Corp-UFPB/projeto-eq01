@@ -54,11 +54,11 @@ public class MarketplaceServiceImpl implements MarketplaceService {
         Shop shop;
         if (existing.isPresent()) {
             shop = existing.get();
-            shop.update(request.name(), request.description(), request.logo(), request.banner(), request.meetLocations(), request.campus(), request.active(), userId);
+            shop.update(request.name(), request.description(), request.logo(), request.banner(), request.meetLocations(), request.paymentMethods(), request.pixKey(), request.campus(), request.active(), userId);
         } else {
             shop = new Shop();
             shop.setOwner(owner);
-            shop.update(request.name(), request.description(), request.logo(), request.banner(), request.meetLocations(), request.campus(), request.active(), userId);
+            shop.update(request.name(), request.description(), request.logo(), request.banner(), request.meetLocations(), request.paymentMethods(), request.pixKey(), request.campus(), request.active(), userId);
         }
         return ShopResponse.from(shopRepository.save(shop));
     }

@@ -15,6 +15,10 @@ import { onboardingGuard } from './core/auth/onboarding.guard';
 import { authGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
 import { ProjetosPageComponent } from './features/projects/pages/projetos/projetos.page';
+import { OportunidadesPageComponent } from './features/opportunities/pages/oportunidades/oportunidades.page';
+import { PessoasPageComponent } from './features/people/pages/pessoas/pessoas.page';
+import { TermosPrivacidadePageComponent } from './features/institutional/pages/termos-privacidade/termos-privacidade.page';
+import { SobrePageComponent } from './features/institutional/pages/sobre/sobre.page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPageComponent },
@@ -33,8 +37,12 @@ export const routes: Routes = [
       { path: 'grupos', component: GruposPageComponent, canActivate: [authGuard] },
       { path: 'grupos/:id', component: GrupoDetalhePageComponent, canActivate: [authGuard] },
       { path: 'loja', component: LojaPageComponent, canActivate: [authGuard] },
+      { path: 'oportunidades', component: OportunidadesPageComponent, canActivate: [authGuard] },
+      { path: 'pessoas', component: PessoasPageComponent, canActivate: [authGuard] },
       { path: 'admin', component: AdminPageComponent, canActivate: [adminGuard] },
-      { path: 'privacidade', component: PrivacyPageComponent }
+      { path: 'privacidade', component: PrivacyPageComponent },
+      { path: 'termos-e-privacidade', component: TermosPrivacidadePageComponent },
+      { path: 'sobre', component: SobrePageComponent }
     ]
   },
   { path: '**', redirectTo: '' }

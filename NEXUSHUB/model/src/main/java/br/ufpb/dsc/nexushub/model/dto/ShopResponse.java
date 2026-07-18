@@ -11,6 +11,8 @@ public record ShopResponse(
         String logo,
         String banner,
         String meetLocations,
+        String paymentMethods,
+        String pixKey,
         String campus,
         boolean active
 ) {
@@ -24,6 +26,8 @@ public record ShopResponse(
                 shop.getLogo(),
                 shop.getBanner(),
                 shop.getMeetLocations(),
+                shop.getPaymentMethods(),
+                shop.getPixKey(),
                 shop.getCampus(),
                 shop.isActive()
         );

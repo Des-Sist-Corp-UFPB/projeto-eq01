@@ -157,24 +157,26 @@
                   <img [src]="post.authorPhotoUrl" alt="Foto do autor" class="avatar-img" />
                 </div>
                 <ng-template #postAuthorInitials>
-                  <div class="avatar-small">{{ post.authorName.charAt(0) }}</div>
+                  <div class="avatar-small avatar-initial" [style.background]="getGroupGradient(post.authorName)">
+                    {{ post.authorName.charAt(0) }}
+                  </div>
                 </ng-template>
               </a>
               <div class="author-info">
                 <a [routerLink]="['/perfil', post.authorUsername]" class="author-name-link">
                   <h5>{{ post.authorName }}</h5>
                 </a>
+                <span class="post-separator">·</span>
                 <span class="post-time">{{ getRelativeTime(post.timestamp) }}</span>
+                <span class="post-system-tag" *ngIf="post.postType">
+                  <ng-container [ngSwitch]="post.postType">
+                    <span *ngSwitchCase="'SYSTEM'">automático</span>
+                    <span *ngSwitchCase="'STORE'">lojinha</span>
+                    <span *ngSwitchCase="'COMMUNITY'">comunidade</span>
+                    <span *ngSwitchDefault>automático</span>
+                  </ng-container>
+                </span>
               </div>
-              
-              <!-- Post Type Badge -->
-              <span class="post-category-badge" [class]="'badge-' + post.postType?.toLowerCase()">
-                <ng-container [ngSwitch]="post.postType">
-                  <span *ngSwitchCase="'STORE'"><span class="material-symbols-rounded" style="font-size:13px">storefront</span> Lojinha</span>
-                  <span *ngSwitchCase="'COMMUNITY'"><span class="material-symbols-rounded" style="font-size:13px">groups</span> Comunidade</span>
-                  <span *ngSwitchDefault><span class="material-symbols-rounded" style="font-size:13px">person</span> Usuário</span>
-                </ng-container>
-              </span>
             </header>
 
             <div class="post-body">
@@ -246,20 +248,15 @@
 
               <!-- Add Comment box -->
               <div class="add-comment-box" *ngIf="isLoggedIn()">
-                <div class="avatar-tiny" *ngIf="currentUser()?.fotoUrl; else commentInitials">
-                  <img [src]="currentUser()?.fotoUrl" alt="Foto" class="avatar-img" />
-                </div>
-                <ng-template #commentInitials>
-                  <div class="avatar-tiny">{{ currentUser()?.nome?.charAt(0) }}</div>
-                </ng-template>
                 <div class="comment-input-wrapper">
                   <input 
                     type="text" 
                     placeholder="Escreva um comentário..." 
                     [(ngModel)]="commentInputs[post.id]"
                     (keydown.enter)="onAddComment(post.id)"
+                    class="comment-input"
                   />
-                  <button class="send-comment-btn" (click)="onAddComment(post.id)">Comentar</button>
+                  <button class="send-comment-btn" (click)="onAddComment(post.id)" [disabled]="!commentInputs[post.id]?.trim()">Comentar</button>
                 </div>
               </div>
             </div>
@@ -357,98 +354,62 @@
   ></app-new-project-modal>
 </div>
 
-<!-- LANDING PAGE FOR PUBLIC/UNAUTHENTICATED GUESTS -->
-<div class="landing-page-wrapper" *ngIf="!isLoggedIn()">
-  <!-- Main Hero -->
-  <section class="landing-hero">
-    <div class="landing-hero-bg"></div>
-    <div class="landing-hero-content">
-      <div class="landing-hero-logo-container">
-        <div class="landing-hero-icon-wrapper">
-          <img src="logo-icon-light.png" alt="NexusHub Icon" class="landing-hero-icon logo-light-theme animate-hero-logo" />
-          <img src="logo-icon-dark.png" alt="NexusHub Icon" class="landing-hero-icon logo-dark-theme animate-hero-logo" />
-        </div>
-      </div>
-      <span class="landing-eyebrow">A Experiência Universitária Conectada</span>
-      <h1>Bem-vindo ao <span>NexusHub</span></h1>
+<!-- LANDING PAGE FOR PUBLIC/UNAUTHENTICATED GUESTS (SPLIT LAYOUT) -->
+<div class="landing-split-layout" *ngIf="!isLoggedIn()">
+  <!-- Left Side: Content / Value Proposition -->
+  <div class="landing-content-side">
+    <div class="landing-brand-logo">
+      <svg class="nexus-logo-svg animate-logo-spin" viewBox="0 0 1024 1024" style="width: 72px; height: 72px;">
+        <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+        <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+      </svg>
+      <span>NEXUS<span>HUB</span></span>
+    </div>
+
+    <div class="landing-text-content">
+      <span class="landing-eyebrow">A sua universidade conectada</span>
+      <h1>Conectando a comunidade acadêmica da <span>UFPB</span></h1>
       <p class="landing-lead">
-        Conectando estudantes, professores e iniciativas em um ecossistema gamificado de aprendizagem. Publique projetos, junte-se a grupos e conquiste recompensas!
+        Um ecossistema exclusivo que une os campi de Mamanguape e Rio Tinto. Encontre oportunidades, compre e venda na lojinha, e impulsione a sua jornada acadêmica.
       </p>
-      <div class="landing-cta-group">
-        <a routerLink="/cadastro" class="landing-btn-primary">Criar Minha Conta Grátis</a>
-        <a routerLink="/login" class="landing-btn-secondary">Entrar no Sistema</a>
-      </div>
-    </div>
-  </section>
 
-  <!-- Features Grid -->
-  <section class="landing-features">
-    <div class="landing-section-header">
-      <h2>Descubra o que o NexusHub oferece</h2>
-      <p>Uma plataforma unificada desenhada especialmente para a comunidade acadêmica da UFPB.</p>
-    </div>
-
-    <div class="features-grid">
-      <!-- Card 1: Projetos -->
-      <div class="feature-card">
-        <div class="feature-icon bg-blue"><span class="material-symbols-rounded">rocket_launch</span></div>
-        <h3>Central de Projetos</h3>
-        <p>
-          Encontre e anuncie projetos de pesquisa, extensão, monitorias e desafios de tecnologia. Participe ativamente e colabore com a comunidade do campus.
-        </p>
-      </div>
-
-      <!-- Card 2: Grupos -->
-      <div class="feature-card">
-        <div class="feature-icon bg-purple"><span class="material-symbols-rounded">groups</span></div>
-        <h3>Grupos & Comunidades</h3>
-        <p>
-          Crie ou participe de comunidades de estudo, times de maratona de programação ou laboratórios. Centralize a comunicação e compartilhe ideias.
-        </p>
-      </div>
-
-      <!-- Card 3: Lojinha -->
-      <div class="feature-card">
-        <div class="feature-icon bg-green"><span class="material-symbols-rounded">storefront</span></div>
-        <h3>Lojinha de Recompensas</h3>
-        <p>
-          Troque seus pontos acumulados por brindes exclusivos, mentorias ou apoie outras ideias inovadoras e causas de estudantes da universidade.
-        </p>
-      </div>
-
-      <!-- Card 4: Feed Social -->
-      <div class="feature-card">
-        <div class="feature-icon bg-yellow"><span class="material-symbols-rounded">forum</span></div>
-        <h3>Feed do Campus</h3>
-        <p>
-          Fique por dentro de tudo o que acontece no campus. Compartilhe suas publicações, curta novidades, comente conquistas e marque seus colegas.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Mission Section -->
-  <section class="landing-mission">
-    <div class="mission-content-box">
-      <div class="mission-text">
-        <span class="mission-eyebrow">Nosso Propósito</span>
-        <h2>Centralizando Oportunidades, Reconhecendo Talentos</h2>
-        <p>
-          O NexusHub nasceu para eliminar a dispersão de informações e oportunidades em murais físicos ou múltiplos canais de chat. Nós unificamos a jornada universitária, transformando cada atividade extracurricular, projeto de pesquisa ou contribuição acadêmica em pontos, insígnias de conquista e um portfólio acadêmico dinâmico que destaca suas habilidades reais.
-        </p>
-        <div class="landing-cta-group pt-2">
-          <a routerLink="/cadastro" class="landing-btn-primary">Junte-se à Comunidade</a>
+      <div class="landing-feature-list">
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-green">storefront</span>
+          <div>
+            <strong>Lojinha Universitária</strong>
+            <span>Compre lanches e anuncie produtos diretamente no seu campus.</span>
+          </div>
         </div>
-      </div>
-      <div class="mission-visual">
-        <div class="visual-badge">🎓 UFPB</div>
-        <div class="visual-gamified-mock">
-          <div class="mock-header">🏆 Projetos em Destaque</div>
-          <div class="mock-row"><span>🚀 Ayty Agro</span></div>
-          <div class="mock-row"><span>🤖 Ideias Lab</span></div>
-          <div class="mock-row"><span>💡 Monitoria BD</span></div>
+        
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-blue">work</span>
+          <div>
+            <strong>Oportunidades e Projetos</strong>
+            <span>Encontre bolsas, estágios e conecte-se com projetos acadêmicos.</span>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-yellow">forum</span>
+          <div>
+            <strong>Feed de Classificados</strong>
+            <span>Interaja, anuncie serviços rápidos e acompanhe novidades.</span>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+
+  <!-- Right Side: Login Integration -->
+  <div class="landing-login-side">
+    <app-login-page></app-login-page>
+  </div>
 </div>

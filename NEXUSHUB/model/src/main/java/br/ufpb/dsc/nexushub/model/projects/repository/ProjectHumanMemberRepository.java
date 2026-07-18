@@ -13,4 +13,6 @@ public interface ProjectHumanMemberRepository extends JpaRepository<ProjectHuman
     List<ProjectHumanMember> findByProject(Project project);
 
     Optional<ProjectHumanMember> findByProjectAndHuman(Project project, Human human);
+
+    int countByHumanId(UUID humanId);
 }

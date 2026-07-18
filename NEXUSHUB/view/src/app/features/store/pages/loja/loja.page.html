@@ -1,20 +1,23 @@
 <div class="marketplace-wrapper animate-fade-in">
   <!-- 1. HEADER SECTION -->
-  <div class="dashboard-page-header">
-    <div class="header-content">
-      <h2 class="dashboard-title">Lojinha</h2>
-      <p class="dashboard-subtitle">Compre produtos, alimentos e serviços diretamente de alunos e professores da universidade.</p>
+  <div class="page-hero">
+    <div class="hero-content animate-fade-in">
+      <span class="hero-tag">Aba Marketplace</span>
+      <h1 style="margin-bottom: 8px;">Apoie a <span>Lojinha</span> Acadêmica</h1>
+      <p>Compre produtos, alimentos e serviços diretamente de alunos e professores da universidade.</p>
     </div>
+  </div>
 
-    <!-- Tab navigation -->
-    <div class="filter-chips" *ngIf="isLoggedIn()" style="margin-top: 16px;">
-      <button class="filter-chip" [class.active]="activeTab() === 'compra'" (click)="setTab('compra')">
-        Comprar Itens
-      </button>
-      <button class="filter-chip" [class.active]="activeTab() === 'venda'" (click)="setTab('venda')">
-        Meu Painel de Vendas
-      </button>
-    </div>
+  <!-- Tab navigation -->
+  <div class="tabs-navigation" *ngIf="isLoggedIn()" style="margin-bottom: 32px; border-bottom: 2px solid var(--color-border); padding-bottom: 2px; display: flex; gap: 16px;">
+    <button class="tab-btn" style="background: transparent; border: none; font-weight: 700; padding: 12px 24px; cursor: pointer; display: flex; align-items: center; gap: 8px;" [style.color]="activeTab() === 'compra' ? 'var(--color-primary)' : 'var(--color-muted)'" [style.border-bottom]="activeTab() === 'compra' ? '2px solid var(--color-primary)' : 'none'" (click)="setTab('compra')">
+      <span class="material-symbols-rounded">shopping_cart</span>
+      Comprar Itens
+    </button>
+    <button class="tab-btn" style="background: transparent; border: none; font-weight: 700; padding: 12px 24px; cursor: pointer; display: flex; align-items: center; gap: 8px;" [style.color]="activeTab() === 'venda' ? 'var(--color-primary)' : 'var(--color-muted)'" [style.border-bottom]="activeTab() === 'venda' ? '2px solid var(--color-primary)' : 'none'" (click)="setTab('venda')">
+      <span class="material-symbols-rounded">storefront</span>
+      Meu Painel de Vendas
+    </button>
   </div>
 
   <!-- 2. BUYER MODE -->
@@ -22,9 +25,7 @@
     <!-- Filter bar -->
     <div class="filter-bar card">
       <div class="search-input-wrapper">
-        <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+        <span class="material-symbols-rounded search-icon">search</span>
         <input type="text" placeholder="O que você está procurando hoje?" [ngModel]="filterSearch()" (ngModelChange)="filterSearch.set($event); loadProducts()" />
       </div>
 
@@ -51,6 +52,14 @@
           </select>
         </div>
       </div>
+      
+      <!-- New button to announce item from the main screen -->
+      <div style="margin-left: auto; align-self: flex-end; padding-bottom: 2px;">
+        <button class="btn btn-primary" (click)="openCreateProduct()" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 700;">
+          <span class="material-symbols-rounded" style="font-size: 20px;">add_circle</span>
+          Anunciar Item
+        </button>
+      </div>
     </div>
 
     <!-- Products grid -->
@@ -60,11 +69,14 @@
     </div>
 
     <div class="empty-state card" *ngIf="!loadingProducts() && products().length === 0">
-      <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
+      <span class="material-symbols-rounded empty-icon" style="font-size: 48px; color: var(--color-muted); margin-bottom: 16px;">inventory_2</span>
       <h3>Ué, cadê os doces? 🍫</h3>
       <p>A lojinha está mais deserta do que o campus numa sexta-feira à noite. Nenhum produto foi anunciado ainda!</p>
+      
+      <button class="btn btn-primary" (click)="openCreateProduct()" style="margin-top: 24px; display: flex; align-items: center; gap: 8px; padding: 12px 24px; font-weight: 700; font-size: 15px;">
+        <span class="material-symbols-rounded">add_circle</span>
+        Anunciar Primeiro Item
+      </button>
     </div>
 
     <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
@@ -76,9 +88,7 @@
         <div class="product-image-container">
           <img *ngIf="p.photos" [src]="p.photos.split(';')[0]" alt="{{ p.title }}" />
           <div *ngIf="!p.photos" class="no-image-placeholder">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <span class="material-symbols-rounded" style="font-size: 32px;">image</span>
           </div>
         </div>
 
@@ -96,9 +106,7 @@
           <div class="product-footer">
             <strong class="product-price">{{ p.price | currency:'BRL' }}</strong>
             <span class="product-location">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-              </svg>
+              <span class="material-symbols-rounded">location_on</span>
               {{ p.campus }}
             </span>
           </div>
@@ -231,13 +239,7 @@
           </div>
         </div>
 
-        <div class="form-group checkbox-group-modern" style="margin-top: 15px;">
-          <label class="toggle-container-modern">
-            <input type="checkbox" [(ngModel)]="shopFormActive" name="active" />
-            <span class="checkmark-modern"></span>
-            Lojinha está aberta para receber pedidos (Online)
-          </label>
-        </div>
+        <!-- The active shop status is now toggled directly on the dashboard header -->
 
         <div class="settings-actions">
           <button type="submit" class="btn btn-primary" [disabled]="savingShop()">
@@ -325,9 +327,7 @@
       </div>
 
       <div class="empty-state" *ngIf="!loadingSellerData() && myProducts().length === 0">
-        <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
+        <span class="material-symbols-rounded empty-icon" style="font-size: 48px; color: var(--color-muted); margin-bottom: 16px;">category</span>
         <h4>Sua prateleira está pegando poeira! 🕸️</h4>
         <p>Você ainda não cadastrou nenhum produto. Que tal começar a vender aquele bolo de pote maravilhoso ou aquele resumo salvador de vidas?</p>
       </div>
@@ -478,106 +478,170 @@
     </div>
   </div>
 
-  <!-- SELLER: SHOP CREATION/EDITION MODAL -->
+  <!-- SELLER: SHOP CREATION/EDITION MODAL (MULTI-STEP) -->
   <div class="modal-backdrop" *ngIf="showShopModal()">
     <div class="modal-card">
       <header class="modal-header">
-        <h3>Configurações da Minha Lojinha</h3>
+        <h3>{{ myShop() ? 'Configurações da Lojinha' : 'Estruturar Nova Lojinha' }}</h3>
         <button class="modal-close-btn" (click)="closeShopModal()">&times;</button>
       </header>
 
+      <!-- Progress Indicators -->
+      <div class="step-indicator">
+        <div class="step" [class.active]="currentShopStep === 1" [class.completed]="currentShopStep > 1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Identidade</span>
+        </div>
+        <div class="step-line" [class.completed]="currentShopStep > 1"></div>
+        <div class="step" [class.active]="currentShopStep === 2" [class.completed]="currentShopStep > 2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Localização</span>
+        </div>
+        <div class="step-line" [class.completed]="currentShopStep > 2"></div>
+        <div class="step" [class.active]="currentShopStep === 3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Pagamento</span>
+        </div>
+      </div>
+
       <form (submit)="saveShop(); $event.preventDefault()">
         <div class="modal-body">
-          <div class="form-group">
-            <label for="shop-name">Nome da Loja *</label>
-            <input type="text" id="shop-name" [(ngModel)]="shopFormName" name="name" required placeholder="Ex: Pastelaria do Campus" />
-          </div>
-
-          <div class="form-group">
-            <label for="shop-desc">Descrição / Biografia</label>
-            <textarea id="shop-desc" [(ngModel)]="shopFormDescription" name="description" rows="3" placeholder="Fale sobre seus produtos, horários de entrega..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="shop-campus">Campus de Operação *</label>
-            <select id="shop-campus" [(ngModel)]="shopFormCampus" name="campus">
-              <option value="Rio Tinto">Rio Tinto</option>
-              <option value="Mamanguape">Mamanguape</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="shop-logo">Logotipo da Loja (Upload de imagem)</label>
-            <input type="file" id="shop-logo" (change)="onLogoUpload($event)" accept="image/*" />
-            <div class="logo-preview-container" *ngIf="shopFormLogo">
-              <img [src]="shopFormLogo" class="uploaded-logo-preview" alt="Prévia da logo" />
+          
+          <!-- STEP 1: Identidade -->
+          <div *ngIf="currentShopStep === 1" class="step-content animate-fade-in">
+            <div class="form-group">
+              <label for="shop-name">Nome da Loja *</label>
+              <input type="text" id="shop-name" [(ngModel)]="shopFormName" name="name" required placeholder="Ex: Pastelaria do Campus" />
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="shop-banner">Banner da Loja (Upload de imagem)</label>
-            <input type="file" id="shop-banner" (change)="onBannerUpload($event)" accept="image/*" />
-            <div class="banner-preview-container" *ngIf="shopFormBanner" style="margin-top: 8px;">
-              <img [src]="shopFormBanner" class="uploaded-banner-preview" alt="Prévia do banner" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px;" />
+            <div class="form-group">
+              <label for="shop-desc">Descrição / Biografia</label>
+              <textarea id="shop-desc" [(ngModel)]="shopFormDescription" name="description" rows="3" placeholder="Fale sobre seus produtos, horários de entrega..."></textarea>
             </div>
-          </div>
 
-          <!-- Locations Selection -->
-          <div class="form-group" style="margin-top: 15px;">
-            <label style="font-weight: 700; color: var(--color-text);">Pontos de Encontro Atendidos no Campus *</label>
-            <div class="meeting-locations-checkboxes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
-              <label *ngFor="let loc of getMeetLocationsForCampus(shopFormCampus)" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--color-text); cursor: pointer;">
-                <input type="checkbox" [checked]="isLocationSelected(loc)" (change)="toggleLocationSelection(loc)" />
-                {{ loc }}
+            <div class="form-group">
+              <label for="shop-logo">Logotipo da Loja (Upload)</label>
+              <input type="file" id="shop-logo" (change)="onLogoUpload($event)" accept="image/*" />
+              <div class="logo-preview-container" *ngIf="shopFormLogo">
+                <img [src]="shopFormLogo" class="uploaded-logo-preview" alt="Prévia da logo" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="shop-banner">Banner da Loja (Upload)</label>
+              <input type="file" id="shop-banner" (change)="onBannerUpload($event)" accept="image/*" />
+              <div class="banner-preview-container" *ngIf="shopFormBanner" style="margin-top: 8px;">
+                <img [src]="shopFormBanner" class="uploaded-banner-preview" alt="Prévia do banner" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px;" />
+              </div>
+            </div>
+
+            <!-- Terms of Use Acceptance -->
+            <div class="form-group terms-acceptance-wrapper" *ngIf="!myShop()" style="border-top: 1px dashed var(--color-border); padding-top: 16px; margin-top: 16px;">
+              <div class="terms-text-box" style="background: var(--color-surface-hover); border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; font-size: 12px; color: var(--color-text); max-height: 100px; overflow-y: auto; margin-bottom: 10px;">
+                <strong>Termos de Uso do Marketplace Acadêmico (NexusHub)</strong>
+                <p>Ao ativar sua lojinha no NexusHub, você concorda que:</p>
+                <ul>
+                  <li>Todas as negociações de venda, entrega e pagamento são de inteira responsabilidade do vendedor e do comprador.</li>
+                  <li>Não é permitida a venda de itens ilícitos.</li>
+                  <li>Você concorda em fornecer informações verídicas.</li>
+                </ul>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--color-text); cursor: pointer;">
+                <input type="checkbox" [(ngModel)]="termsAccepted" name="termsAccepted" required />
+                Li e concordo com os Termos de Uso do Campus
               </label>
             </div>
-            
-            <div class="custom-location-add" style="display: flex; gap: 8px; margin-top: 12px;">
-              <input type="text" [(ngModel)]="customLocationInput" name="customLocationInput" placeholder="Outro local personalizado..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px;" />
-              <button type="button" class="btn btn-secondary" style="padding: 8px 16px;" (click)="addCustomLocation()">Adicionar</button>
+          </div>
+
+          <!-- STEP 2: Localização -->
+          <div *ngIf="currentShopStep === 2" class="step-content animate-fade-in">
+            <div class="form-group">
+              <label for="shop-campus">Campus de Operação *</label>
+              <select id="shop-campus" [(ngModel)]="shopFormCampus" name="campus">
+                <option value="Rio Tinto">Rio Tinto</option>
+                <option value="Mamanguape">Mamanguape</option>
+              </select>
             </div>
 
-            <!-- Selected Locations Summary Chips -->
-            <div class="selected-locations-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
-              <span *ngFor="let selLoc of getSelectedLocationsList()" class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-                {{ selLoc }}
-                <button type="button" (click)="toggleLocationSelection(selLoc)" style="background: none; border: none; padding: 0; color: #1d4ed8; font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1;">&times;</button>
-              </span>
+            <div class="form-group" style="margin-top: 15px;">
+              <label style="font-weight: 700; color: var(--color-text);">Pontos de Encontro Atendidos no Campus *</label>
+              <div class="meeting-locations-checkboxes" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+                <label *ngFor="let loc of getMeetLocationsForCampus(shopFormCampus)" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--color-text); cursor: pointer;">
+                  <input type="checkbox" [checked]="isLocationSelected(loc)" (change)="toggleLocationSelection(loc)" />
+                  {{ loc }}
+                </label>
+              </div>
+              
+              <div class="custom-location-add" style="display: flex; gap: 8px; margin-top: 12px;">
+                <input type="text" [(ngModel)]="customLocationInput" name="customLocationInput" placeholder="Outro local personalizado..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-text);" />
+                <button type="button" class="btn btn-secondary" style="padding: 8px 16px;" (click)="addCustomLocation()">Adicionar</button>
+              </div>
+
+              <!-- Selected Locations Summary Chips -->
+              <div class="selected-locations-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                <span *ngFor="let selLoc of getSelectedLocationsList()" class="badge location-badge" style="background: var(--color-primary); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                  {{ selLoc }}
+                  <button type="button" (click)="toggleLocationSelection(selLoc)" style="background: none; border: none; padding: 0; color: white; font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1;">&times;</button>
+                </span>
+              </div>
             </div>
           </div>
 
-          <div class="form-group checkbox-group">
-            <label>
-              <input type="checkbox" [(ngModel)]="shopFormActive" name="active" />
-              Lojinha está aberta para receber pedidos (Online)
-            </label>
-          </div>
-
-          <!-- Terms of Use Acceptance -->
-          <div class="form-group terms-acceptance-wrapper" *ngIf="!myShop()" style="border-top: 1px dashed var(--color-border); padding-top: 16px; margin-top: 16px;">
-            <div class="terms-text-box" style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; font-size: 12px; color: var(--color-muted); max-height: 100px; overflow-y: auto; margin-bottom: 10px;">
-              <strong>Termos de Uso do Marketplace Acadêmico (NexusHub)</strong>
-              <p>Ao ativar sua lojinha no NexusHub, você concorda que:</p>
-              <ul>
-                <li>Todas as negociações de venda, entrega e pagamento são de inteira responsabilidade do vendedor e do comprador.</li>
-                <li>Não é permitida a venda de itens ilícitos, drogas, bebidas alcoólicas, armas, ou qualquer outro produto que viole as regras do regimento acadêmico.</li>
-                <li>Você concorda em fornecer informações verídicas e manter o estoque de seus produtos atualizado.</li>
-              </ul>
+          <!-- STEP 3: Pagamento -->
+          <div *ngIf="currentShopStep === 3" class="step-content animate-fade-in">
+            <div class="form-group">
+              <label for="shop-pay">Métodos de Pagamento Aceitos *</label>
+              <select id="shop-pay" [(ngModel)]="shopFormPaymentMethods" name="paymentMethods">
+                <option value="Pix">Apenas Pix</option>
+                <option value="Dinheiro">Apenas Dinheiro / Presencial</option>
+                <option value="Pix; Dinheiro">Pix e Dinheiro</option>
+              </select>
             </div>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--color-text); cursor: pointer;">
-              <input type="checkbox" [(ngModel)]="termsAccepted" name="termsAccepted" required />
-              Li e concordo com os Termos de Uso do Campus
-            </label>
+
+            <div class="form-group" *ngIf="shopFormPaymentMethods.includes('Pix')">
+              <label for="shop-pix">Chave Pix Padrão da Loja *</label>
+              <input type="text" id="shop-pix" [(ngModel)]="shopFormPixKey" name="pixKey" placeholder="E-mail, celular, CPF ou chave aleatória" />
+              <span class="info-text">Essa chave será sugerida por padrão para todos os seus anúncios.</span>
+            </div>
           </div>
         </div>
 
         <footer class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeShopModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary" [disabled]="savingShop() || (!myShop() && !termsAccepted)">
-            {{ savingShop() ? 'Salvando...' : 'Salvar Loja' }}
+          <button *ngIf="currentShopStep > 1" type="button" class="btn btn-secondary" (click)="prevShopStep()">Voltar</button>
+          <button *ngIf="currentShopStep === 1" type="button" class="btn btn-secondary" (click)="closeShopModal()">Cancelar</button>
+          
+          <button *ngIf="currentShopStep < 3" type="button" class="btn btn-primary" (click)="nextShopStep()" [disabled]="!shopFormName.trim() || (!myShop() && !termsAccepted && currentShopStep === 1)">Próximo</button>
+          <button *ngIf="currentShopStep === 3" type="submit" class="btn btn-primary" [disabled]="savingShop()">
+            {{ savingShop() ? 'Salvando...' : 'Finalizar e Salvar Loja' }}
           </button>
         </footer>
       </form>
+    </div>
+  </div>
+
+  <!-- SELLER: PRODUCT TYPE SELECTION MODAL -->
+  <div class="modal-backdrop" *ngIf="showProductTypeModal()">
+    <div class="modal-card" style="max-width: 500px;">
+      <header class="modal-header">
+        <h3>Como você deseja anunciar?</h3>
+        <button class="modal-close-btn" (click)="showProductTypeModal.set(false)">&times;</button>
+      </header>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <button type="button" class="btn btn-primary" style="padding: 24px; font-size: 16px; text-align: left; align-items: flex-start;" (click)="startCreateProduct(true)">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="material-symbols-rounded" style="font-size: 24px;">storefront</span>
+            <strong>Pela minha Lojinha</strong>
+          </div>
+          <small style="display: block; font-weight: normal; font-size: 13px; opacity: 0.8; margin-top: 8px;">O produto será vinculado ao catálogo da sua loja, utilizando as configurações de pagamento e locais de encontro dela.</small>
+        </button>
+        <button type="button" class="btn btn-outline" style="padding: 24px; font-size: 16px; text-align: left; align-items: flex-start; border-color: var(--color-border); color: var(--color-text);" (click)="startCreateProduct(false)">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="material-symbols-rounded" style="font-size: 24px;">person</span>
+            <strong>Anúncio Avulso</strong>
+          </div>
+          <small style="display: block; font-weight: normal; font-size: 13px; opacity: 0.8; margin-top: 8px;">Desapego rápido vinculado apenas a você, com contato direto pelo seu WhatsApp.</small>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -617,7 +681,7 @@
                   </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" *ngIf="!creatingAsShop()">
                   <label for="prod-campus">Campus de Entrega *</label>
                   <select id="prod-campus" [(ngModel)]="productFormCampus" name="campus">
                     <option value="Rio Tinto">Rio Tinto</option>

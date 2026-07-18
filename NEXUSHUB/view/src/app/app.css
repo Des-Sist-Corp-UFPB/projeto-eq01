@@ -54,16 +54,13 @@
   transform: rotate(45deg) scale(1.05);
 }
 
-.logo-dark-theme {
-  display: none;
+.nexus-logo-svg .logo-dot {
+  fill: #0B1D3A;
+  transition: fill 0.3s ease;
 }
 
-body.dark-mode .logo-light-theme {
-  display: none;
-}
-
-body.dark-mode .logo-dark-theme {
-  display: block;
+body.dark-mode .nexus-logo-svg .logo-dot {
+  fill: #FFFFFF;
 }
 
 .brand h1 {
@@ -230,44 +227,7 @@ body.dark-mode .logo-dark-theme {
   flex-grow: 1;
 }
 
-.app-footer {
-  border-top: 1px solid var(--color-border);
-  background: var(--footer-bg);
-  padding: 24px 0;
-  margin-top: auto;
-}
 
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.app-footer p {
-  font-size: 12.5px;
-  color: var(--color-muted);
-}
-
-.footer-links {
-  display: flex;
-  gap: 20px;
-}
-
-.footer-links a {
-  font-size: 12.5px;
-  color: var(--color-muted);
-  text-decoration: none;
-  transition: var(--transition);
-}
-
-.footer-links a:hover {
-  color: var(--color-primary);
-}
 
 @media (max-width: 768px) {
   .mobile-menu-toggle {

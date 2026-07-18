@@ -41,6 +41,9 @@ public class OpportunityApplication extends AuditableEntity {
     @Column(name = "dsmessage")
     private String message;
 
+    @Column(name = "dsphone")
+    private String phone;
+
     @Column(name = "stapply", nullable = false)
     private Integer applicationStatus = 1;
 
@@ -48,6 +51,19 @@ public class OpportunityApplication extends AuditableEntity {
         this.opportunity = opportunity;
         this.human = human;
         this.message = message;
+        touch(updatedById);
+    }
+
+    public OpportunityApplication(Opportunity opportunity, Human human, String message, String phone, UUID updatedById) {
+        this.opportunity = opportunity;
+        this.human = human;
+        this.message = message;
+        this.phone = phone;
+        touch(updatedById);
+    }
+
+    public void updateStatus(Integer status, UUID updatedById) {
+        this.applicationStatus = status;
         touch(updatedById);
     }
 }

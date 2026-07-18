@@ -1,12 +1,13 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
+import { FooterComponent } from './shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RouterOutlet, FooterComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -22,6 +23,10 @@ export class AppComponent implements OnInit {
 
   isAdminRoute() {
     return this.router.url.includes('/admin');
+  }
+
+  isHomeRoute() {
+    return this.router.url === '/';
   }
 
   ngOnInit() {
