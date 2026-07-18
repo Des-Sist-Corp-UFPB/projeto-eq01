@@ -9,6 +9,7 @@ describe('AuthService', () => {
   let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         AuthService,
@@ -20,7 +21,7 @@ describe('AuthService', () => {
     httpTestingController = TestBed.inject(HttpTestingController);
 
     // Expect initial loadSession call
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/sessao');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/sessao');
     expect(req.request.method).toBe('GET');
     req.flush(null); // Return no user initially
   });
@@ -54,7 +55,7 @@ describe('AuthService', () => {
       expect(service.isAdmin()).toBe(false);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/login');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/login');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(credentials);
     req.flush(mockUser);
@@ -80,7 +81,7 @@ describe('AuthService', () => {
       expect(user).toEqual(mockUser);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/cadastro');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/cadastro');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(registerReq);
     req.flush(mockUser);
@@ -94,7 +95,7 @@ describe('AuthService', () => {
 
     service.redefinirSenha(request).subscribe();
 
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/esqueci-senha');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/esqueci-senha');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(request);
     req.flush(null);
@@ -114,7 +115,7 @@ describe('AuthService', () => {
       expect(service.currentUser()).toEqual(mockUser);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/perfil/1');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/perfil/1');
     expect(req.request.method).toBe('PUT');
     req.flush(mockUser);
   });
@@ -133,7 +134,7 @@ describe('AuthService', () => {
       expect(service.currentUser()).toEqual(mockUser);
     });
 
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/onboarding/1');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/onboarding/1');
     expect(req.request.method).toBe('POST');
     req.flush(mockUser);
   });
@@ -151,7 +152,7 @@ describe('AuthService', () => {
     service.logout();
 
     expect(service.currentUser()).toBeNull();
-    const req = httpTestingController.expectOne('http://localhost:8085/api/usuarios/logout');
+    const req = httpTestingController.expectOne('http://localhost:8080/api/usuarios/logout');
     expect(req.request.method).toBe('POST');
     req.flush(null);
   });

@@ -9,7 +9,7 @@ describe('api.config', () => {
       origin: 'http://localhost'
     });
 
-    expect(getApiBaseUrl()).toBe('http://localhost:8085');
+    expect(getApiBaseUrl()).toBe('http://localhost:8080');
 
     vi.unstubAllGlobals();
   });
@@ -45,8 +45,8 @@ describe('api.config', () => {
       origin: 'http://localhost'
     });
 
-    expect(apiUrl('/api/test')).toBe('http://localhost:8085/api/test');
-    expect(apiUrl('api/test')).toBe('http://localhost:8085/api/test');
+    expect(apiUrl('/api/test')).toBe('http://localhost:8080/api/test');
+    expect(apiUrl('api/test')).toBe('http://localhost:8080/api/test');
 
     vi.unstubAllGlobals();
   });
