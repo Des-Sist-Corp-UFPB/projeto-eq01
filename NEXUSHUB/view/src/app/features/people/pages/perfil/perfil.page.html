@@ -94,6 +94,25 @@
           </div>
         </div>
 
+        <!-- CARD: RECONHECIMENTO ACADÊMICO (SELOS INSTITUCIONAIS) -->
+        <div class="linkedin-card badges-card" *ngIf="getAcademicBadges().length > 0">
+          <div class="badges-card-header">
+            <span class="material-symbols-rounded header-icon">workspace_premium</span>
+            <h3 class="card-section-title">Reconhecimento Acadêmico</h3>
+          </div>
+          <div class="academic-badges-grid">
+            <div class="academic-badge-item" *ngFor="let badge of getAcademicBadges()" [title]="badge.description">
+              <div class="badge-icon-box" [style.background-color]="badge.color + '15'" [style.color]="badge.color" [style.border-color]="badge.color + '40'">
+                <span class="material-symbols-rounded">{{ badge.icon }}</span>
+              </div>
+              <div class="badge-info">
+                <h4 class="badge-name" [style.color]="badge.color">{{ badge.name }}</h4>
+                <p class="badge-desc">{{ badge.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- CARD 2: ABOUT/SOBRE -->
         <div class="linkedin-card about-card">
           <h3 class="card-section-title">Sobre</h3>
@@ -443,251 +462,382 @@
       </div>
 
       <form (ngSubmit)="onSaveProfile()" #editForm="ngForm">
+        <!-- TOPIC TABS NAVIGATION -->
+        <div class="edit-topics-nav">
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'pessoais'" (click)="editTopicTab.set('pessoais')">
+            <span class="material-symbols-rounded">person</span>
+            1. Pessoais
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'academicos'" (click)="editTopicTab.set('academicos')">
+            <span class="material-symbols-rounded">school</span>
+            2. Acadêmicos
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'competencias'" (click)="editTopicTab.set('competencias')">
+            <span class="material-symbols-rounded">psychology</span>
+            3. Competências
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'historico'" (click)="editTopicTab.set('historico')">
+            <span class="material-symbols-rounded">work</span>
+            4. Histórico
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'contatos'" (click)="editTopicTab.set('contatos')">
+            <span class="material-symbols-rounded">share</span>
+            5. Contatos
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'configuracoes'" (click)="editTopicTab.set('configuracoes')">
+            <span class="material-symbols-rounded">settings</span>
+            6. Configurações
+          </button>
+        </div>
+
         <!-- 1. DADOS PESSOAIS -->
-        <h3 class="form-section-title">1. Dados Pessoais</h3>
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'pessoais'">
+          <h3 class="form-section-title">1. Dados Pessoais</h3>
 
-        <div class="form-row">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label for="username">Username único (@) *</label>
+              <div class="username-input-wrapper">
+                <span class="at-prefix">@</span>
+                <input 
+                  type="text" 
+                  id="edit-username" 
+                  name="username" 
+                  [ngModel]="editUsername" 
+                  (ngModelChange)="onUsernameInput($event)"
+                  required 
+                  placeholder="Ex: joao.silva" 
+                  #usernameInput="ngModel" 
+                  class="username-input"
+                />
+                <span class="username-status-badge checking" *ngIf="usernameStatus() === 'checking'">
+                  <span class="material-symbols-rounded animate-spin">progress_activity</span> Verificando...
+                </span>
+                <span class="username-status-badge available" *ngIf="usernameStatus() === 'available'">
+                  <span class="material-symbols-rounded">check_circle</span> Disponível
+                </span>
+                <span class="username-status-badge taken" *ngIf="usernameStatus() === 'taken'">
+                  <span class="material-symbols-rounded">cancel</span> Em uso por outro perfil
+                </span>
+                <span class="username-status-badge current" *ngIf="usernameStatus() === 'current'">
+                  <span class="material-symbols-rounded">verified</span> Username atual
+                </span>
+              </div>
+              <span class="error-msg" *ngIf="usernameStatus() === 'taken'">Este @username pertence a outra pessoa. Escolha outro.</span>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
+              <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-mail Acadêmico *</label>
+              <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadêmico" #emailInput="ngModel" />
+              <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label>Foto de Perfil</label>
+              <div class="photo-upload-options">
+                <div class="file-upload-box">
+                  <input type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" #profileFileInput />
+                  <button type="button" class="btn btn-secondary upload-btn" (click)="profileFileInput.click()" [disabled]="isCompressingImage()">
+                    <span class="material-symbols-rounded">upload_file</span>
+                    {{ isCompressingImage() ? 'Otimizando imagem...' : 'Escolher foto do dispositivo' }}
+                  </button>
+                  <span class="file-hint">Tamanho recomendado: <strong>300×300 px (Máx. 150 KB)</strong></span>
+                </div>
+
+                <div class="url-input-box">
+                  <span class="or-label">ou colar URL direta da imagem:</span>
+                  <input type="text" id="edit-fotoUrl" name="fotoUrl" [(ngModel)]="editFotoUrl" placeholder="Ex: https://link-da-foto.com/foto.jpg" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="birthDate">Data de Aniversário</label>
+              <input type="text" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDateInput" (input)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="genderType">Gênero</label>
+              <select id="edit-genderType" name="genderType" [(ngModel)]="editGenderType">
+                <option [value]="1">Masculino</option>
+                <option [value]="2">Feminino</option>
+                <option [value]="3">Outro</option>
+              </select>
+            </div>
+
+            <div class="form-group" *ngIf="editGenderType == 3">
+              <label for="genderOther">Especifique o Gênero *</label>
+              <input type="text" id="edit-genderOther" name="genderOther" [(ngModel)]="editGenderOther" required placeholder="Ex: Não binário" />
+            </div>
+          </div>
+
+          <div class="form-group toggle-group" style="flex-direction: row; align-items: center;">
+            <label class="toggle-container">
+              <input type="checkbox" name="showBirthday" [(ngModel)]="editShowBirthday" />
+              <span class="checkmark"></span>
+              Mostrar data de aniversário no perfil
+            </label>
+            <span class="info-text">(Se desativado, o ano do seu aniversário ficará oculto para terceiros)</span>
+          </div>
+
           <div class="form-group">
-            <label for="username">Username único (@) *</label>
-            <input type="text" id="edit-username" name="username" [(ngModel)]="editUsername" required placeholder="Ex: joao.silva" #usernameInput="ngModel" />
-            <span class="error-msg" *ngIf="usernameInput.invalid && usernameInput.touched">Username é obrigatório.</span>
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="nome">Nome Completo *</label>
-            <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
-            <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
+            <label for="bio">Biografia / Resumo Profissional</label>
+            <textarea id="edit-bio" name="bio" [(ngModel)]="editBio" rows="3" placeholder="Fale um pouco sobre você, sua carreira acadêmica e interesses..."></textarea>
           </div>
 
-          <div class="form-group">
-            <label for="email">E-mail Acadêmico *</label>
-            <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadêmico" #emailInput="ngModel" />
-            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('academicos')">
+              Próximo: Dados Acadêmicos &rarr;
+            </button>
           </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="fotoUrl">URL da Foto de Perfil</label>
-            <input type="text" id="edit-fotoUrl" name="fotoUrl" [(ngModel)]="editFotoUrl" placeholder="Ex: https://link-da-foto.com/foto.jpg" />
-          </div>
-
-          <div class="form-group">
-            <label for="birthDate">Data de Aniversário</label>
-            <input type="text" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDateInput" (input)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="genderType">Gênero</label>
-            <select id="edit-genderType" name="genderType" [(ngModel)]="editGenderType">
-              <option [value]="1">Masculino</option>
-              <option [value]="2">Feminino</option>
-              <option [value]="3">Outro</option>
-            </select>
-          </div>
-
-          <div class="form-group" *ngIf="editGenderType == 3">
-            <label for="genderOther">Especifique o Gênero *</label>
-            <input type="text" id="edit-genderOther" name="genderOther" [(ngModel)]="editGenderOther" required placeholder="Ex: Não binário" />
-          </div>
-        </div>
-
-        <div class="form-group toggle-group" style="flex-direction: row; align-items: center;">
-          <label class="toggle-container">
-            <input type="checkbox" name="showBirthday" [(ngModel)]="editShowBirthday" />
-            <span class="checkmark"></span>
-            Mostrar data de aniversário no perfil
-          </label>
-          <span class="info-text">(Se desativado, o ano do seu aniversário ficará oculto para terceiros)</span>
-        </div>
-
-        <div class="form-group">
-          <label for="bio">Biografia / Resumo Profissional</label>
-          <textarea id="edit-bio" name="bio" [(ngModel)]="editBio" rows="3" placeholder="Fale um pouco sobre você, sua carreira acadêmica e interesses..."></textarea>
         </div>
 
         <!-- 2. DADOS ACADÊMICOS -->
-        <h3 class="form-section-title">2. Dados Acadêmicos & Profissionais</h3>
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'academicos'">
+          <h3 class="form-section-title">2. Dados Acadêmicos & Profissionais</h3>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="course">Curso *</label>
-            <select id="edit-course" name="course" [(ngModel)]="editCourse" required class="form-control select-modern">
-              <option value="" disabled selected>Selecione seu curso</option>
-              <optgroup label="Campus IV - Rio Tinto">
-                <option value="Antropologia">Antropologia</option>
-                <option value="Ciência da Computação">Ciência da Computação</option>
-                <option value="Design">Design</option>
-                <option value="Ecologia">Ecologia</option>
-                <option value="Matemática">Matemática</option>
-                <option value="Sistemas de Informação">Sistemas de Informação</option>
-              </optgroup>
-              <optgroup label="Campus IV - Mamanguape">
-                <option value="Administração">Administração</option>
-                <option value="Ciências Contábeis">Ciências Contábeis</option>
-                <option value="Letras - Língua Portuguesa">Letras - Língua Portuguesa</option>
-                <option value="Pedagogia">Pedagogia</option>
-                <option value="Secretariado Executivo Bilíngue">Secretariado Executivo Bilíngue</option>
-                <option value="Letras - Espanhol (EaD)">Letras - Espanhol (EaD)</option>
-                <option value="Letras - Inglês (EaD)">Letras - Inglês (EaD)</option>
-              </optgroup>
-            </select>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="course">Curso *</label>
+              <select id="edit-course" name="course" [(ngModel)]="editCourse" required class="form-control select-modern">
+                <option value="" disabled selected>Selecione seu curso</option>
+                <optgroup label="Campus IV - Rio Tinto">
+                  <option value="Antropologia">Antropologia</option>
+                  <option value="Ciência da Computação">Ciência da Computação</option>
+                  <option value="Design">Design</option>
+                  <option value="Ecologia">Ecologia</option>
+                  <option value="Matemática">Matemática</option>
+                  <option value="Sistemas de Informação">Sistemas de Informação</option>
+                </optgroup>
+                <optgroup label="Campus IV - Mamanguape">
+                  <option value="Administração">Administração</option>
+                  <option value="Ciências Contábeis">Ciências Contábeis</option>
+                  <option value="Letras - Língua Portuguesa">Letras - Língua Portuguesa</option>
+                  <option value="Pedagogia">Pedagogia</option>
+                  <option value="Secretariado Executivo Bilíngue">Secretariado Executivo Bilíngue</option>
+                  <option value="Letras - Espanhol (EaD)">Letras - Espanhol (EaD)</option>
+                  <option value="Letras - Inglês (EaD)">Letras - Inglês (EaD)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="period">Período Atual *</label>
+              <input type="text" id="edit-period" name="period" [(ngModel)]="editPeriod" required placeholder="Ex: 2023.1 ou 5" />
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="period">Período Atual *</label>
-            <input type="text" id="edit-period" name="period" [(ngModel)]="editPeriod" required placeholder="Ex: 2023.1 ou 5" />
-          </div>
-        </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="matricula">Matrícula</label>
+              <input type="text" id="edit-matricula" name="matricula" [(ngModel)]="editMatricula" placeholder="Ex: 2023001234" />
+            </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="matricula">Matrícula</label>
-            <input type="text" id="edit-matricula" name="matricula" [(ngModel)]="editMatricula" placeholder="Ex: 2023001234" />
-          </div>
+            <div class="form-group">
+              <label for="ingressPeriod">Período de Ingresso (Ano.Período)</label>
+              <input type="text" id="edit-ingressPeriod" name="ingressPeriod" [(ngModel)]="editIngressPeriod" placeholder="Ex: 2023.1" />
+            </div>
 
-          <div class="form-group">
-            <label for="ingressPeriod">Período de Ingresso (Ano.Período)</label>
-            <input type="text" id="edit-ingressPeriod" name="ingressPeriod" [(ngModel)]="editIngressPeriod" placeholder="Ex: 2023.1" />
-          </div>
-
-          <div class="form-group">
-            <label for="conclusionPeriod">Previsão de Conclusão (Ano.Período)</label>
-            <input type="text" id="edit-conclusionPeriod" name="conclusionPeriod" [(ngModel)]="editConclusionPeriod" placeholder="Ex: 2027.2" />
-          </div>
-        </div>
-
-        <!-- 3. CONTATOS E REDES SOCIAIS -->
-        <h3 class="form-section-title">3. Contatos & Redes</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="whatsapp">WhatsApp (com DDD)</label>
-            <input type="text" id="edit-whatsapp" name="whatsapp" [value]="editWhatsapp" (input)="formatWhatsapp($event)" placeholder="Ex: (83) 99999-9999" />
+            <div class="form-group">
+              <label for="conclusionPeriod">Previsão de Conclusão (Ano.Período)</label>
+              <input type="text" id="edit-conclusionPeriod" name="conclusionPeriod" [(ngModel)]="editConclusionPeriod" placeholder="Ex: 2027.2" />
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="githubUrl">URL do GitHub</label>
-            <input type="text" id="edit-githubUrl" name="githubUrl" [(ngModel)]="editGithubUrl" placeholder="Ex: https://github.com/usuario" />
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('pessoais')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('competencias')">Próximo: Competências &rarr;</button>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="linkedinUrl">URL do LinkedIn</label>
-            <input type="text" id="edit-linkedinUrl" name="linkedinUrl" [(ngModel)]="editLinkedinUrl" placeholder="Ex: https://linkedin.com/in/usuario" />
-          </div>
+        <!-- 3. COMPETÊNCIAS & STACKS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'competencias'">
+          <h3 class="form-section-title">3. Competências & Stacks</h3>
 
-          <div class="form-group">
-            <label for="instagramUrl">URL do Instagram</label>
-            <input type="text" id="edit-instagramUrl" name="instagramUrl" [(ngModel)]="editInstagramUrl" placeholder="Ex: https://instagram.com/usuario" />
-          </div>
-
-          <div class="form-group">
-            <label for="websiteUrl">Site Pessoal / Portfólio</label>
-            <input type="text" id="edit-websiteUrl" name="websiteUrl" [(ngModel)]="editWebsiteUrl" placeholder="Ex: https://meusite.com" />
-          </div>
-        </div>
-
-        <!-- 4. TECNOLOGIAS / STACKS -->
-        <h3 class="form-section-title">4. Tecnologias & Stacks</h3>
-        
-        <div class="form-group autocomplete-wrapper">
-          <label for="newTech">Adicionar Tecnologias (Pressione Enter para adicionar)</label>
-          <div class="tech-input-container">
-            <input type="text" id="edit-newTech" name="newTech" [(ngModel)]="newTechInput" (keydown.enter)="$event.preventDefault(); addTechnology(newTechInput)" placeholder="Ex: React, Spring, Docker, Git" />
-            <button type="button" class="btn btn-secondary" (click)="addTechnology(newTechInput)">Adicionar</button>
+          <!-- Sugestões recomendadas com base no Curso do Campus IV -->
+          <div class="course-suggestions-box" *ngIf="editCourse && getSuggestedCompetenciesForCourse().length > 0">
+            <div class="box-title">
+              <span class="material-symbols-rounded icon">auto_awesome</span>
+              <span>Competências recomendadas para <strong>{{ editCourse }}</strong>:</span>
+            </div>
+            <div class="suggested-chips">
+              <button type="button" class="suggested-chip-btn" *ngFor="let sug of getSuggestedCompetenciesForCourse()" (click)="addTechnology(sug)">
+                + {{ sug }}
+              </button>
+            </div>
           </div>
           
-          <!-- Filtered suggestions list -->
-          <ul class="suggestions-list" *ngIf="getFilteredSuggestions().length > 0">
-            <li *ngFor="let sug of getFilteredSuggestions()" (click)="addTechnology(sug)">
-              {{ sug }}
-            </li>
-          </ul>
+          <div class="form-group autocomplete-wrapper" style="margin-top: 16px;">
+            <label for="newTech">Adicionar Competências / Tecnologias (Pressione Enter para adicionar)</label>
+            <div class="tech-input-container">
+              <input type="text" id="edit-newTech" name="newTech" [(ngModel)]="newTechInput" (keydown.enter)="$event.preventDefault(); addTechnology(newTechInput)" placeholder="Ex: React, Java, Figma, Inglês, Gestão" />
+              <button type="button" class="btn btn-secondary" (click)="addTechnology(newTechInput)">Adicionar</button>
+            </div>
+            
+            <!-- Filtered suggestions list -->
+            <ul class="suggestions-list" *ngIf="getFilteredSuggestions().length > 0">
+              <li *ngFor="let sug of getFilteredSuggestions()" (click)="addTechnology(sug)">
+                {{ sug }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="tech-tags-edit-container" *ngIf="editTechnologies.length > 0">
+            <span class="tech-tag-edit" *ngFor="let tech of editTechnologies">
+              <span class="tech-name">{{ tech }}</span>
+              <button type="button" class="remove-tag-btn" (click)="removeTechnology(tech)" title="Remover competência">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </span>
+          </div>
+          <div class="tech-empty-hint" *ngIf="editTechnologies.length === 0">
+            <span class="material-symbols-rounded icon">info</span>
+            <span>Nenhuma competência adicionada ainda. Digite no campo acima ou selecione as sugestões recomendadas.</span>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('academicos')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('historico')">Próximo: Histórico &rarr;</button>
+          </div>
         </div>
 
-        <div class="tech-tags-edit-container">
-          <span class="tech-tag-edit" *ngFor="let tech of editTechnologies">
-            {{ tech }}
-            <button type="button" class="remove-tag-btn" (click)="removeTechnology(tech)">&times;</button>
-          </span>
-        </div>
-
-        <!-- 5. ESTRUTURA DE TEXTO / EXPERIÊNCIAS -->
-        <h3 class="form-section-title">5. Seções Detalhadas</h3>
-        
-        <div class="form-group">
-          <label for="experience">Resumo de Experiências profissionais/projetos</label>
-          <textarea id="edit-experience" name="experience" [(ngModel)]="editExperience" rows="4" placeholder="Descreva seus projetos anteriores, atuações profissionais, estágios..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="education">Formação Acadêmica</label>
-          <textarea id="edit-education" name="education" [(ngModel)]="editEducation" rows="4" placeholder="Descreva sua formação, escolas, cursos técnicos, certificações acadêmicas..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="certification">Competências & Certificados</label>
-          <textarea id="edit-certification" name="certification" [(ngModel)]="editCertification" rows="4" placeholder="Liste suas certificações, prêmios ou conquistas relevantes..."></textarea>
-        </div>
-
-        <!-- 6. PREFERÊNCIAS DE NOTIFICAÇÃO -->
-        <h3 class="form-section-title">6. Preferências de Notificação por E-mail</h3>
-        <div class="notifications-checkboxes">
-          <label class="toggle-container">
-            <input type="checkbox" name="notifRecommendations" [(ngModel)]="editNotifRecommendations" />
-            <span class="checkmark"></span>
-            Recomendações e competências
-          </label>
+        <!-- 4. HISTÓRICO & FORMAÇÃO -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'historico'">
+          <h3 class="form-section-title">4. Histórico e Formação</h3>
           
-          <label class="toggle-container">
-            <input type="checkbox" name="notifApplications" [(ngModel)]="editNotifApplications" />
-            <span class="checkmark"></span>
-            Candidaturas
-          </label>
-          
-          <label class="toggle-container">
-            <input type="checkbox" name="notifAnnouncements" [(ngModel)]="editNotifAnnouncements" />
-            <span class="checkmark"></span>
-            Anúncios do Hub
-          </label>
-          
-          <label class="toggle-container">
-            <input type="checkbox" name="notifEdicts" [(ngModel)]="editNotifEdicts" />
-            <span class="checkmark"></span>
-            Editais
-          </label>
-          
-          <label class="toggle-container">
-            <input type="checkbox" name="notifAdmin" [(ngModel)]="editNotifAdmin" />
-            <span class="checkmark"></span>
-            Administração
-          </label>
+          <div class="form-group">
+            <label for="experience">Resumo de Experiências profissionais/projetos</label>
+            <textarea id="edit-experience" name="experience" [(ngModel)]="editExperience" rows="4" placeholder="Descreva seus projetos anteriores, atuações profissionais, estágios..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="education">Formação Acadêmica</label>
+            <textarea id="edit-education" name="education" [(ngModel)]="editEducation" rows="4" placeholder="Descreva sua formação, escolas, cursos técnicos, certificações acadêmicas..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="certification">Competências & Certificados</label>
+            <textarea id="edit-certification" name="certification" [(ngModel)]="editCertification" rows="4" placeholder="Liste suas certificações, prêmios ou conquistas relevantes..."></textarea>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('competencias')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('contatos')">Próximo: Contatos &rarr;</button>
+          </div>
         </div>
 
-        <div class="form-group" style="margin-top: 2rem;">
-          <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
-          <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mínimo 6 dígitos)" minlength="6" #senhaInput="ngModel" />
-          <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+        <!-- 5. CONTATOS E REDES SOCIAIS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'contatos'">
+          <h3 class="form-section-title">5. Contatos & Redes</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="whatsapp">WhatsApp (com DDD)</label>
+              <input type="text" id="edit-whatsapp" name="whatsapp" [value]="editWhatsapp" (input)="formatWhatsapp($event)" placeholder="Ex: (83) 99999-9999" />
+            </div>
+
+            <div class="form-group">
+              <label for="githubUrl">URL do GitHub</label>
+              <input type="text" id="edit-githubUrl" name="githubUrl" [(ngModel)]="editGithubUrl" placeholder="Ex: https://github.com/usuario" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="linkedinUrl">URL do LinkedIn</label>
+              <input type="text" id="edit-linkedinUrl" name="linkedinUrl" [(ngModel)]="editLinkedinUrl" placeholder="Ex: https://linkedin.com/in/usuario" />
+            </div>
+
+            <div class="form-group">
+              <label for="instagramUrl">URL do Instagram</label>
+              <input type="text" id="edit-instagramUrl" name="instagramUrl" [(ngModel)]="editInstagramUrl" placeholder="Ex: https://instagram.com/usuario" />
+            </div>
+
+            <div class="form-group">
+              <label for="websiteUrl">Site Pessoal / Portfólio</label>
+              <input type="text" id="edit-websiteUrl" name="websiteUrl" [(ngModel)]="editWebsiteUrl" placeholder="Ex: https://meusite.com" />
+            </div>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('historico')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('configuracoes')">Próximo: Configurações &rarr;</button>
+          </div>
         </div>
 
-        <div class="form-group share-on-feed-group" style="margin-top: 2rem; margin-bottom: 2rem;">
-          <label class="toggle-container" style="display: inline-flex; align-items: center; gap: 8px;">
-            <input type="checkbox" name="shareOnFeed" [(ngModel)]="shareOnFeed" />
-            <span class="checkmark"></span>
-            <strong>Compartilhar atualizações no feed principal</strong>
-          </label>
-          <span class="info-text">(Se ativado, cria uma postagem automática no feed sobre suas novas Stacks ou biografia atualizada)</span>
+        <!-- 6. PREFERÊNCIAS E NOTIFICAÇÕES -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'configuracoes'">
+          <h3 class="form-section-title">6. Preferências de Notificação & Segurança</h3>
+          
+          <div class="notifications-checkboxes">
+            <label class="toggle-container">
+              <input type="checkbox" name="notifRecommendations" [(ngModel)]="editNotifRecommendations" />
+              <span class="checkmark"></span>
+              Recomendações e competências
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifApplications" [(ngModel)]="editNotifApplications" />
+              <span class="checkmark"></span>
+              Candidaturas
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifAnnouncements" [(ngModel)]="editNotifAnnouncements" />
+              <span class="checkmark"></span>
+              Anúncios do Hub
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifEdicts" [(ngModel)]="editNotifEdicts" />
+              <span class="checkmark"></span>
+              Editais
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifAdmin" [(ngModel)]="editNotifAdmin" />
+              <span class="checkmark"></span>
+              Administração
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 1.5rem;">
+            <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
+            <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mínimo 6 dígitos)" minlength="6" #senhaInput="ngModel" />
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <div class="form-group share-on-feed-group" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <label class="toggle-container" style="display: inline-flex; align-items: center; gap: 8px;">
+              <input type="checkbox" name="shareOnFeed" [(ngModel)]="shareOnFeed" />
+              <span class="checkmark"></span>
+              <strong>Compartilhar atualizações no feed principal</strong>
+            </label>
+            <span class="info-text">(Se ativado, cria uma postagem automática no feed sobre suas novas Stacks ou biografia atualizada)</span>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('contatos')">&larr; Anterior</button>
+          </div>
         </div>
 
-        <div class="edit-actions">
+        <!-- ALWAYS VISIBLE SAVE/CANCEL BAR AT THE BOTTOM -->
+        <div class="edit-actions" style="margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1.5rem;">
           <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
-            {{ isSaving() ? 'Salvando...' : 'Salvar Alterações' }}
+            <span class="material-symbols-rounded">save</span>
+            {{ isSaving() ? 'Salvando...' : 'Salvar Alterações do Perfil' }}
           </button>
           <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
             Cancelar

@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { apiUrl } from '../../../../core/config/api.config';
@@ -52,6 +53,7 @@ export class LojaPageComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected activeTab = signal<'compra' | 'venda'>('compra');
 
@@ -418,7 +420,13 @@ export class LojaPageComponent implements OnInit {
     this.creatingAsShop.set(asShop);
     
     if (!asShop && !this.currentUser()?.whatsapp) {
-      this.toastService.showWarning('Você precisa cadastrar seu WhatsApp no seu perfil para poder anunciar itens avulsos.');
+      this.toastService.showWarning(
+        'Falta cadastrar seu número de WhatsApp no seu perfil para anunciar itens avulsos.',
+        {
+          text: 'Cadastrar agora',
+          onClick: () => this.router.navigate(['/perfil'])
+        }
+      );
       this.showProductTypeModal.set(false);
       return;
     }

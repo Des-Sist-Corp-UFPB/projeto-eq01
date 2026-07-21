@@ -13,19 +13,33 @@
 
 
 :root {
-  --color-primary: #3b6ef4;
-  --color-primary-hover: #1b52dd;
+  /* ─── Cores Oficiais da Marca ─── */
+  --brand-night-blue: #0B1D3A;
+  --brand-highlight-blue: #3B6EF4;
+  --brand-white: #FFFFFF;
+
+  /* ─── Tokens Funcionais - ☀️ Light Mode ─── */
+  --bg-primary: #FFFFFF;
+  --bg-surface: #F1F5F9;
+  --text-primary: #0B1D3A;
+  --text-secondary: #64748B;
+  --action-primary: #3B6EF4;
+  --border-subtle: #E2E8F0;
+
+  /* Mapeamentos para retrocompatibilidade de CSS */
+  --color-primary: var(--action-primary);
+  --color-primary-hover: #2563eb;
   --color-secondary: #13a37c;
   --color-secondary-hover: #0e8564;
   --color-accent: #f5b82e;
   --color-warning: #f97316;
   --color-danger: #dc2626;
   --color-journey: #7c3aed;
-  --color-background: #f5f7fb;
-  --color-surface: #ffffff;
-  --color-text: #0b1d3a;
-  --color-muted: #65758b;
-  --color-border: #dfe6f0;
+  --color-background: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-text: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-border: var(--border-subtle);
 
   --header-bg: rgba(255, 255, 255, 0.85);
   --footer-bg: #ffffff;
@@ -39,32 +53,41 @@
   --border-radius: 14px;
   --border-radius-lg: 20px;
   
-  --shadow-sm: 0 2px 8px rgba(19, 32, 51, 0.04);
-  --shadow-md: 0 8px 30px rgba(19, 32, 51, 0.06);
-  --shadow-lg: 0 16px 40px rgba(19, 32, 51, 0.12);
+  --shadow-sm: 0 2px 8px rgba(11, 29, 58, 0.04);
+  --shadow-md: 0 8px 30px rgba(11, 29, 58, 0.06);
+  --shadow-lg: 0 16px 40px rgba(11, 29, 58, 0.12);
   
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 body.dark-mode {
-  --color-primary: #3b6ef4;
-  --color-primary-hover: #5785f7;
+  /* ─── Tokens Funcionais - 🌙 Dark Mode ─── */
+  --bg-primary: #0B1D3A;
+  --bg-surface: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --action-primary: #60A5FA;
+  --border-subtle: #334155;
+
+  /* Mapeamentos para retrocompatibilidade de CSS */
+  --color-primary: var(--action-primary);
+  --color-primary-hover: #93c5fd;
   --color-secondary: #34d399;
   --color-secondary-hover: #10b981;
   --color-accent: #fbbf24;
   --color-warning: #fb923c;
   --color-danger: #f87171;
   --color-journey: #a78bfa;
-  --color-background: #0b1220;
-  --color-surface: #111c2e;
-  --color-text: #eaf1fb;
-  --color-muted: #9aa8bc;
-  --color-border: #243349;
+  --color-background: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-text: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-border: var(--border-subtle);
 
-  --header-bg: rgba(17, 28, 46, 0.85);
-  --footer-bg: #111c2e;
+  --header-bg: rgba(11, 29, 58, 0.85);
+  --footer-bg: #0B1D3A;
   --nav-hover-bg: #1e293b;
-  --nav-wrapper-bg: rgba(17, 28, 46, 0.98);
+  --nav-wrapper-bg: rgba(11, 29, 58, 0.98);
 }
 
 /* Dark Mode UI Adaptations and Button Fixes */
@@ -382,4 +405,150 @@ body.dark-mode .academic-importance-box {
   line-height: 1.5;
   color: var(--color-muted);
   margin: 0;
+}
+
+/* ─── Global Toast Notifications Container & Balloon System ─── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.toast-message {
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  min-width: 300px;
+  max-width: 480px;
+  pointer-events: auto;
+}
+
+.toast-message.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-text {
+  flex-grow: 1;
+}
+
+/* Balão verde clarinho para Success */
+.toast-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 5px solid #22c55e;
+  color: #14532d;
+}
+
+/* Balão vermelho para Fails */
+.toast-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 5px solid #ef4444;
+  color: #7f1d1d;
+}
+
+/* Balão amarelo para Warnings */
+.toast-warning {
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-left: 5px solid #eab308;
+  color: #713f12;
+}
+
+/* Balão azul para Info */
+.toast-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 5px solid #3b82f6;
+  color: #1e3a8a;
+}
+
+/* Botão de ação nos balões de notificação */
+.toast-action-btn {
+  margin-left: auto;
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.toast-action-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.toast-warning .toast-action-btn {
+  background: #713f12;
+  color: #ffffff;
+}
+
+.toast-error .toast-action-btn {
+  background: #7f1d1d;
+  color: #ffffff;
+}
+
+.toast-success .toast-action-btn {
+  background: #14532d;
+  color: #ffffff;
+}
+
+/* Suporte para Dark Mode */
+body.dark-mode .toast-success {
+  background: #064e3b;
+  border-color: #059669;
+  color: #ecfdf5;
+}
+
+body.dark-mode .toast-error {
+  background: #450a0a;
+  border-color: #dc2626;
+  color: #fef2f2;
+}
+
+body.dark-mode .toast-warning {
+  background: #422006;
+  border-color: #d97706;
+  color: #fefce8;
+}
+
+body.dark-mode .toast-info {
+  background: #172554;
+  border-color: #2563eb;
+  color: #eff6ff;
+}
+
+body.dark-mode .toast-warning .toast-action-btn {
+  background: #fde047;
+  color: #422006;
+}
+
+body.dark-mode .toast-error .toast-action-btn {
+  background: #fca5a5;
+  color: #450a0a;
+}
+
+body.dark-mode .toast-success .toast-action-btn {
+  background: #86efac;
+  color: #064e3b;
 }

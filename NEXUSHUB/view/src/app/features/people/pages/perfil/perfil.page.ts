@@ -7,6 +7,68 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { apiUrl } from '../../../../core/config/api.config';
 import { ToastService } from '../../../../core/services/toast.service';
 
+export const COURSE_COMPETENCIES_MAP: Record<string, string[]> = {
+  'Sistemas de Informação': [
+    'Angular', 'TypeScript', 'Java', 'Spring Boot', 'PostgreSQL', 'SQL', 'Docker',
+    'Gestão de TI', 'Engenharia de Requisitos', 'SCRUM', 'Arquitetura de Software',
+    'DevOps', 'UI/UX Design', 'Modelagem de Dados', 'REST APIs', 'Git & GitHub'
+  ],
+  'Ciência da Computação': [
+    'Python', 'C++', 'Java', 'Algoritmos & Estruturas de Dados', 'Inteligência Artificial',
+    'Machine Learning', 'Compiladores', 'Sistemas Operacionais', 'Redes de Computadores',
+    'Computação em Nuvem', 'Linux', 'Clean Code', 'Segurança da Informação'
+  ],
+  'Design': [
+    'Figma', 'Adobe XD', 'UI Design', 'UX Research', 'Design System', 'Typography',
+    'Branding', 'Prototipagem', 'Adobe Illustrator', 'Adobe Photoshop', 'Design Thinking',
+    'Motion Design', 'Visual Design'
+  ],
+  'Ecologia': [
+    'Gestão Ambiental', 'Geoprocessamento (QGIS)', 'Licenciamento Ambiental',
+    'Análise de Dados Ambientais', 'R / RStudio', 'Conservação da Biodiversidade',
+    'Perícia Ambiental', 'Relatórios EIA/RIMA', 'Ecologia de Campo', 'Sustentabilidade'
+  ],
+  'Matemática': [
+    'Cálculo Diferencial e Integral', 'Álgebra Linear', 'Estatística & Probabilidade',
+    'Python para Matemática', 'LaTeX', 'Análise Numérica', 'Modelagem Matemática',
+    'Ensino de Matemática', 'Geometria Analítica'
+  ],
+  'Antropologia': [
+    'Etnografia', 'Pesquisa Qualitativa', 'Antropologia Visual', 'Patrimônio Cultural',
+    'Direitos Humanos', 'Elaboração de Projetos Sociais', 'Análise de Discurso', 'Sociologia'
+  ],
+  'Secretariado Executivo Bilíngue': [
+    'Gestão Documental', 'Inglês Fluente', 'Espanhol Avançado', 'Redação Empresarial',
+    'Organização de Eventos Corporate', 'Assessoria Executiva', 'Comunicação Interpessoal',
+    'Ferramentas Office / Workspace', 'Etiqueta Corporativa'
+  ],
+  'Pedagogia': [
+    'Psicologia da Educação', 'Gestão Escolar', 'Elaboração de Planos de Aula',
+    'Metodologias Ativas', 'Educação Inclusiva', 'Tecnologias Educacionais',
+    'Letramento e Alfabetização', 'Didática'
+  ],
+  'Administração': [
+    'Gestão Financeira', 'Planejamento Estratégico', 'Marketing Digital', 'Gestão de Pessoas',
+    'Análise de Custos', 'Excel Avançado', 'Liderança', 'Empreendedorismo', 'BIM / Gestão de Processos'
+  ],
+  'Ciências Contábeis': [
+    'Contabilidade Geral', 'DRE & Balanço Patrimonial', 'Planejamento Tributário',
+    'Auditoria Contábil', 'Controladoria', 'Análise Financeira', 'Excel Avançado', 'HP 12C'
+  ],
+  'Letras - Língua Portuguesa': [
+    'Revisão de Texto', 'Linguística Aplicada', 'Produção Textual', 'Literatura Brasileira',
+    'Gramática Normativa', 'Análise Literária', 'Didática de Idiomas'
+  ],
+  'Letras - Inglês (EaD)': [
+    'Inglês Fluente / Avançado', 'Tradução Inglês-Português', 'Linguística de Língua Inglesa',
+    'Ensino de Línguas Estrangeiras', 'Produção Textual em Inglês'
+  ],
+  'Letras - Espanhol (EaD)': [
+    'Espanhol Fluente / Avançado', 'Tradução Espanhol-Português', 'Literatura Hispânica',
+    'Didática do Espanhol', 'Redação em Espanhol'
+  ]
+};
+
 @Component({
   selector: 'app-perfil-page',
   standalone: true,
@@ -32,6 +94,7 @@ export class PerfilPageComponent implements OnInit {
   });
 
   protected readonly activeTab = signal<'perfil' | 'recados' | 'feeds' | 'depoimentos'>('perfil');
+  protected readonly editTopicTab = signal<'pessoais' | 'academicos' | 'competencias' | 'historico' | 'contatos' | 'configuracoes'>('pessoais');
   protected readonly followStatus = signal<{ following: boolean, followersCount: number, followingCount: number }>({ following: false, followersCount: 0, followingCount: 0 });
   protected readonly notificationsList = signal<any[]>([]);
   protected shareOnFeed = false;
@@ -310,12 +373,75 @@ export class PerfilPageComponent implements OnInit {
     return dateStr;
   }
 
-  getGenderName(type?: number, other?: string): string {
-    if (type === 1) return 'Masculino';
-    if (type === 2) return 'Feminino';
-    if (type === 3) return other || 'Outro';
+  getGenderName(genderType?: number, genderOther?: string): string {
+    if (genderType === 1) return 'Masculino';
+    if (genderType === 2) return 'Feminino';
+    if (genderType === 3) return genderOther || 'Outro';
     return 'Não especificado';
   }
+
+  getAcademicBadges(): { name: string; icon: string; color: string; description: string }[] {
+    const user = this.profileUser();
+    if (!user) return [];
+
+    const badges = [];
+
+    if (user.cargo === 'PROFESSOR') {
+      badges.push({
+        name: 'Docente & Pesquisador',
+        icon: 'workspace_premium',
+        color: '#7c3aed',
+        description: 'Membro do corpo docente e orientador de projetos no Campus IV.'
+      });
+    } else {
+      badges.push({
+        name: 'Discente Ativo',
+        icon: 'school',
+        color: '#2563eb',
+        description: 'Estudante matriculado e ativo no ecossistema acadêmico.'
+      });
+    }
+
+    if (user.course) {
+      if (user.course.includes('Sistemas') || user.course.includes('Computação')) {
+        badges.push({
+          name: 'Top Contribuidor Tech',
+          icon: 'code_blocks',
+          color: '#10b981',
+          description: 'Reconhecimento por contribuição e proficiência em desenvolvimento e arquitetura.'
+        });
+      } else if (user.course.includes('Design')) {
+        badges.push({
+          name: 'Destaque em UI/UX',
+          icon: 'palette',
+          color: '#8b5cf6',
+          description: 'Reconhecimento por excelência em design visual e experiência de usuário.'
+        });
+      } else {
+        badges.push({
+          name: 'Pesquisador Acadêmico',
+          icon: 'science',
+          color: '#059669',
+          description: 'Engajamento em produção científica e grupos de estudo.'
+        });
+      }
+    }
+
+    if ((user.technologies && user.technologies.length >= 3) || user.bio) {
+      badges.push({
+        name: 'Perfil Verificado & Completo',
+        icon: 'verified',
+        color: '#f59e0b',
+        description: 'Perfil acadêmico com informações completas e competências mapeadas.'
+      });
+    }
+
+    return badges;
+  }
+
+  protected readonly usernameStatus = signal<'current' | 'checking' | 'available' | 'taken' | 'invalid'>('current');
+  protected readonly isCompressingImage = signal<boolean>(false);
+  private usernameCheckTimer: any = null;
 
   enableEditMode() {
     const user = this.profileUser();
@@ -326,6 +452,7 @@ export class PerfilPageComponent implements OnInit {
       this.editSenha = '';
       this.editFotoUrl = user.fotoUrl || '';
       this.editBio = user.bio || '';
+      this.usernameStatus.set('current');
       
       if (user.birthDate) {
         const parts = user.birthDate.split('-');
@@ -363,6 +490,99 @@ export class PerfilPageComponent implements OnInit {
       this.isEditMode.set(true);
       this.editError.set('');
     }
+  }
+
+  onUsernameInput(value: string) {
+    let clean = value.toLowerCase().trim().replace(/[^a-z0-9._-]/g, '');
+    this.editUsername = clean;
+
+    if (this.usernameCheckTimer) {
+      clearTimeout(this.usernameCheckTimer);
+    }
+
+    const currUser = this.currentUser();
+    if (clean === currUser?.username?.toLowerCase()) {
+      this.usernameStatus.set('current');
+      return;
+    }
+
+    if (clean.length < 3) {
+      this.usernameStatus.set('invalid');
+      return;
+    }
+
+    this.usernameStatus.set('checking');
+    this.usernameCheckTimer = setTimeout(() => {
+      this.http.get<any>(apiUrl(`/api/usuarios/username/${clean}`)).subscribe({
+        next: (userFound) => {
+          if (userFound && userFound.id !== currUser?.id) {
+            this.usernameStatus.set('taken');
+          } else {
+            this.usernameStatus.set('current');
+          }
+        },
+        error: () => {
+          this.usernameStatus.set('available');
+        }
+      });
+    }, 350);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+      this.toastService.show('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WebP).', 'error');
+      return;
+    }
+
+    this.isCompressingImage.set(true);
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const base64Str = e.target.result;
+      this.compressProfileImage(base64Str, 300, 300).then(compressedBase64 => {
+        this.editFotoUrl = compressedBase64;
+        this.isCompressingImage.set(false);
+        this.toastService.show('Foto de perfil recortada e otimizada (300x300 px) com sucesso!', 'success');
+      }).catch(() => {
+        this.isCompressingImage.set(false);
+        this.toastService.show('Falha ao processar a imagem selecionada.', 'error');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private compressProfileImage(base64Str: string, maxWidth: number, maxHeight: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        const minDim = Math.min(width, height);
+        const startX = (width - minDim) / 2;
+        const startY = (height - minDim) / 2;
+
+        canvas.width = maxWidth;
+        canvas.height = maxHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, maxWidth, maxHeight);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        } else {
+          reject('Canvas error');
+        }
+      };
+      img.onerror = (err) => reject(err);
+    });
   }
 
   cancelEdit() {
@@ -416,12 +636,30 @@ export class PerfilPageComponent implements OnInit {
     );
   }
 
+  getSuggestedCompetenciesForCourse(): string[] {
+    const course = this.editCourse;
+    if (!course) return [];
+    
+    const mapKey = Object.keys(COURSE_COMPETENCIES_MAP).find(k => 
+      k.toLowerCase() === course.toLowerCase() || course.toLowerCase().includes(k.toLowerCase())
+    );
+
+    const suggested = mapKey ? COURSE_COMPETENCIES_MAP[mapKey] : [];
+    return suggested.filter(tech => !this.editTechnologies.includes(tech));
+  }
+
   onSaveProfile() {
     const user = this.currentUser();
     if (!user) return;
 
     this.isSaving.set(true);
     this.editError.set('');
+
+    if (this.usernameStatus() === 'taken') {
+      this.toastService.show('O username escolhido já está em uso por outro usuário.', 'error');
+      this.isSaving.set(false);
+      return;
+    }
 
     const periodPattern = /^\d{4}\.[12]$/;
     if (this.editIngressPeriod && !periodPattern.test(this.editIngressPeriod)) {

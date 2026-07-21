@@ -1,85 +1,144 @@
-<div class="pessoas-wrapper animate-fade-in">
+<div class="pessoas-page-container animate-fade-in">
 
-  <!-- Page Header (Page Hero) -->
+  <!-- Page Hero (Banner Padronizado) -->
   <div class="page-hero">
-    <div class="hero-content animate-fade-in" style="display: flex; flex-direction: column; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <svg class="nexus-icon" viewBox="0 0 32 32" style="width: 28px; height: 28px;">
-          <line x1="8" y1="13" x2="16" y2="10" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
-          <line x1="24" y1="13" x2="16" y2="10" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
-          <circle cx="16" cy="10" r="3.5" fill="#3B6EF4" class="logo-core"/>
-          <path d="M9 25 C9 19, 23 19, 23 25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="8" cy="13" r="2.2" fill="currentColor"/>
-          <path d="M3 26 C3 21.5, 13 21.5, 13 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-          <circle cx="24" cy="13" r="2.2" fill="currentColor"/>
-          <path d="M19 26 C19 21.5, 29 21.5, 29 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-        </svg>
-        <span class="hero-tag" style="margin-bottom: 0;">Comunidade Nexus</span>
-      </div>
-      <h1 style="margin-bottom: 8px;">Nossas <span>Pessoas</span></h1>
-      <p>Conecte-se com alunos, professores e técnicos da nossa universidade.</p>
+    <div class="hero-content animate-fade-in">
+      <span class="hero-tag">Ecossistema Nexus</span>
+      <h1>Comunidade e <span>Nossas Pessoas</span></h1>
+      <p>Conecte-se com alunos, professores e técnicos da nossa comunidade acadêmica.</p>
     </div>
   </div>
 
-  <div class="action-bar-pessoas">
-    <div class="search-container" style="flex-grow: 1; max-width: 500px; display: flex; align-items: center; position: relative;">
-      <span class="material-symbols-rounded search-icon" style="position: absolute; left: 12px; color: var(--color-muted);">search</span>
-      <input 
-        type="text" 
-        placeholder="Buscar por nome..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)"
-        class="search-input"
-        style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid var(--color-border);"
-      />
+  <!-- EXPANDABLE FILTER BOX (FIEL AO LAYOUT FORNECIDO) -->
+  <div class="filter-box-card">
+    <div class="filter-box-header" (click)="isFilterExpanded.set(!isFilterExpanded())">
+      <span class="filter-title">Filtros</span>
+      <button type="button" class="btn-toggle-filter">
+        <span class="material-symbols-rounded">{{ isFilterExpanded() ? 'expand_less' : 'expand_more' }}</span>
+      </button>
     </div>
 
-    <div class="filters-container">
-      <select [ngModel]="selectedFilter()" (ngModelChange)="selectedFilter.set($event)" class="filter-select">
-        <option value="Todos">Filtros (Todos)</option>
-        <option value="Aluno">Alunos</option>
-        <option value="Professor">Professores</option>
-        <option value="Técnico">Técnicos</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="loading-spinner" *ngIf="isLoading()">
-    <span class="material-symbols-rounded animate-spin" style="font-size: 32px; color: var(--color-primary);">progress_activity</span>
-    <p style="margin-top: 8px; color: var(--color-muted);">Carregando pessoas...</p>
-  </div>
-
-  <div class="pessoas-grid" *ngIf="!isLoading() && filteredPessoas().length > 0">
-    <article class="pessoa-card" *ngFor="let p of filteredPessoas()">
-      <div class="pessoa-header">
-        <img [src]="p.fotoUrl || 'assets/img/default-avatar.png'" alt="Avatar de {{ p.nome }}" class="pessoa-avatar" />
-      </div>
-      
-      <div class="pessoa-content">
-        <h3 class="pessoa-nome">{{ p.nome }}</h3>
-        
-        <div class="pessoa-badges">
-          <span class="badge-role" [ngClass]="p.cargo">{{ getRoleDisplay(p.cargo) }}</span>
-          <span class="badge-stats" *ngIf="p.projetosCount > 0">{{ p.projetosCount }} projeto(s)</span>
-          <span class="badge-stats">{{ p.seguidoresCount }} seguidor(es)</span>
+    <div class="filter-box-body" *ngIf="isFilterExpanded()">
+      <!-- Selects Row -->
+      <div class="filter-selects-grid">
+        <div class="filter-group">
+          <label>Papel</label>
+          <select [ngModel]="filterPapel()" (ngModelChange)="filterPapel.set($event)" class="filter-control">
+            <option value="Todos">Todos os Papéis</option>
+            <option value="Aluno">Aluno</option>
+            <option value="Professor">Professor</option>
+            <option value="Técnico">Técnico Administrativo</option>
+            <option value="Administrador">Administrador</option>
+          </select>
         </div>
-        
-        <div class="pessoa-course" *ngIf="p.curso">
-          <span class="badge-course">{{ p.curso }}</span>
-          <span class="badge-period" *ngIf="p.periodo">{{ p.periodo }}</span>
+
+        <div class="filter-group">
+          <label>Curso</label>
+          <select [ngModel]="filterCurso()" (ngModelChange)="filterCurso.set($event)" class="filter-control">
+            <option value="Todos">Todos</option>
+            <option value="Sistemas de Informação">Sistemas de Informação</option>
+            <option value="Ciência da Computação">Ciência da Computação</option>
+            <option value="Design">Design</option>
+            <option value="Ecologia">Ecologia</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Secretariado Executivo Bilíngue">Secretariado Executivo Bilíngue</option>
+            <option value="Pedagogia">Pedagogia</option>
+            <option value="Administração">Administração</option>
+            <option value="Ciências Contábeis">Ciências Contábeis</option>
+            <option value="Antropologia">Antropologia</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Projeto</label>
+          <select [ngModel]="filterProjeto()" (ngModelChange)="filterProjeto.set($event)" class="filter-control">
+            <option value="Todos">Todos</option>
+          </select>
         </div>
       </div>
-      
-      <div class="pessoa-footer">
-        <button class="btn-seguir" [class.following]="p.isFollowing" (click)="toggleFollow(p)">
+
+      <!-- Competências Section -->
+      <div class="filter-competencies-section">
+        <label>Competências <span class="sub-label">(todas exigidas, no nível mínimo)</span></label>
+        <div class="competency-input-wrapper">
+          <input 
+            type="text" 
+            placeholder="Adicionar competência ao filtro..." 
+            [ngModel]="competenciaInput()" 
+            (ngModelChange)="competenciaInput.set($event)"
+            (keydown.enter)="$event.preventDefault(); addCompetenciaFiltro()"
+            class="filter-control competency-input"
+          />
+        </div>
+
+        <!-- Filtered Chips -->
+        <div class="filter-chips-list" *ngIf="filterCompetencias().length > 0">
+          <span class="filter-chip" *ngFor="let c of filterCompetencias()">
+            {{ c }}
+            <button type="button" (click)="removeCompetenciaFiltro(c)">&times;</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="filter-actions-row">
+        <button type="button" class="btn btn-filtrar">Filtrar</button>
+        <button type="button" class="btn btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING SPINNER -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <span class="material-symbols-rounded animate-spin">progress_activity</span>
+    <p>Carregando pessoas da comunidade...</p>
+  </div>
+
+  <!-- CARDS GRID (4 COLUNAS FIEL À IMAGEM) -->
+  <div class="pessoas-cards-grid" *ngIf="!isLoading() && filteredPessoas().length > 0">
+    <div 
+      class="pessoa-user-card" 
+      *ngFor="let p of filteredPessoas()"
+      (click)="navigateToPerfil(p.username, $event)"
+    >
+      <!-- AVATAR CIRCULAR -->
+      <div class="card-avatar-wrapper">
+        <img *ngIf="p.fotoUrl; else initialsAvatar" [src]="p.fotoUrl" [alt]="p.nome" class="card-avatar-img" />
+        <ng-template #initialsAvatar>
+          <div class="card-avatar-initial" [style.background-color]="getAvatarColor(p.nome)">
+            {{ getAvatarInitial(p.nome) }}
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- NOME -->
+      <h3 class="card-user-name" title="{{ p.nome }}">{{ p.nome }}</h3>
+
+      <!-- BADGES & SEGUIDORES -->
+      <div class="card-badges-info">
+        <span class="role-badge" [class.prof-badge]="p.cargo === 'PROFESSOR'" [class.si-badge]="p.curso?.includes('Sistemas')">
+          {{ getRoleBadgeDisplay(p).label }}
+        </span>
+        <span class="followers-text">{{ p.seguidoresCount }} seguidor{{ p.seguidoresCount === 1 ? '' : 'es' }}</span>
+      </div>
+
+      <!-- BOTÃO SEGUIR EMBUTIDO NA MOLDURA -->
+      <div class="card-follow-frame">
+        <button 
+          type="button" 
+          class="btn-follow-card" 
+          [class.is-following]="p.isFollowing"
+          (click)="toggleFollow(p, $event)"
+        >
           {{ p.isFollowing ? 'Seguindo' : 'Seguir' }}
         </button>
       </div>
-    </article>
+    </div>
   </div>
 
+  <!-- EMPTY STATE -->
   <div class="empty-state" *ngIf="!isLoading() && filteredPessoas().length === 0">
-    <p>Nenhuma pessoa encontrada com os filtros atuais.</p>
+    <p>Nenhuma pessoa encontrada com os filtros selecionados.</p>
   </div>
 
 </div>

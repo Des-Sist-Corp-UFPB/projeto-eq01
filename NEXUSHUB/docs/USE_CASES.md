@@ -147,15 +147,18 @@ Fluxo principal:
 
 Regras atuais:
 
-- Nome, e-mail e cargo podem ser alterados.
-- Senha so e atualizada se vier com pelo menos 6 caracteres.
-- Metricas exibidas no frontend sao estaticas/mocadas.
+- Edição organizada por **6 Tópicos** (Pessoais, Acadêmicos, Competências, Histórico, Contatos e Configurações).
+- Sugestão inteligente de competências por curso do Campus IV (Rio Tinto e Mamanguape) em chips com adição em 1 clique.
+- Estilização moderna de chips/tags de competência adicionadas com botão circular de exclusão.
+- Upload de foto do dispositivo com auto-crop 1:1, compressão automática (300x300 px / 150 KB) e pré-visualização ao vivo (*Live Preview*).
+- Verificação de disponibilidade de `@username` único em tempo real com badges visuais (Disponível, Em uso, Verificando, Atual).
+- Nome, e-mail, cargo, bio, redes sociais e privacidade configuráveis.
 
-Lacunas:
+Implementado recentemente:
 
-- Perfil academico precisa virar entidade propria.
-- Faltam areas de interesse, curso, matricula, bio, habilidades, links, historico e privacidade.
-- Metricas precisam ser calculadas a partir de participacao real.
+- Perfil integrado ao modelo `User` / `Human` / `Technology`.
+- Dicionário de competências por curso do Campus IV.
+- Verificação em tempo real de username no endpoint `/api/usuarios/username/{username}`.
 
 ### UC05 - Explorar catalogo de projetos
 

@@ -42,6 +42,7 @@ public class UsuarioRestController {
     private final br.ufpb.dsc.nexushub.model.privacy.service.PrivacyService privacyService;
     private final br.ufpb.dsc.nexushub.model.people.repository.HumanRepository humanRepository;
     private final br.ufpb.dsc.nexushub.model.projects.repository.ProjectHumanMemberRepository projectHumanMemberRepository;
+    private final br.ufpb.dsc.nexushub.model.identity.repository.UserRepository userRepository;
     private final String googleClientId;
 
     public UsuarioRestController(IdentityService identityService, AuditService auditService, 
@@ -53,6 +54,7 @@ public class UsuarioRestController {
                                  br.ufpb.dsc.nexushub.model.privacy.service.PrivacyService privacyService,
                                  br.ufpb.dsc.nexushub.model.people.repository.HumanRepository humanRepository,
                                  br.ufpb.dsc.nexushub.model.projects.repository.ProjectHumanMemberRepository projectHumanMemberRepository,
+                                 br.ufpb.dsc.nexushub.model.identity.repository.UserRepository userRepository,
                                  @Value("${app.google.client-id}") String googleClientId) {
         this.identityService = identityService;
         this.auditService = auditService;
@@ -64,6 +66,7 @@ public class UsuarioRestController {
         this.privacyService = privacyService;
         this.humanRepository = humanRepository;
         this.projectHumanMemberRepository = projectHumanMemberRepository;
+        this.userRepository = userRepository;
         this.googleClientId = googleClientId;
     }
 
@@ -209,6 +212,7 @@ public class UsuarioRestController {
     }
 
     @GetMapping("/tecnologias")
+    @org.springframework.cache.annotation.Cacheable("tecnologias")
     public ResponseEntity<?> listarTecnologias() {
         java.util.List<String> list = technologyRepository.findAll().stream()
                 .map(br.ufpb.dsc.nexushub.model.people.domain.Technology::getName)
@@ -228,34 +232,40 @@ public class UsuarioRestController {
 
         final UUID loggedInHumanId = currentHumanId;
 
-        List<br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse> result = humanRepository.findAll().stream()
-            .map(h -> {
-                br.ufpb.dsc.nexushub.model.identity.domain.User u = identityService.findByUsername(h.getUsername());
-                if (u == null || !u.isOnboardingCompleted()) return null;
+        List<br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse> result = userRepository.findAll().stream()
+            .map(u -> {
+                br.ufpb.dsc.nexushub.model.people.domain.Human h = u.getHuman();
 
-                long projetosCount = projectHumanMemberRepository.countByHumanId(h.getId());
-                long seguidoresCount = followRepository.countByFollowingId(h.getId());
+                UUID id = h != null ? h.getId() : u.getId();
+                String name = (h != null && h.getName() != null && !h.getName().trim().isEmpty()) ? h.getName() : u.getUsername();
+                String username = u.getUsername();
+                String cargo = u.getRole() != null ? u.getRole().getName() : "USER";
+                String userType = h != null ? h.getUserType() : "GERAL";
+                String photoUrl = h != null ? h.getPhotoUrl() : null;
+                String course = h != null ? h.getCourse() : null;
+                String period = h != null ? h.getPeriod() : null;
+
+                long projetosCount = h != null ? projectHumanMemberRepository.countByHumanId(h.getId()) : 0;
+                long seguidoresCount = h != null ? followRepository.countByFollowingId(h.getId()) : 0;
                 boolean isFollowing = false;
-                if (loggedInHumanId != null) {
+                if (loggedInHumanId != null && h != null) {
                     isFollowing = followRepository.existsByFollowerIdAndFollowingId(loggedInHumanId, h.getId());
                 }
-                
-                String cargo = u.getRole() != null ? u.getRole().getName() : "USER";
+
                 return new br.ufpb.dsc.nexushub.model.dto.PessoaCardResponse(
-                        h.getId(),
-                        h.getName(),
-                        h.getUsername(),
+                        id,
+                        name,
+                        username,
                         cargo,
-                        h.getUserType(),
-                        h.getPhotoUrl(),
-                        h.getCourse(),
-                        h.getPeriod(),
+                        userType,
+                        photoUrl,
+                        course,
+                        period,
                         projetosCount,
                         seguidoresCount,
                         isFollowing
                 );
             })
-            .filter(java.util.Objects::nonNull)
             .toList();
 
         return ResponseEntity.ok(result);

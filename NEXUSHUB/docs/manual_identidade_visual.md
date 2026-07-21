@@ -48,6 +48,32 @@ Para garantir a versatilidade de aplicação, a logo do NEXUS HUB possui quatro 
 | **Azul Claro** | `#3B6EF4` | Círculo central, botões de ação principal (CTAs), destaques de gamificação e conquistas. | Usar em botões com texto branco ou ícones de destaque. |
 | **Branco** | `#FFFFFF` | Fundo principal de cartões (cards), formulários, páginas e espaçamentos limpos. | Proporciona respiro e leveza à interface. |
 
+### 3.1 Mapeamento de Tokens Funcionais (Light & Dark Mode)
+
+O sistema utiliza nomes funcionais para os tokens de cor para garantir consistência visual e alternância automática de tema.
+
+#### ☀️ Light Mode (Padrão)
+
+| Token | Valor Hex | Função | Notas de Design |
+| :--- | :--- | :--- | :--- |
+| `--bg-primary` | `#FFFFFF` | Fundo principal da página | Cor Oficial. |
+| `--bg-surface` | `#F1F5F9` | Superfícies secundárias | Cards de feed, modais. Melhora a hierarquia sobre o branco. |
+| `--text-primary`| `#0B1D3A` | Texto principal e títulos | Cor Oficial. Contraste excelente. |
+| `--text-secondary`| `#64748B` | Textos de apoio | Timestamps, legendas. Suaviza a interface. |
+| `--action-primary`| `#3B6EF4` | Botões e Links ativos | Cor Oficial. |
+| `--border-subtle`| `#E2E8F0` | Divisores e bordas | Separação de conteúdo sem peso visual. |
+
+#### 🌙 Dark Mode (Automático)
+
+| Token | Valor Hex | Função | Notas de Design |
+| :--- | :--- | :--- | :--- |
+| `--bg-primary` | `#0B1D3A` | Fundo principal da página | Cor Oficial. |
+| `--bg-surface` | `#1E293B` | Superfícies secundárias | Cards e menus flutuantes. |
+| `--text-primary`| `#F1F5F9` | Texto principal | Off-white suavizado para evitar cansaço visual (não usar branco puro). |
+| `--text-secondary`| `#94A3B8` | Textos de apoio | Legendas em ambientes escuros. |
+| `--action-primary`| `#60A5FA` | Botões e Links ativos | Versão aclarada do Azul Oficial para garantir contraste WCAG AA. |
+| `--border-subtle`| `#334155` | Divisores e bordas | Slate escuro para delimitação discreta. |
+
 ---
 
 ## 4. Tipografia
