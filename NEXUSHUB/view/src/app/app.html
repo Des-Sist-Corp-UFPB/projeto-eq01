@@ -1,0 +1,279 @@
+<div class="app-layout" [class.logged-in-layout]="isLoggedIn()">
+  
+  <!-- 1. HEADER (Only for Guests / Public Landing Page) -->
+  <header class="main-header animate-fade-in" *ngIf="!isLoggedIn() && !isHomeRoute()">
+    <div class="header-container">
+      <a class="brand" routerLink="/" (click)="closeMobileMenu()">
+        <div class="brand-logo-wrapper">
+          <svg class="nexus-logo-svg brand-logo" viewBox="0 0 1024 1024">
+            <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+            <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+          </svg>
+        </div>
+        <h1>NEXUS<span>HUB</span></h1>
+      </a>
+
+      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen()" aria-label="Menu principal">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-wrapper" [class.mobile-open]="isMobileMenuOpen()">
+        <nav class="main-nav">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">
+            Início
+          </a>
+          <!-- Added dynamically for authenticated users, but if it's here we can add it -->
+          <ng-container *ngIf="isLoggedIn()">
+            <a routerLink="/projetos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Projetos</a>
+            <a routerLink="/pessoas" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Pessoas</a>
+            <a routerLink="/grupos" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Grupos</a>
+            <a routerLink="/oportunidades" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Editais</a>
+          </ng-container>
+        </nav>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary theme-toggle-btn" (click)="toggleTheme(); closeMobileMenu()" [title]="isDarkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="theme-icon" *ngIf="isDarkMode()">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="theme-icon" *ngIf="!isDarkMode()">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+          </button>
+
+          <button class="btn btn-secondary" routerLink="/login" (click)="closeMobileMenu()">Entrar</button>
+          <button class="btn btn-primary" routerLink="/cadastro" (click)="closeMobileMenu()">Cadastrar-se</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. MOBILE HEADER (Only for Logged-In Users on Mobile) -->
+  <div class="mobile-top-bar" *ngIf="isLoggedIn()">
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [class.open]="isMobileMenuOpen()" aria-label="Menu principal">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <span class="mobile-brand-title">NEXUS<span>HUB</span></span>
+    <div class="mobile-profile-pic" routerLink="/perfil" (click)="closeMobileMenu()">
+      <img *ngIf="currentUser()?.fotoUrl" [src]="currentUser()?.fotoUrl" alt="Perfil" />
+      <span *ngIf="!currentUser()?.fotoUrl" class="mobile-initials">{{ currentUser()?.nome?.charAt(0) }}</span>
+    </div>
+  </div>
+
+  <!-- 3. SIDEBAR NAVIGATION (Only for Logged-In Users) -->
+  <aside class="app-sidebar" *ngIf="isLoggedIn()" [class.mobile-open]="isMobileMenuOpen()">
+    <div class="sidebar-top">
+      
+      <!-- DEFAULT BRAND LOGO (NON-ADMIN ROUTES) -->
+      <a class="brand" routerLink="/" (click)="closeMobileMenu()" *ngIf="!isAdminRoute()">
+        <div class="brand-logo-wrapper">
+          <svg class="nexus-logo-svg brand-logo" viewBox="0 0 1024 1024">
+            <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+            <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+            <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+          </svg>
+        </div>
+        <h1>NEXUS<span>HUB</span></h1>
+      </a>
+
+      <!-- ADMIN SLOTH LOGO BRAND (ADMIN ROUTES) -->
+      <div class="brand-sloth-wrapper" *ngIf="isAdminRoute()" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; text-align: center; width: 100%;">
+        <img src="sloth-avatar.png" alt="NexusHub Admin Sloth Mascot" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #00b4d8; box-shadow: 0 4px 10px rgba(0, 180, 216, 0.2);" />
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 16px; font-weight: 800; color: #ffffff;">NexusHub</span>
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00b4d8; letter-spacing: 1px;">Admin Panel</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <!-- 3A. STANDARD SIDEBAR NAV (NON-ADMIN ROUTES) -->
+        <ng-container *ngIf="!isAdminRoute()">
+          <!-- Início (Feed) -->
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidebar-link" (click)="closeMobileMenu()">
+            <svg class="nexus-icon feed-link-icon" viewBox="0 0 32 32">
+              <line x1="16" y1="6" x2="16" y2="26" stroke="currentColor" stroke-width="1.5" opacity="0.25"/>
+              <line x1="6" y1="16" x2="26" y2="16" stroke="currentColor" stroke-width="1.5" opacity="0.25"/>
+              <line x1="9" y1="9" x2="23" y2="23" stroke="currentColor" stroke-width="1.5" opacity="0.25"/>
+              <line x1="23" y1="9" x2="9" y2="23" stroke="currentColor" stroke-width="1.5" opacity="0.25"/>
+              <circle cx="16" cy="16" r="4" fill="#3B6EF4" class="logo-core"/>
+              <circle cx="16" cy="6" r="2.2" fill="currentColor"/>
+              <circle cx="16" cy="26" r="2.2" fill="currentColor"/>
+              <circle cx="6" cy="16" r="2.2" fill="currentColor"/>
+              <circle cx="26" cy="16" r="2.2" fill="currentColor"/>
+              <circle cx="9" cy="9" r="1.8" fill="currentColor"/>
+              <circle cx="23" cy="9" r="1.8" fill="currentColor"/>
+              <circle cx="9" cy="23" r="1.8" fill="currentColor"/>
+              <circle cx="23" cy="23" r="1.8" fill="currentColor"/>
+            </svg>
+            <span>Início (Feed)</span>
+          </a>
+
+          <!-- Projetos -->
+          <a routerLink="/projetos" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <svg class="nexus-icon nav-icon" viewBox="0 0 32 32">
+              <path d="M4 8 C4 6.9 4.9 6 6 6 H12 L15 9 H26 C27.1 9 28 9.9 28 11 V24 C28 25.1 27.1 26 26 26 H6 C4.9 26 4 25.1 4 24 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <line x1="10" y1="18" x2="16" y2="18" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+              <line x1="16" y1="18" x2="22" y2="15" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+              <line x1="16" y1="18" x2="22" y2="21" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+              <circle cx="16" cy="18" r="3.5" fill="#3B6EF4" class="logo-core"/>
+              <circle cx="10" cy="18" r="1.8" fill="currentColor"/>
+              <circle cx="22" cy="15" r="1.8" fill="currentColor"/>
+              <circle cx="22" cy="21" r="1.8" fill="currentColor"/>
+              <circle cx="6" cy="6" r="1.5" fill="currentColor"/>
+            </svg>
+            <span>Projetos</span>
+          </a>
+
+          <!-- Pessoas -->
+          <a routerLink="/pessoas" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <svg class="nexus-icon nav-icon" viewBox="0 0 32 32">
+              <line x1="8" y1="13" x2="16" y2="10" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+              <line x1="24" y1="13" x2="16" y2="10" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+              <circle cx="16" cy="10" r="3.5" fill="#3B6EF4" class="logo-core"/>
+              <path d="M9 25 C9 19, 23 19, 23 25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="8" cy="13" r="2.2" fill="currentColor"/>
+              <path d="M3 26 C3 21.5, 13 21.5, 13 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+              <circle cx="24" cy="13" r="2.2" fill="currentColor"/>
+              <path d="M19 26 C19 21.5, 29 21.5, 29 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+            </svg>
+            <span>Pessoas</span>
+          </a>
+
+          <!-- Grupos -->
+          <a routerLink="/grupos" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">groups</span>
+            <span>Grupos</span>
+          </a>
+
+          <!-- Loja -->
+          <a routerLink="/loja" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <svg class="nexus-icon nav-icon" viewBox="0 0 32 32">
+              <path d="M11 11 C11 6.5, 21 6.5, 21 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 11 H25 L23.8 25.5 C23.6 26.9 22.4 28 21 28 H11 C9.6 28 8.4 26.9 8.2 25.5 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="16" cy="18.5" r="3.5" fill="#3B6EF4" class="logo-core"/>
+              <circle cx="7" cy="11" r="1.8" fill="currentColor"/>
+              <circle cx="25" cy="11" r="1.8" fill="currentColor"/>
+              <circle cx="11" cy="28" r="1.5" fill="currentColor"/>
+              <circle cx="21" cy="28" r="1.5" fill="currentColor"/>
+            </svg>
+            <span>Loja</span>
+          </a>
+
+          <!-- Oportunidades -->
+          <a routerLink="/oportunidades" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">campaign</span>
+            <span>Oportunidades</span>
+          </a>
+
+          <!-- Admin -->
+          <a routerLink="/admin" routerLinkActive="active" class="sidebar-link" *ngIf="isAdmin()" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
+            <span>Admin</span>
+          </a>
+        </ng-container>
+
+        <!-- 3B. INTEGRATED ADMIN SIDEBAR NAV (ADMIN ROUTES) -->
+        <ng-container *ngIf="isAdminRoute()">
+          <!-- Voltar ao Hub -->
+          <a routerLink="/" class="sidebar-link" (click)="closeMobileMenu()" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 8px;">
+            <span class="material-symbols-rounded nav-icon" style="color: #00b4d8;">arrow_back</span>
+            <span style="color: #00b4d8;">Voltar ao Hub</span>
+          </a>
+
+          <!-- Usuários -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'users' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">group</span>
+            <span>Usuários</span>
+          </a>
+
+          <!-- Segurança -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'security' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">security</span>
+            <span>Segurança</span>
+          </a>
+
+          <!-- Conteúdo -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'content' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">article</span>
+            <span>Conteúdo</span>
+          </a>
+
+          <!-- Gamificação -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'gamification' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">military_tech</span>
+            <span>Gamificação</span>
+          </a>
+
+          <!-- Instituições -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'institutions' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">school</span>
+            <span>Instituições</span>
+          </a>
+
+          <!-- Denúncias -->
+          <a routerLink="/admin" [queryParams]="{ tab: 'reports' }" routerLinkActive="active" class="sidebar-link" (click)="closeMobileMenu()">
+            <span class="material-symbols-rounded nav-icon">campaign</span>
+            <span>Denúncias</span>
+          </a>
+        </ng-container>
+      </nav>
+    </div>
+
+    <!-- User Profile Panel at the Bottom of Sidebar -->
+    <div class="sidebar-footer" *ngIf="currentUser()">
+      <div class="sidebar-user-info" routerLink="/perfil" (click)="closeMobileMenu()">
+        <div class="avatar-small" *ngIf="currentUser()?.fotoUrl; else sideInitials">
+          <img [src]="currentUser()?.fotoUrl" alt="Avatar" class="sidebar-avatar-img" />
+        </div>
+        <ng-template #sideInitials>
+          <span class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</span>
+        </ng-template>
+        <div class="user-text">
+          <span class="user-name">{{ currentUser()?.nome?.split(' ')?.at(0) }}</span>
+          <span class="user-role">{{ currentUser()?.userType || 'Estudante' }}</span>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <!-- Edit Profile shortcut -->
+        <a class="sidebar-footer-btn" routerLink="/perfil" title="Editar Perfil" (click)="closeMobileMenu()">
+          <span class="material-symbols-rounded footer-icon">manage_accounts</span>
+        </a>
+        <!-- Theme Toggle -->
+        <button class="sidebar-footer-btn theme-toggle" (click)="toggleTheme()" [title]="isDarkMode() ? 'Modo Claro' : 'Modo Escuro'">
+          <span class="material-symbols-rounded footer-icon" *ngIf="isDarkMode()">light_mode</span>
+          <span class="material-symbols-rounded footer-icon" *ngIf="!isDarkMode()">dark_mode</span>
+        </button>
+        <!-- Logout Button -->
+        <button class="sidebar-footer-btn logout" (click)="logout(); closeMobileMenu()" title="Sair">
+          <span class="material-symbols-rounded footer-icon">logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 4. MAIN PAGE CONTAINER -->
+  <main class="page-container">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- 5. FOOTER (Only for Guests) -->
+  <app-footer *ngIf="!isLoggedIn()"></app-footer>
+</div>

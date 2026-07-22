@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdministrationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NEXUS HUB Model</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.nexushub.model.administration.service</a> &gt; <span class="el_source">AdministrationService.java</span></div><h1>AdministrationService.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.nexushub.model.administration.service;
+import br.ufpb.dsc.nexushub.model.identity.domain.*;
+import br.ufpb.dsc.nexushub.model.identity.repository.*;
+import java.util.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+@Service
+public class AdministrationService {
+ private final UserRepository users;private final RoleRepository roles;
+<span class="fc" id="L10"> public AdministrationService(UserRepository users,RoleRepository roles){this.users=users;this.roles=roles;}</span>
+<span class="fc" id="L11"> @Transactional(readOnly=true) public List&lt;User&gt; users(){return users.findAll();}</span>
+ @Transactional public User active(UUID id,boolean active,UUID actor){
+<span class="pc bpc" id="L13" title="1 of 4 branches missed.">  User user=find(id);if(user.getId().equals(actor)&amp;&amp;!active)throw new IllegalArgumentException(&quot;Administrador nao pode bloquear a si mesmo.&quot;);</span>
+<span class="fc" id="L14">  user.setActive(active,actor);return users.save(user);</span>
+ }
+ @Transactional public User role(UUID id,String roleName,UUID actor){
+<span class="fc" id="L17">  Role role=roles.findByName(roleName.toUpperCase()).orElseThrow(()-&gt;new IllegalArgumentException(&quot;Papel inexistente.&quot;));</span>
+<span class="fc" id="L18">  User user=find(id);user.changeRole(role,actor);return users.save(user);</span>
+ }
+<span class="fc" id="L20"> private User find(UUID id){return users.findById(id).orElseThrow(()-&gt;new IllegalArgumentException(&quot;Usuario nao encontrado.&quot;));}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

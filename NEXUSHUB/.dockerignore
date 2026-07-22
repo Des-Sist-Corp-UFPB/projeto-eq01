@@ -1,0 +1,34 @@
+# Ignore Node.js dependencies and builds
+**/node_modules
+**/dist
+**/.angular
+**/coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore Maven build artifacts
+**/target
+**/.mvn
+*.jar
+*.war
+
+# Ignore IDE and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Ignore version control and local configs
+.git/
+.github/
+.gitignore
+instalar.sh
+COMO_RODAR.md
+README.md
+AGENTS.md

@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /NEXUSHUB
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /NEXUSHUB/view
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,0 +1,465 @@
+<div class="groups-detail-container animate-fade-in" *ngIf="grupo()">
+      
+      <!-- Cover Banner -->
+      <div class="detail-banner" [style.background]="(grupo()?.logo && (grupo()?.logo || '').length > 20) ? 'none' : 'linear-gradient(135deg, ' + (grupo()?.cor || '#1e3a8a') + ' 0%, #13a37c 100%)'">
+        <img [src]="(grupo()?.logo && (grupo()?.logo || '').length > 20) ? grupo()?.logo : fallbackCover" alt="Banner do grupo" />
+        
+        <div class="banner-overlay">
+          <div class="banner-content">
+            <span class="category-badge" [style.background-color]="grupo()?.cor || '#1e3a8a'">
+              {{ grupo()?.area || 'Pesquisa' }}
+            </span>
+            <h1 class="group-banner-title">{{ grupo()?.nome }}</h1>
+            <p class="group-banner-subtitle">Coordenado por {{ grupo()?.responsavel }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-navigation-container">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'forum'"
+          [style.border-bottom-color]="activeTab() === 'forum' ? (grupo()?.cor || '#1e3a8a') : 'transparent'"
+          [style.color]="activeTab() === 'forum' ? (grupo()?.cor || '#1e3a8a') : '#64748b'"
+          (click)="setTab('forum')"
+        >
+          <span class="material-symbols-rounded">forum</span>
+          Fórum 0
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'mural'"
+          [style.border-bottom-color]="activeTab() === 'mural' ? (grupo()?.cor || '#1e3a8a') : 'transparent'"
+          [style.color]="activeTab() === 'mural' ? (grupo()?.cor || '#1e3a8a') : '#64748b'"
+          (click)="setTab('mural')"
+        >
+          <span class="material-symbols-rounded">campaign</span>
+          Mural
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'links'"
+          [style.border-bottom-color]="activeTab() === 'links' ? (grupo()?.cor || '#1e3a8a') : 'transparent'"
+          [style.color]="activeTab() === 'links' ? (grupo()?.cor || '#1e3a8a') : '#64748b'"
+          (click)="setTab('links')"
+        >
+          <span class="material-symbols-rounded">link</span>
+          Links 0
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'membros_tab'"
+          [style.border-bottom-color]="activeTab() === 'membros_tab' ? (grupo()?.cor || '#1e3a8a') : 'transparent'"
+          [style.color]="activeTab() === 'membros_tab' ? (grupo()?.cor || '#1e3a8a') : '#64748b'"
+          (click)="setTab('membros_tab')"
+        >
+          <span class="material-symbols-rounded">group</span>
+          Membros {{ members().length }}
+        </button>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="detail-grid">
+        
+        <!-- Main Column (Left) -->
+        <div class="main-info-column">
+          
+          <!-- TAB 1: FÓRUM -->
+          <ng-container *ngIf="activeTab() === 'forum'">
+            <!-- Forum Filter / Search bar -->
+            <div class="forum-filters-row animate-fade-in">
+              <div class="forum-filter-buttons">
+                <button class="forum-filter-btn active">Recentes</button>
+                <button class="forum-filter-btn">Populares</button>
+                <button class="forum-filter-btn">Sem resposta</button>
+              </div>
+            </div>
+
+            <!-- Empty State for Forum -->
+            <div class="empty-state-box animate-fade-in">
+              <span class="material-symbols-rounded empty-icon" style="font-size: 48px; color: var(--color-muted); margin-bottom: 12px;">content_paste</span>
+              <p class="empty-list-text" style="font-weight: 700; color: var(--color-text); margin-bottom: 4px;">Nenhum tópico ainda. Abra o primeiro!</p>
+              <p class="empty-list-sub" style="font-size: 13px; color: var(--color-muted); margin-bottom: 16px;">Inicie uma discussão ou faça uma pergunta para movimentar o grupo.</p>
+            </div>
+            
+            <!-- Group Description & Projects block -->
+            <div class="section-block animate-fade-in" style="margin-top: 30px;">
+              <div class="section-header-row">
+                <h3>Sobre o Grupo</h3>
+                <span class="privacy-pill" [class.private]="grupo()?.tipo === 'Restrito'">
+                  <span class="material-symbols-rounded lock-icon" *ngIf="grupo()?.tipo === 'Restrito'">lock</span>
+                  {{ grupo()?.tipo || 'Aberto' }}
+                </span>
+              </div>
+              <p class="description-text">{{ grupo()?.descricao }}</p>
+            </div>
+
+            <!-- Join / Leave CTA -->
+            <div class="action-card-box animate-fade-in">
+              <div class="action-info" *ngIf="!isCoordinator()">
+                <h4>Gostou do nosso grupo de estudos e pesquisa?</h4>
+                <p *ngIf="!isJoinedUser()">Faça parte e colabore em projetos de alto impacto acadêmico e tecnológico.</p>
+                <p *ngIf="isJoinedUser()">Você já é um membro deste grupo! Participe dos projetos ou candidate-se a vagas.</p>
+              </div>
+              <div class="action-info" *ngIf="isCoordinator()">
+                <h4>Painel do Coordenador Geral</h4>
+                <p>Você gerencia este grupo acadêmico. Pode cadastrar novas oportunidades e visualizar candidatos.</p>
+              </div>
+              
+              <div class="action-button-area">
+                <ng-container *ngIf="currentUser(); else loginPrompt">
+                  <button 
+                    *ngIf="!isCoordinator() && !isJoinedUser()"
+                    class="action-cta-btn" 
+                    [style.background]="grupo()?.cor || '#1e3a8a'"
+                    (click)="joinGroup()"
+                  >
+                    <span class="material-symbols-rounded btn-icon">expand_more</span>
+                    Participar do Grupo
+                  </button>
+                  
+                  <button 
+                    *ngIf="!isCoordinator() && isJoinedUser()"
+                    class="action-cta-btn leave" 
+                    (click)="leaveGroup()"
+                  >
+                    <span class="material-symbols-rounded btn-icon">logout</span>
+                    Sair do Grupo
+                  </button>
+
+                  <div *ngIf="isCoordinator()" class="coordinator-actions-wrapper">
+                    <div class="coordinator-badge">
+                      <span class="material-symbols-rounded badge-icon">verified</span>
+                      Você coordena este grupo
+                    </div>
+                    <button 
+                      class="action-cta-btn delete-group-btn" 
+                      (click)="excluirGrupo()"
+                    >
+                      <span class="material-symbols-rounded btn-icon">delete</span>
+                      Excluir Grupo
+                    </button>
+                  </div>
+                </ng-container>
+                <ng-template #loginPrompt>
+                  <button class="action-cta-btn disabled" disabled>
+                    Faça login para participar
+                  </button>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="section-block animate-fade-in">
+              <h3>Projetos do Grupo ({{ groupProjects().length }})</h3>
+              <div class="projects-grid" *ngIf="groupProjects().length > 0">
+                <div class="proj-card-wrapper" *ngFor="let proj of groupProjects()">
+                  <app-project-card [projeto]="proj"></app-project-card>
+                </div>
+              </div>
+              <div class="empty-state-box" *ngIf="groupProjects().length === 0">
+                <div class="empty-icon">📁</div>
+                <p class="empty-list-text">Nenhum projeto ativo associado a este grupo ainda.</p>
+              </div>
+            </div>
+
+            <!-- Opportunities / Vacancies Wall -->
+            <div class="section-block animate-fade-in">
+              <div class="section-header-row">
+                <h3>Mural de Vagas e Oportunidades</h3>
+                <button 
+                  *ngIf="isCoordinator()" 
+                  class="btn-toggle-vaga"
+                  [style.border-color]="grupo()?.cor || '#1e3a8a'"
+                  [style.color]="grupo()?.cor || '#1e3a8a'"
+                  (click)="showAddVagaForm.set(!showAddVagaForm())"
+                >
+                  {{ showAddVagaForm() ? 'Fechar Form' : 'Adicionar Vaga' }}
+                </button>
+              </div>
+
+              <!-- Create Vacancy Form (Coordinators only) -->
+              <div class="create-vaga-form animate-scale-up" *ngIf="isCoordinator() && showAddVagaForm()">
+                <h4>Nova Oportunidade no Grupo</h4>
+                <div class="form-row">
+                  <div class="form-group-item">
+                    <label for="vaga-cargo">Cargo / Função *</label>
+                    <input type="text" id="vaga-cargo" placeholder="Ex: Desenvolvedor Front-end Angular" [(ngModel)]="novaVagaCargo" />
+                  </div>
+                  <div class="form-group-item">
+                    <label for="vaga-tipo">Tipo de Contrato</label>
+                    <select id="vaga-tipo" [(ngModel)]="novaVagaTipo">
+                      <option value="Bolsista">Bolsista</option>
+                      <option value="Voluntário">Voluntário</option>
+                      <option value="Estagiário">Estagiário</option>
+                      <option value="CLT">CLT / CLT Flex</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group-item">
+                  <label for="vaga-req">Requisitos e Descrição *</label>
+                  <textarea id="vaga-req" rows="3" placeholder="Requisitos da vaga, benefícios e prazos..." [(ngModel)]="novaVagaRequisitos"></textarea>
+                </div>
+                <button class="btn-submit-vaga" [style.background]="grupo()?.cor || '#1e3a8a'" (click)="adicionarVaga()">
+                  Publicar Oportunidade
+                </button>
+              </div>
+
+              <!-- Vacancies List -->
+              <div class="vagas-list-container" *ngIf="vagas().length > 0">
+                <div class="vaga-card" *ngFor="let vaga of vagas()">
+                  <div class="vaga-header">
+                    <div class="vaga-title-row">
+                      <h5>{{ vaga.cargo }}</h5>
+                      <span class="vaga-type-pill">{{ vaga.tipo }}</span>
+                    </div>
+                    
+                    <!-- Candidate Button -->
+                    <div class="vaga-action-side" *ngIf="currentUser() && !isCoordinator()">
+                      <button 
+                        class="btn-candidate" 
+                        [class.applied]="hasApplied(vaga)" 
+                        (click)="toggleCandidatura(vaga.id)"
+                      >
+                        {{ hasApplied(vaga) ? 'Candidatado ✓' : 'Candidatar-se' }}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <p class="vaga-requirements-desc">{{ vaga.requisitos }}</p>
+
+                  <!-- Coordinator-only Applicant View -->
+                  <div class="vaga-candidates-coordinator" *ngIf="isCoordinator()">
+                    <div class="candidates-header-row">
+                      <span class="material-symbols-rounded cand-icon">people</span>
+                      <span>Candidatos Inscritos ({{ vaga.candidatos.length }})</span>
+                    </div>
+                    <div class="candidates-names-list" *ngIf="vaga.candidatos.length > 0">
+                      <span class="cand-name-pill" *ngFor="let cand of vaga.candidatos">{{ cand }}</span>
+                    </div>
+                    <p class="no-cand-text" *ngIf="vaga.candidatos.length === 0">Nenhum candidato inscrito ainda.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="empty-state-box" *ngIf="vagas().length === 0">
+                <div class="empty-icon">📢</div>
+                <p class="empty-list-text">Não há vagas abertas neste grupo no momento.</p>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- TAB 2: MURAL -->
+          <ng-container *ngIf="activeTab() === 'mural'">
+            <!-- Create Post Card -->
+            <div class="group-create-post-card animate-fade-in" *ngIf="isJoinedUser() || isCoordinator()">
+              <div 
+                class="drag-drop-zone"
+                [class.drag-over]="dragOverActive()"
+                (dragover)="$event.preventDefault(); dragOverActive.set(true)"
+                (dragleave)="dragOverActive.set(false)"
+                (drop)="$event.preventDefault(); dragOverActive.set(false); onFileDropped($event)"
+              >
+                <textarea 
+                  [(ngModel)]="newPostContent" 
+                  [placeholder]="'Compartilhe atualizações, links ou materiais com o grupo...'" 
+                  rows="3"
+                  maxLength="3000"
+                  class="post-textarea"
+                ></textarea>
+
+                <div class="post-preview-image-container" *ngIf="newPostImageUrl()">
+                  <img [src]="newPostImageUrl()" alt="Preview da imagem" class="attached-preview-img" />
+                  <button class="remove-preview-btn" (click)="newPostImageUrl.set('')">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+
+                <div class="post-actions-row">
+                  <div class="attachment-triggers">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+                    <button class="attach-btn" (click)="triggerFileSelect(fileInput)">
+                      <span class="material-symbols-rounded">image</span>
+                      Anexar Imagem
+                    </button>
+                    <span class="char-counter" [class.warning]="newPostContent().length > 2500">
+                      {{ 3000 - newPostContent().length }}
+                    </span>
+                  </div>
+
+                  <button 
+                    class="btn-publish-post"
+                    [style.background]="grupo()?.cor || '#1e3a8a'"
+                    [disabled]="!newPostContent().trim() || isCreatingPost()"
+                    (click)="onCreateGroupPost()"
+                  >
+                    {{ isCreatingPost() ? 'Publicando...' : 'Publicar' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Join Prompt if not joined -->
+            <div class="join-prompt-banner animate-fade-in" *ngIf="!isJoinedUser() && !isCoordinator()">
+              <span class="material-symbols-rounded info-icon">lock</span>
+              <div class="prompt-text">
+                <h5>Mural Restrito a Membros</h5>
+                <p>Participe deste grupo para poder interagir, ler e publicar atualizações neste feed.</p>
+              </div>
+            </div>
+
+            <!-- Feed Loading -->
+            <div class="feed-loading-wrapper" *ngIf="isFeedLoading()">
+              <div class="spinner"></div>
+              <p>Carregando conversas do grupo...</p>
+            </div>
+
+            <!-- Feed Posts List -->
+            <div class="group-feed-list" *ngIf="!isFeedLoading() && groupFeedPosts().length > 0">
+              <div class="group-post-card animate-fade-in" *ngFor="let post of groupFeedPosts()">
+                <div class="post-card-header">
+                  <img [src]="post.authorPhotoUrl || 'assets/default-avatar.png'" alt="Avatar" class="post-author-avatar" />
+                  <div class="post-header-metadata">
+                    <span class="author-name">{{ post.authorName }}</span>
+                    <span class="author-username" *ngIf="post.authorUsername">@{{ post.authorUsername }}</span>
+                    <span class="post-time">{{ post.timestamp | date:'short' }}</span>
+                  </div>
+                </div>
+
+                <div class="post-card-body">
+                  <p class="post-content-text">{{ post.content }}</p>
+                  <img [src]="post.imageUrl" alt="Publicação" class="post-attached-img" *ngIf="post.imageUrl" />
+                </div>
+
+                <!-- Footer Interativo: Likes e Comentários -->
+                <div class="post-card-footer">
+                  <button 
+                    class="footer-interactive-btn like-btn" 
+                    [class.liked]="post.likedByCurrentUser"
+                    (click)="onToggleLike(post)"
+                  >
+                    <span class="material-symbols-rounded footer-icon">favorite</span>
+                    {{ post.likesCount }} {{ post.likesCount === 1 ? 'Curtida' : 'Curtidas' }}
+                  </button>
+                  <div class="comment-count-label">
+                    <span class="material-symbols-rounded footer-icon">chat_bubble</span>
+                    {{ post.comments.length }} {{ post.comments.length === 1 ? 'Comentário' : 'Comentários' }}
+                  </div>
+                </div>
+
+                <!-- Section de Comentários -->
+                <div class="post-comments-section">
+                  <div class="comment-item" *ngFor="let comment of post.comments">
+                    <img [src]="comment.authorPhotoUrl || 'assets/default-avatar.png'" alt="Avatar" class="comment-author-avatar" />
+                    <div class="comment-details">
+                      <div class="comment-header-row">
+                        <span class="c-author">{{ comment.authorName }}</span>
+                        <span class="c-time">{{ comment.timestamp | date:'short' }}</span>
+                      </div>
+                      <p class="c-content">{{ comment.content }}</p>
+                      
+                      <button 
+                        class="comment-like-btn" 
+                        [class.liked]="comment.likedByCurrentUser"
+                        (click)="onToggleCommentLike(post, comment)"
+                      >
+                        <span class="material-symbols-rounded c-like-icon">thumb_up</span>
+                        {{ comment.likesCount || 0 }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Campo de Adicionar Comentário -->
+                  <div class="add-comment-box" *ngIf="isJoinedUser() || isCoordinator()">
+                    <input 
+                      type="text" 
+                      placeholder="Escreva um comentário..." 
+                      [(ngModel)]="commentInputs[post.id]"
+                      (keyup.enter)="onAddComment(post.id)"
+                      class="comment-input"
+                    />
+                    <button class="btn-send-comment" [style.color]="grupo()?.cor || '#1e3a8a'" (click)="onAddComment(post.id)">
+                      <span class="material-symbols-rounded">send</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty Feed State -->
+            <div class="empty-feed-state animate-fade-in" *ngIf="!isFeedLoading() && groupFeedPosts().length === 0">
+              <span class="material-symbols-rounded empty-icon">forum</span>
+              <h4>Nenhuma conversa ainda</h4>
+              <p>Seja o primeiro a publicar algo interessante para o grupo!</p>
+            </div>
+          </ng-container>
+
+          <!-- TAB 3: LINKS -->
+          <ng-container *ngIf="activeTab() === 'links'">
+            <div class="empty-state-box animate-fade-in">
+              <span class="material-symbols-rounded empty-icon" style="font-size: 48px; color: var(--color-muted); margin-bottom: 12px;">link</span>
+              <p class="empty-list-text" style="font-weight: 700; color: var(--color-text); margin-bottom: 4px;">Nenhum link útil cadastrado.</p>
+              <p class="empty-list-sub" style="font-size: 13px; color: var(--color-muted);">Compartilhe links importantes, repositórios ou documentações do grupo.</p>
+            </div>
+          </ng-container>
+
+          <!-- TAB 4: MEMBROS TAB -->
+          <ng-container *ngIf="activeTab() === 'membros_tab'">
+            <div class="members-tab-grid animate-fade-in" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
+              <div 
+                class="member-tab-card" 
+                *ngFor="let mb of members()"
+                [class.coordinator]="isMembroCoordenador(mb.nome)"
+                style="background: white; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); padding: 16px; display: flex; align-items: center; gap: 12px;"
+              >
+                <div class="avatar-wrapper" style="position: relative;">
+                  <img [src]="isMembroCoordenador(mb.nome) && grupo()?.logo && (grupo()?.logo || '').length > 20 ? grupo()?.logo : mb.fotoUrl" alt="Foto do Membro" class="avatar-photo" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;" />
+                  <span class="crown-badge" *ngIf="isMembroCoordenador(mb.nome)" style="position: absolute; top: -6px; right: -6px; font-size: 14px;">👑</span>
+                </div>
+                <div class="user-text-info">
+                  <div class="u-name" style="font-weight: 800; font-size: 14px; color: var(--color-text);">{{ mb.nome }}</div>
+                  <div class="u-role" style="font-size: 11px; color: var(--color-muted);">{{ mb.papel }}</div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+        </div>
+
+        <!-- Sidebar Column (Right) -->
+        <aside class="sidebar-column">
+          <section class="card-section" style="padding: 20px; display: flex; flex-direction: column; gap: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: white;">
+            
+            <div class="sidebar-info-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="info-meta-label" style="font-size: 11px; font-weight: 800; color: var(--color-muted); letter-spacing: 0.5px;">CRIADO POR</span>
+              <span class="info-meta-value" style="font-size: 14px; font-weight: 700; color: var(--color-text);">{{ grupo()?.responsavel || 'Não cadastrado' }}</span>
+            </div>
+
+            <div class="sidebar-info-group" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed var(--color-border); padding-top: 12px;">
+              <span class="info-meta-label" style="font-size: 11px; font-weight: 800; color: var(--color-muted); letter-spacing: 0.5px;">MEMBROS</span>
+              <span class="info-meta-value" style="font-size: 14px; font-weight: 700; color: var(--color-text);">{{ members().length }}</span>
+            </div>
+
+            <div class="sidebar-info-group" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed var(--color-border); padding-top: 12px;">
+              <span class="info-meta-label" style="font-size: 11px; font-weight: 800; color: var(--color-muted); letter-spacing: 0.5px;">CRIADO EM</span>
+              <span class="info-meta-value" style="font-size: 14px; font-weight: 700; color: var(--color-text);">15/07/2026 22:20</span>
+            </div>
+            
+            <div class="related-section" *ngIf="groupProjects().length > 0" style="border-top: 1px dashed var(--color-border); padding-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+              <span class="info-meta-label" style="font-size: 11px; font-weight: 800; color: var(--color-muted); letter-spacing: 0.5px;">PROJETOS RELACIONADOS</span>
+              <div class="related-item" *ngFor="let proj of groupProjects()" style="display: flex; align-items: center; gap: 10px;">
+                <img [src]="proj.imagemCardUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=100'" alt="Projeto" class="related-img" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover;" />
+                <div class="related-info" style="display: flex; flex-direction: column;">
+                  <a [routerLink]="['/projetos', proj.id]" class="related-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-decoration: none;">{{ proj.nome }}</a>
+                  <span class="related-sub" style="font-size: 11px; color: var(--color-muted);">{{ proj.quantidadeMembros || 1 }} membro(s)</span>
+                </div>
+              </div>
+            </div>
+
+          </section>
+        </aside>
+
+      </div>
+
+    </div>

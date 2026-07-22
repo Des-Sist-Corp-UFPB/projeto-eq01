@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="nexus-icon nexus-icon-lojinha">
+  <!-- Bag Handle -->
+  <path d="M11 11 C11 6.5, 21 6.5, 21 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Bag Body -->
+  <path d="M7 11 H25 L23.8 25.5 C23.6 26.9 22.4 28 21 28 H11 C9.6 28 8.4 26.9 8.2 25.5 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Core Nexus Node at center of shop bag -->
+  <circle cx="16" cy="18.5" r="3.5" fill="#3B6EF4" class="logo-core"/>
+
+  <!-- Node Dots at bag vertices -->
+  <circle cx="7" cy="11" r="1.8" fill="currentColor" class="logo-dot"/>
+  <circle cx="25" cy="11" r="1.8" fill="currentColor" class="logo-dot"/>
+  <circle cx="11" cy="28" r="1.5" fill="currentColor" class="logo-dot"/>
+  <circle cx="21" cy="28" r="1.5" fill="currentColor" class="logo-dot"/>
+</svg>

@@ -1,0 +1,955 @@
+<div class="profile-wrapper animate-fade-in">
+  <!-- UNAUTHENTICATED STATE -->
+  <div class="unauth-container" *ngIf="!isLoggedIn()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="lock-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+    <h3>Acesso restrito</h3>
+    <p>Você precisa estar autenticado na plataforma para visualizar seu perfil acadêmico e suas métricas.</p>
+    <div class="actions">
+      <button class="btn btn-primary" routerLink="/login">Ir para Login</button>
+      <button class="btn btn-secondary" routerLink="/">Voltar ao Início</button>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATED STATE -->
+  <div class="profile-card" *ngIf="isLoggedIn() && profileUser()">
+    <!-- View Profile Mode (LinkedIn structured layout) -->
+    <div *ngIf="!isEditMode()" class="profile-linkedin-layout animate-fade-in">
+      
+      <!-- LEFT COLUMN: MAIN PROFILE PANELS (70% width) -->
+      <div class="profile-main-column">
+        
+        <!-- CARD 1: INTRO/HEADER CARD -->
+        <div class="linkedin-card intro-card">
+          <div class="profile-cover-banner">
+            <!-- Cover image placeholder fallback -->
+            <div class="banner-gradient-effect"></div>
+          </div>
+          
+          <div class="intro-content">
+            <div class="profile-avatar-overlap">
+              <img *ngIf="profileUser()?.fotoUrl; else initialsAvatar" [src]="profileUser()?.fotoUrl" alt="Foto de perfil" class="avatar-img" />
+              <ng-template #initialsAvatar>
+                <div class="profile-avatar-overlap-initials">{{ getInitials() }}</div>
+              </ng-template>
+            </div>
+            
+            <div class="intro-details-row">
+              <div class="left-info">
+                <h2 class="profile-name">{{ profileUser()?.nome }}</h2>
+                <p class="profile-headline">{{ profileUser()?.bio || 'Estudante/Membro do Campus IV da UFPB' }}</p>
+                <p class="profile-location">
+                  Rio Tinto / Mamanguape, Paraíba, Brasil · 
+                  <span class="contact-info-trigger" (click)="activeTab.set('perfil')">Informações de contato</span>
+                </p>
+                <p class="profile-connections">
+                  <span class="count">{{ followStatus().followersCount }}</span> seguidores · 
+                  <span class="count">{{ followStatus().followingCount }}</span> conexões
+                </p>
+              </div>
+              
+              <div class="right-school">
+                <div class="school-item">
+                  <span class="material-symbols-rounded school-icon">school</span>
+                  <span class="school-name">Universidade Federal da Paraíba</span>
+                </div>
+                <div class="school-item" *ngIf="profileUser()?.course">
+                  <span class="material-symbols-rounded school-icon">menu_book</span>
+                  <span class="school-name">{{ profileUser()?.course }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="intro-actions">
+              <!-- Own profile actions -->
+              <button class="btn btn-linkedin-primary" (click)="enableEditMode()" *ngIf="isOwnProfile()">
+                <span class="material-symbols-rounded text-icon">edit</span>
+                Editar Perfil
+              </button>
+              
+              <!-- Other profiles actions -->
+              <ng-container *ngIf="!isOwnProfile() && isLoggedIn()">
+                <button 
+                  class="btn follow-profile-btn" 
+                  [class.btn-linkedin-primary]="!followStatus().following"
+                  [class.btn-linkedin-secondary]="followStatus().following"
+                  (click)="onToggleFollow()"
+                >
+                  <span class="material-symbols-rounded text-icon">{{ followStatus().following ? 'person_remove' : 'person_add' }}</span>
+                  {{ followStatus().following ? 'Seguindo' : 'Seguir' }}
+                </button>
+                
+                <button class="btn btn-linkedin-secondary" (click)="activeTab.set('recados')">
+                  <span class="material-symbols-rounded text-icon">chat</span>
+                  Enviar Mensagem
+                </button>
+                
+                <button class="btn btn-linkedin-danger" (click)="onReportProfile()">
+                  <span class="material-symbols-rounded text-icon">report</span>
+                  Denunciar Perfil
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD: RECONHECIMENTO ACADÊMICO (SELOS INSTITUCIONAIS) -->
+        <div class="linkedin-card badges-card" *ngIf="getAcademicBadges().length > 0">
+          <div class="badges-card-header">
+            <span class="material-symbols-rounded header-icon">workspace_premium</span>
+            <h3 class="card-section-title">Reconhecimento Acadêmico</h3>
+          </div>
+          <div class="academic-badges-grid">
+            <div class="academic-badge-item" *ngFor="let badge of getAcademicBadges()" [title]="badge.description">
+              <div class="badge-icon-box" [style.background-color]="badge.color + '15'" [style.color]="badge.color" [style.border-color]="badge.color + '40'">
+                <span class="material-symbols-rounded">{{ badge.icon }}</span>
+              </div>
+              <div class="badge-info">
+                <h4 class="badge-name" [style.color]="badge.color">{{ badge.name }}</h4>
+                <p class="badge-desc">{{ badge.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: ABOUT/SOBRE -->
+        <div class="linkedin-card about-card">
+          <h3 class="card-section-title">Sobre</h3>
+          <p class="about-text" *ngIf="profileUser()?.bio; else noBio">
+            {{ profileUser()?.bio }}
+          </p>
+          <ng-template #noBio>
+            <p class="text-muted italic">Nenhuma descrição adicionada ainda.</p>
+          </ng-template>
+        </div>
+
+        <!-- CARD 3: ACADEMIC DETAILS -->
+        <div class="linkedin-card details-card">
+          <h3 class="card-section-title">Dados Acadêmicos & Pessoais</h3>
+          <div class="academic-grid-details">
+            <div class="details-section">
+              <h5>Dados Acadêmicos</h5>
+              <ul class="linkedin-detail-list">
+                <li><strong>Curso:</strong> <span>{{ profileUser()?.course || 'Não informado' }}</span></li>
+                <li><strong>Período Atual:</strong> <span>{{ profileUser()?.period ? (profileUser()?.period.toString().includes('.') ? profileUser()?.period : profileUser()?.period + 'º') : 'Não informado' }}</span></li>
+                <li><strong>Matrícula:</strong> <span>{{ profileUser()?.matricula || 'Não informada' }}</span></li>
+                <li><strong>Ingresso:</strong> <span>{{ profileUser()?.ingressPeriod || 'Não informado' }}</span></li>
+                <li><strong>Conclusão:</strong> <span>{{ profileUser()?.conclusionPeriod || 'Não informado' }}</span></li>
+              </ul>
+            </div>
+            <div class="details-section">
+              <h5>Dados Pessoais & Contato</h5>
+              <ul class="linkedin-detail-list">
+                <li><strong>Gênero:</strong> <span>{{ getGenderName(profileUser()?.genderType, profileUser()?.genderOther) }}</span></li>
+                <li><strong>Aniversário:</strong> <span>{{ formatBirthdate(profileUser()?.birthDate) }}</span></li>
+                <li *ngIf="profileUser()?.whatsapp"><strong>WhatsApp:</strong> <span>{{ profileUser()?.whatsapp }}</span></li>
+                <li *ngIf="profileUser()?.githubUrl"><strong>GitHub:</strong> <a [href]="profileUser()?.githubUrl" target="_blank">{{ profileUser()?.githubUrl }}</a></li>
+                <li *ngIf="profileUser()?.linkedinUrl"><strong>LinkedIn:</strong> <a [href]="profileUser()?.linkedinUrl" target="_blank">{{ profileUser()?.linkedinUrl }}</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 4: EXPERIENCE & EDUCATION -->
+        <div class="linkedin-card experience-card" *ngIf="profileUser()?.experience || profileUser()?.education || profileUser()?.certification">
+          <h3 class="card-section-title">Histórico e Formação</h3>
+          
+          <div class="history-item" *ngIf="profileUser()?.experience">
+            <div class="history-icon-wrapper">
+              <span class="material-symbols-rounded">work</span>
+            </div>
+            <div class="history-text">
+              <h4>Experiência</h4>
+              <p>{{ profileUser()?.experience }}</p>
+            </div>
+          </div>
+
+          <div class="history-item" *ngIf="profileUser()?.education">
+            <div class="history-icon-wrapper">
+              <span class="material-symbols-rounded">school</span>
+            </div>
+            <div class="history-text">
+              <h4>Formação Acadêmica</h4>
+              <p>{{ profileUser()?.education }}</p>
+            </div>
+          </div>
+
+          <div class="history-item" *ngIf="profileUser()?.certification">
+            <div class="history-icon-wrapper">
+              <span class="material-symbols-rounded">verified</span>
+            </div>
+            <div class="history-text">
+              <h4>Licenças & Certificados</h4>
+              <p>{{ profileUser()?.certification }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 5: SKILLS -->
+        <div class="linkedin-card skills-card">
+          <h3 class="card-section-title">Competências</h3>
+          <div class="skills-tags-list" *ngIf="profileUser()?.technologies?.length; else noTechs">
+            <span class="skill-tag" *ngFor="let tech of profileUser()?.technologies">{{ tech }}</span>
+          </div>
+          <ng-template #noTechs>
+            <p class="text-muted italic">Nenhuma stack ou tecnologia cadastrada.</p>
+          </ng-template>
+        </div>
+
+        <!-- CARD 6: ACTIVITY (TIMELINE) -->
+        <div class="linkedin-card activity-card">
+          <h3 class="card-section-title">Atividades</h3>
+          <p class="activity-followers-count">{{ followStatus().followersCount }} seguidores</p>
+          
+          <!-- Timeline Tab Navigation -->
+          <div class="activity-tabs">
+            <button class="activity-tab-btn" [class.active]="activeTab() === 'perfil'" (click)="activeTab.set('perfil')">Geral</button>
+            <button class="activity-tab-btn" [class.active]="activeTab() === 'feeds'" (click)="activeTab.set('feeds')">Publicações</button>
+            <button class="activity-tab-btn" [class.active]="activeTab() === 'recados'" (click)="activeTab.set('recados'); loadNotifications()">Mensagens/Recados</button>
+            <button class="activity-tab-btn" [class.active]="activeTab() === 'depoimentos'" (click)="activeTab.set('depoimentos')">Recomendações</button>
+          </div>
+
+          <!-- Tab content rendered inline under Activity Card to match LinkedIn style -->
+          <div class="activity-content-box">
+            
+            <!-- Geral Tab -->
+            <div class="activity-subtab-content" *ngIf="activeTab() === 'perfil'">
+              <div class="latest-posts-summary" *ngIf="userPosts().length > 0; else noRecentActivity">
+                <div class="summary-post-row" *ngFor="let post of userPosts().slice(0, 3)">
+                  <div class="post-preview-line">
+                    <span class="dot"></span>
+                    <span class="preview-text">{{ post.content | slice:0:150 }}{{ post.content?.length > 150 ? '...' : '' }}</span>
+                  </div>
+                  <span class="time">{{ getRelativeTime(post.timestamp) }}</span>
+                </div>
+                <button class="btn-view-all-activity" (click)="activeTab.set('feeds')">Ver todas as publicações</button>
+              </div>
+              <ng-template #noRecentActivity>
+                <p class="text-muted italic">Nenhuma atividade recente registrada.</p>
+              </ng-template>
+            </div>
+
+            <!-- Publicações Tab -->
+            <div class="activity-subtab-content" *ngIf="activeTab() === 'feeds'">
+              <div class="posts-list-profile" *ngIf="userPosts().length > 0; else noPosts">
+                <div class="post-card card" *ngFor="let post of userPosts()">
+                  <header class="post-card-header">
+                    <div class="avatar-small">
+                      <img *ngIf="post.authorPhotoUrl" [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+                      <span *ngIf="!post.authorPhotoUrl">{{ post.authorName?.charAt(0) }}</span>
+                    </div>
+                    <div class="author-info">
+                      <h5>{{ post.authorName }}</h5>
+                      <span class="post-time">{{ getRelativeTime(post.timestamp) }}</span>
+                    </div>
+                    <span class="post-category-badge" [class]="'badge-' + post.postType?.toLowerCase()">
+                      {{ post.postType === 'STORE' ? 'Lojinha' : post.postType === 'COMMUNITY' ? 'Comunidade' : 'Usuário' }}
+                    </span>
+                  </header>
+
+                  <div class="post-body">
+                    <p class="post-content">{{ post.content }}</p>
+                    <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Imagem da postagem" class="post-image" />
+                  </div>
+
+                  <div class="post-actions">
+                    <button class="action-btn like-btn" [class.liked]="post.likedByCurrentUser" (click)="onToggleLike(post)">
+                      <span class="material-symbols-rounded icon" [class.filled-icon]="post.likedByCurrentUser">thumb_up</span>
+                      {{ post.likedByCurrentUser ? 'Curtido' : 'Curtir' }}
+                      <span class="count" *ngIf="post.likesCount > 0">({{ post.likesCount }})</span>
+                    </button>
+                    <div class="action-btn comment-count-btn">
+                      <span class="material-symbols-rounded icon">chat_bubble</span>
+                      Comentários ({{ post.comments?.length || 0 }})
+                    </div>
+                    <button class="action-btn report-btn" (click)="onReportPost(post)">
+                      <span class="material-symbols-rounded icon">report</span>
+                      Denunciar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noPosts>
+                <p class="text-muted italic">Nenhuma publicação feita por este usuário.</p>
+              </ng-template>
+            </div>
+
+            <!-- Mensagens/Recados Tab -->
+            <div class="activity-subtab-content" *ngIf="activeTab() === 'recados'">
+              <div class="notifications-scraps-list" *ngIf="isOwnProfile() && notificationsList().length > 0; else noNotifications">
+                <div class="scrap-item card" *ngFor="let notif of notificationsList()" [class.unread]="!notif.read">
+                  <div class="scrap-main">
+                    <p class="scrap-message">{{ notif.message }}</p>
+                    <span class="scrap-time">{{ getRelativeTime(notif.createdTime) }}</span>
+                  </div>
+                  <button class="btn btn-secondary btn-sm mark-read-btn" *ngIf="!notif.read" (click)="onMarkNotificationRead(notif)">
+                    Marcar como lida
+                  </button>
+                </div>
+              </div>
+              <ng-template #noNotifications>
+                <p class="text-muted italic text-center">Nenhum recado ou notificação para exibir.</p>
+              </ng-template>
+            </div>
+
+            <!-- Depoimentos/Recomendações Tab -->
+            <div class="activity-subtab-content" *ngIf="activeTab() === 'depoimentos'">
+              <!-- Pending list (Only visible to own profile) -->
+              <div class="pending-testimonials-container" *ngIf="isOwnProfile() && pendingTestimonials().length > 0">
+                <h5 class="pending-title">Depoimentos Pendentes de Aprovação ({{ pendingTestimonials().length }})</h5>
+                <div class="pending-list">
+                  <div class="testimonial-card pending card" *ngFor="let t of pendingTestimonials()">
+                    <div class="testimonial-header">
+                      <div class="sender-info">
+                        <div class="sender-avatar-wrapper">
+                          <img *ngIf="t.senderPhotoUrl" [src]="t.senderPhotoUrl" alt="Avatar" class="sender-avatar" />
+                          <span *ngIf="!t.senderPhotoUrl" class="sender-avatar-initials">{{ t.senderName?.charAt(0) }}</span>
+                        </div>
+                        <div>
+                          <span class="sender-name">{{ t.senderName }}</span>
+                          <a [routerLink]="['/perfil', t.senderUsername]" class="sender-handle">@{{ t.senderUsername }}</a>
+                        </div>
+                      </div>
+                      <div class="testimonial-actions">
+                        <button class="btn btn-primary btn-sm btn-accept" (click)="onAcceptTestimonial(t)">Aceitar</button>
+                        <button class="btn btn-danger btn-sm btn-reject" (click)="onDeleteTestimonial(t)">Recusar</button>
+                      </div>
+                    </div>
+                    <p class="testimonial-content">"{{ t.content }}"</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accepted Testimonials -->
+              <div class="testimonials-list" *ngIf="testimonials().length > 0; else noTestimonials">
+                <div class="testimonial-card card" *ngFor="let t of testimonials()">
+                  <div class="testimonial-header">
+                    <div class="sender-info">
+                      <div class="sender-avatar-wrapper">
+                        <img *ngIf="t.senderPhotoUrl" [src]="t.senderPhotoUrl" alt="Avatar" class="sender-avatar" />
+                        <span *ngIf="!t.senderPhotoUrl" class="sender-avatar-initials">{{ t.senderName?.charAt(0) }}</span>
+                      </div>
+                      <div>
+                        <span class="sender-name">{{ t.senderName }}</span>
+                        <a [routerLink]="['/perfil', t.senderUsername]" class="sender-handle">@{{ t.senderUsername }}</a>
+                      </div>
+                    </div>
+                    <button class="btn-delete-testimonial" *ngIf="isOwnProfile() || (currentUser() && t.senderId === currentUser()?.id)" (click)="onDeleteTestimonial(t)" title="Excluir Depoimento">
+                      &times;
+                    </button>
+                  </div>
+                  <p class="testimonial-content">"{{ t.content }}"</p>
+                </div>
+              </div>
+              <ng-template #noTestimonials>
+                <p class="text-muted italic text-center">Nenhum depoimento aceito ainda.</p>
+              </ng-template>
+
+              <!-- Form to write testimonial (Only for others) -->
+              <div class="send-testimonial-form animate-fade-in" *ngIf="!isOwnProfile() && isLoggedIn()">
+                <h5>Escrever depoimento para {{ profileUser()?.nome }}</h5>
+                <textarea [value]="testimonialInput()" (input)="testimonialInput.set($any($event.target).value)" placeholder="Escreva um depoimento sincero..." rows="3" class="testimonial-textarea"></textarea>
+                <div class="send-actions" style="margin-top: 8px; text-align: right;">
+                  <span class="error-msg" *ngIf="testimonialError()">{{ testimonialError() }}</span>
+                  <button class="btn btn-linkedin-primary" [disabled]="!testimonialInput().trim() || isSendingTestimonial()" (click)="onSendTestimonial()">
+                    {{ isSendingTestimonial() ? 'Enviando...' : 'Enviar para Aprovação' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: SIDEBAR WIDGETS (30% width) -->
+      <div class="profile-sidebar-column">
+        
+        <!-- widget 1: completeness meter (only for own profile) -->
+        <div class="linkedin-card completeness-widget" *ngIf="isOwnProfile()">
+          <div class="completeness-header-row">
+            <h4>Força do Perfil</h4>
+            <span class="percentage">{{ getProfileCompleteness() }}%</span>
+          </div>
+          <div class="completeness-bar">
+            <div class="completeness-fill" [style.width.%]="getProfileCompleteness()"></div>
+          </div>
+          <p class="completeness-tip">{{ getCompletenessTip() }}</p>
+        </div>
+
+        <!-- widget 2: explore more posts / recent activity from network -->
+        <div class="linkedin-card network-widget">
+          <h4>Explorar outros posts</h4>
+          <div class="network-posts-list">
+            <div class="network-post-item">
+              <strong class="user-name">Richard Herrera</strong>
+              <span class="sub-label">Professor / Alest Consultoria</span>
+              <p class="desc">Finalizei o AuthGuard Platform, plataforma de autenticação segura e RBAC...</p>
+            </div>
+            <div class="network-post-item">
+              <strong class="user-name">Fernando Cardoso</strong>
+              <span class="sub-label">Sistemas de Informação / UFPB</span>
+              <p class="desc">Desenvolvi um simulador visual de switch gerenciável do zero, totalmente interativo...</p>
+            </div>
+            <div class="network-post-item">
+              <strong class="user-name">Paulo Cruz</strong>
+              <span class="sub-label">Estudante / Mamanguape</span>
+              <p class="desc">Adeus, Zone.js. Por que sua aplicação Angular 19+ deveria ser Zoneless...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- widget 3: communities (projects & groups) -->
+        <div class="linkedin-card communities-widget">
+          <h4>Minhas Comunidades</h4>
+          <div class="communities-avatar-list">
+            <div class="community-avatar-item" *ngFor="let proj of userPosts().slice(0, 4)">
+              <div class="icon-circle">
+                <span class="material-symbols-rounded">groups</span>
+              </div>
+              <span class="title">{{ proj.content?.split(' ')?.slice(0, 3)?.join(' ') || 'Projeto Acadêmico' }}</span>
+            </div>
+            <div class="community-avatar-item" *ngIf="userPosts().length === 0">
+              <p class="text-muted italic">Ainda sem projetos vinculados.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- widget 4: recommended skills courses (Mamanguape/Rio Tinto) -->
+        <div class="linkedin-card courses-widget">
+          <h4>Adicione novas habilidades</h4>
+          <div class="courses-list">
+            <div class="course-item">
+              <span class="emoji">🛡️</span>
+              <div class="course-text">
+                <strong>Panorama de Ameaças à Cibersegurança</strong>
+                <span>58m · Curso online recomendado</span>
+              </div>
+            </div>
+            <div class="course-item">
+              <span class="emoji">🎓</span>
+              <div class="course-text">
+                <strong>Exame Preparatório: Certificação CISSP</strong>
+                <span>3h 5m · Curso recomendado</span>
+              </div>
+            </div>
+            <div class="course-item">
+              <span class="emoji">☕</span>
+              <div class="course-text">
+                <strong>Spring Security e OAuth2 Avançado</strong>
+                <span>2h 40m · Vídeo aula</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Edit Profile Mode -->
+    <div *ngIf="isEditMode()" class="edit-mode-layout">
+
+      <!-- LEFT COLUMN - Form -->
+      <div class="edit-form-column">
+        <header class="profile-header-edit">
+          <h2>Editar Perfil</h2>
+          <p>Mantenha seus dados pessoais, acadêmicos e contatos atualizados.</p>
+        </header>
+
+      <div class="alert alert-danger" *ngIf="editError()">
+        {{ editError() }}
+      </div>
+
+      <form (ngSubmit)="onSaveProfile()" #editForm="ngForm">
+        <!-- TOPIC TABS NAVIGATION -->
+        <div class="edit-topics-nav">
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'pessoais'" (click)="editTopicTab.set('pessoais')">
+            <span class="material-symbols-rounded">person</span>
+            1. Pessoais
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'academicos'" (click)="editTopicTab.set('academicos')">
+            <span class="material-symbols-rounded">school</span>
+            2. Acadêmicos
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'competencias'" (click)="editTopicTab.set('competencias')">
+            <span class="material-symbols-rounded">psychology</span>
+            3. Competências
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'historico'" (click)="editTopicTab.set('historico')">
+            <span class="material-symbols-rounded">work</span>
+            4. Histórico
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'contatos'" (click)="editTopicTab.set('contatos')">
+            <span class="material-symbols-rounded">share</span>
+            5. Contatos
+          </button>
+          <button type="button" class="topic-tab-btn" [class.active]="editTopicTab() === 'configuracoes'" (click)="editTopicTab.set('configuracoes')">
+            <span class="material-symbols-rounded">settings</span>
+            6. Configurações
+          </button>
+        </div>
+
+        <!-- 1. DADOS PESSOAIS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'pessoais'">
+          <h3 class="form-section-title">1. Dados Pessoais</h3>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label for="username">Username único (@) *</label>
+              <div class="username-input-wrapper">
+                <span class="at-prefix">@</span>
+                <input 
+                  type="text" 
+                  id="edit-username" 
+                  name="username" 
+                  [ngModel]="editUsername" 
+                  (ngModelChange)="onUsernameInput($event)"
+                  required 
+                  placeholder="Ex: joao.silva" 
+                  #usernameInput="ngModel" 
+                  class="username-input"
+                />
+                <span class="username-status-badge checking" *ngIf="usernameStatus() === 'checking'">
+                  <span class="material-symbols-rounded animate-spin">progress_activity</span> Verificando...
+                </span>
+                <span class="username-status-badge available" *ngIf="usernameStatus() === 'available'">
+                  <span class="material-symbols-rounded">check_circle</span> Disponível
+                </span>
+                <span class="username-status-badge taken" *ngIf="usernameStatus() === 'taken'">
+                  <span class="material-symbols-rounded">cancel</span> Em uso por outro perfil
+                </span>
+                <span class="username-status-badge current" *ngIf="usernameStatus() === 'current'">
+                  <span class="material-symbols-rounded">verified</span> Username atual
+                </span>
+              </div>
+              <span class="error-msg" *ngIf="usernameStatus() === 'taken'">Este @username pertence a outra pessoa. Escolha outro.</span>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input type="text" id="edit-nome" name="nome" [(ngModel)]="editNome" required placeholder="Seu nome completo" #nomeInput="ngModel" />
+              <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-mail Acadêmico *</label>
+              <input type="email" id="edit-email" name="email" [(ngModel)]="editEmail" required email placeholder="Seu e-mail acadêmico" #emailInput="ngModel" />
+              <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label>Foto de Perfil</label>
+              <div class="photo-upload-options">
+                <div class="file-upload-box">
+                  <input type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" #profileFileInput />
+                  <button type="button" class="btn btn-secondary upload-btn" (click)="profileFileInput.click()" [disabled]="isCompressingImage()">
+                    <span class="material-symbols-rounded">upload_file</span>
+                    {{ isCompressingImage() ? 'Otimizando imagem...' : 'Escolher foto do dispositivo' }}
+                  </button>
+                  <span class="file-hint">Tamanho recomendado: <strong>300×300 px (Máx. 150 KB)</strong></span>
+                </div>
+
+                <div class="url-input-box">
+                  <span class="or-label">ou colar URL direta da imagem:</span>
+                  <input type="text" id="edit-fotoUrl" name="fotoUrl" [(ngModel)]="editFotoUrl" placeholder="Ex: https://link-da-foto.com/foto.jpg" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="birthDate">Data de Aniversário</label>
+              <input type="text" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDateInput" (input)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="genderType">Gênero</label>
+              <select id="edit-genderType" name="genderType" [(ngModel)]="editGenderType">
+                <option [value]="1">Masculino</option>
+                <option [value]="2">Feminino</option>
+                <option [value]="3">Outro</option>
+              </select>
+            </div>
+
+            <div class="form-group" *ngIf="editGenderType == 3">
+              <label for="genderOther">Especifique o Gênero *</label>
+              <input type="text" id="edit-genderOther" name="genderOther" [(ngModel)]="editGenderOther" required placeholder="Ex: Não binário" />
+            </div>
+          </div>
+
+          <div class="form-group toggle-group" style="flex-direction: row; align-items: center;">
+            <label class="toggle-container">
+              <input type="checkbox" name="showBirthday" [(ngModel)]="editShowBirthday" />
+              <span class="checkmark"></span>
+              Mostrar data de aniversário no perfil
+            </label>
+            <span class="info-text">(Se desativado, o ano do seu aniversário ficará oculto para terceiros)</span>
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Biografia / Resumo Profissional</label>
+            <textarea id="edit-bio" name="bio" [(ngModel)]="editBio" rows="3" placeholder="Fale um pouco sobre você, sua carreira acadêmica e interesses..."></textarea>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('academicos')">
+              Próximo: Dados Acadêmicos &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. DADOS ACADÊMICOS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'academicos'">
+          <h3 class="form-section-title">2. Dados Acadêmicos & Profissionais</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="course">Curso *</label>
+              <select id="edit-course" name="course" [(ngModel)]="editCourse" required class="form-control select-modern">
+                <option value="" disabled selected>Selecione seu curso</option>
+                <optgroup label="Campus IV - Rio Tinto">
+                  <option value="Antropologia">Antropologia</option>
+                  <option value="Ciência da Computação">Ciência da Computação</option>
+                  <option value="Design">Design</option>
+                  <option value="Ecologia">Ecologia</option>
+                  <option value="Matemática">Matemática</option>
+                  <option value="Sistemas de Informação">Sistemas de Informação</option>
+                </optgroup>
+                <optgroup label="Campus IV - Mamanguape">
+                  <option value="Administração">Administração</option>
+                  <option value="Ciências Contábeis">Ciências Contábeis</option>
+                  <option value="Letras - Língua Portuguesa">Letras - Língua Portuguesa</option>
+                  <option value="Pedagogia">Pedagogia</option>
+                  <option value="Secretariado Executivo Bilíngue">Secretariado Executivo Bilíngue</option>
+                  <option value="Letras - Espanhol (EaD)">Letras - Espanhol (EaD)</option>
+                  <option value="Letras - Inglês (EaD)">Letras - Inglês (EaD)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="period">Período Atual *</label>
+              <input type="text" id="edit-period" name="period" [(ngModel)]="editPeriod" required placeholder="Ex: 2023.1 ou 5" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="matricula">Matrícula</label>
+              <input type="text" id="edit-matricula" name="matricula" [(ngModel)]="editMatricula" placeholder="Ex: 2023001234" />
+            </div>
+
+            <div class="form-group">
+              <label for="ingressPeriod">Período de Ingresso (Ano.Período)</label>
+              <input type="text" id="edit-ingressPeriod" name="ingressPeriod" [(ngModel)]="editIngressPeriod" placeholder="Ex: 2023.1" />
+            </div>
+
+            <div class="form-group">
+              <label for="conclusionPeriod">Previsão de Conclusão (Ano.Período)</label>
+              <input type="text" id="edit-conclusionPeriod" name="conclusionPeriod" [(ngModel)]="editConclusionPeriod" placeholder="Ex: 2027.2" />
+            </div>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('pessoais')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('competencias')">Próximo: Competências &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 3. COMPETÊNCIAS & STACKS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'competencias'">
+          <h3 class="form-section-title">3. Competências & Stacks</h3>
+
+          <!-- Sugestões recomendadas com base no Curso do Campus IV -->
+          <div class="course-suggestions-box" *ngIf="editCourse && getSuggestedCompetenciesForCourse().length > 0">
+            <div class="box-title">
+              <span class="material-symbols-rounded icon">auto_awesome</span>
+              <span>Competências recomendadas para <strong>{{ editCourse }}</strong>:</span>
+            </div>
+            <div class="suggested-chips">
+              <button type="button" class="suggested-chip-btn" *ngFor="let sug of getSuggestedCompetenciesForCourse()" (click)="addTechnology(sug)">
+                + {{ sug }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group autocomplete-wrapper" style="margin-top: 16px;">
+            <label for="newTech">Adicionar Competências / Tecnologias (Pressione Enter para adicionar)</label>
+            <div class="tech-input-container">
+              <input type="text" id="edit-newTech" name="newTech" [(ngModel)]="newTechInput" (keydown.enter)="$event.preventDefault(); addTechnology(newTechInput)" placeholder="Ex: React, Java, Figma, Inglês, Gestão" />
+              <button type="button" class="btn btn-secondary" (click)="addTechnology(newTechInput)">Adicionar</button>
+            </div>
+            
+            <!-- Filtered suggestions list -->
+            <ul class="suggestions-list" *ngIf="getFilteredSuggestions().length > 0">
+              <li *ngFor="let sug of getFilteredSuggestions()" (click)="addTechnology(sug)">
+                {{ sug }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="tech-tags-edit-container" *ngIf="editTechnologies.length > 0">
+            <span class="tech-tag-edit" *ngFor="let tech of editTechnologies">
+              <span class="tech-name">{{ tech }}</span>
+              <button type="button" class="remove-tag-btn" (click)="removeTechnology(tech)" title="Remover competência">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </span>
+          </div>
+          <div class="tech-empty-hint" *ngIf="editTechnologies.length === 0">
+            <span class="material-symbols-rounded icon">info</span>
+            <span>Nenhuma competência adicionada ainda. Digite no campo acima ou selecione as sugestões recomendadas.</span>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('academicos')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('historico')">Próximo: Histórico &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 4. HISTÓRICO & FORMAÇÃO -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'historico'">
+          <h3 class="form-section-title">4. Histórico e Formação</h3>
+          
+          <div class="form-group">
+            <label for="experience">Resumo de Experiências profissionais/projetos</label>
+            <textarea id="edit-experience" name="experience" [(ngModel)]="editExperience" rows="4" placeholder="Descreva seus projetos anteriores, atuações profissionais, estágios..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="education">Formação Acadêmica</label>
+            <textarea id="edit-education" name="education" [(ngModel)]="editEducation" rows="4" placeholder="Descreva sua formação, escolas, cursos técnicos, certificações acadêmicas..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="certification">Competências & Certificados</label>
+            <textarea id="edit-certification" name="certification" [(ngModel)]="editCertification" rows="4" placeholder="Liste suas certificações, prêmios ou conquistas relevantes..."></textarea>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('competencias')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('contatos')">Próximo: Contatos &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 5. CONTATOS E REDES SOCIAIS -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'contatos'">
+          <h3 class="form-section-title">5. Contatos & Redes</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="whatsapp">WhatsApp (com DDD)</label>
+              <input type="text" id="edit-whatsapp" name="whatsapp" [value]="editWhatsapp" (input)="formatWhatsapp($event)" placeholder="Ex: (83) 99999-9999" />
+            </div>
+
+            <div class="form-group">
+              <label for="githubUrl">URL do GitHub</label>
+              <input type="text" id="edit-githubUrl" name="githubUrl" [(ngModel)]="editGithubUrl" placeholder="Ex: https://github.com/usuario" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="linkedinUrl">URL do LinkedIn</label>
+              <input type="text" id="edit-linkedinUrl" name="linkedinUrl" [(ngModel)]="editLinkedinUrl" placeholder="Ex: https://linkedin.com/in/usuario" />
+            </div>
+
+            <div class="form-group">
+              <label for="instagramUrl">URL do Instagram</label>
+              <input type="text" id="edit-instagramUrl" name="instagramUrl" [(ngModel)]="editInstagramUrl" placeholder="Ex: https://instagram.com/usuario" />
+            </div>
+
+            <div class="form-group">
+              <label for="websiteUrl">Site Pessoal / Portfólio</label>
+              <input type="text" id="edit-websiteUrl" name="websiteUrl" [(ngModel)]="editWebsiteUrl" placeholder="Ex: https://meusite.com" />
+            </div>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('historico')">&larr; Anterior</button>
+            <button type="button" class="btn btn-primary" (click)="editTopicTab.set('configuracoes')">Próximo: Configurações &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 6. PREFERÊNCIAS E NOTIFICAÇÕES -->
+        <div class="topic-pane animate-fade-in" *ngIf="editTopicTab() === 'configuracoes'">
+          <h3 class="form-section-title">6. Preferências de Notificação & Segurança</h3>
+          
+          <div class="notifications-checkboxes">
+            <label class="toggle-container">
+              <input type="checkbox" name="notifRecommendations" [(ngModel)]="editNotifRecommendations" />
+              <span class="checkmark"></span>
+              Recomendações e competências
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifApplications" [(ngModel)]="editNotifApplications" />
+              <span class="checkmark"></span>
+              Candidaturas
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifAnnouncements" [(ngModel)]="editNotifAnnouncements" />
+              <span class="checkmark"></span>
+              Anúncios do Hub
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifEdicts" [(ngModel)]="editNotifEdicts" />
+              <span class="checkmark"></span>
+              Editais
+            </label>
+            
+            <label class="toggle-container">
+              <input type="checkbox" name="notifAdmin" [(ngModel)]="editNotifAdmin" />
+              <span class="checkmark"></span>
+              Administração
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 1.5rem;">
+            <label for="senha">Nova Senha (deixe em branco para manter a atual)</label>
+            <input type="password" id="edit-senha" name="senha" [(ngModel)]="editSenha" placeholder="Digite uma nova senha (mínimo 6 dígitos)" minlength="6" #senhaInput="ngModel" />
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <div class="form-group share-on-feed-group" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <label class="toggle-container" style="display: inline-flex; align-items: center; gap: 8px;">
+              <input type="checkbox" name="shareOnFeed" [(ngModel)]="shareOnFeed" />
+              <span class="checkmark"></span>
+              <strong>Compartilhar atualizações no feed principal</strong>
+            </label>
+            <span class="info-text">(Se ativado, cria uma postagem automática no feed sobre suas novas Stacks ou biografia atualizada)</span>
+          </div>
+
+          <div class="topic-step-actions">
+            <button type="button" class="btn btn-secondary" (click)="editTopicTab.set('contatos')">&larr; Anterior</button>
+          </div>
+        </div>
+
+        <!-- ALWAYS VISIBLE SAVE/CANCEL BAR AT THE BOTTOM -->
+        <div class="edit-actions" style="margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
+            <span class="material-symbols-rounded">save</span>
+            {{ isSaving() ? 'Salvando...' : 'Salvar Alterações do Perfil' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+
+      </div><!-- end edit-form-column -->
+
+      <!-- RIGHT COLUMN - Live Preview -->
+      <div class="edit-preview-column">
+        <div class="preview-sticky">
+
+          <div class="preview-label">
+            <span class="preview-live-badge">AO VIVO</span>
+            <span>Pré-visualização do Perfil</span>
+          </div>
+
+          <div class="preview-card">
+            <!-- Avatar -->
+            <div class="preview-avatar-wrapper">
+              <div class="preview-avatar" *ngIf="editFotoUrl; else previewInitials">
+                <img [src]="editFotoUrl" alt="Preview" class="preview-avatar-img" />
+              </div>
+              <ng-template #previewInitials>
+                <div class="preview-avatar preview-avatar-initials">
+                  {{ editNome ? editNome.charAt(0).toUpperCase() : '?' }}
+                </div>
+              </ng-template>
+              <div class="preview-online-dot"></div>
+            </div>
+
+            <!-- Name & Handle -->
+            <h3 class="preview-name">{{ editNome || 'Seu Nome' }}</h3>
+            <span class="preview-handle" *ngIf="editUsername">@{{ editUsername }}</span>
+
+            <!-- Role Badges -->
+            <div class="preview-badges">
+              <span class="preview-badge-role">{{ profileUser()?.cargo === 'ADMIN' ? 'Admin' : 'Usuário' }}</span>
+              <span class="preview-badge-type">{{ profileUser()?.userType || 'Aluno' }}</span>
+            </div>
+
+            <!-- Academic Info -->
+            <div class="preview-academic" *ngIf="editCourse || editPeriod">
+              <div class="preview-academic-item" *ngIf="editCourse">
+                <span class="preview-academic-icon">🎓</span>
+                <span>{{ editCourse }}</span>
+              </div>
+              <div class="preview-academic-item" *ngIf="editPeriod">
+                <span class="preview-academic-icon">📅</span>
+                <span>{{ editPeriod.toString().includes('.') ? editPeriod : editPeriod + 'º Período' }} · UFPB</span>
+              </div>
+              <div class="preview-academic-item" *ngIf="editIngressPeriod">
+                <span class="preview-academic-icon">🏁</span>
+                <span>Ingresso: {{ editIngressPeriod }}</span>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="preview-bio" *ngIf="editBio">
+              <p>{{ editBio }}</p>
+            </div>
+
+            <!-- Technologies -->
+            <div class="preview-techs" *ngIf="editTechnologies.length > 0">
+              <span class="preview-tech-tag" *ngFor="let t of editTechnologies.slice(0, 8)">{{ t }}</span>
+              <span class="preview-tech-more" *ngIf="editTechnologies.length > 8">+{{ editTechnologies.length - 8 }}</span>
+            </div>
+
+            <!-- Social Links -->
+            <div class="preview-social" *ngIf="editGithubUrl || editLinkedinUrl || editInstagramUrl || editWebsiteUrl">
+              <a [href]="editGithubUrl" target="_blank" class="preview-social-btn" *ngIf="editGithubUrl" title="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              </a>
+              <a [href]="editLinkedinUrl" target="_blank" class="preview-social-btn" *ngIf="editLinkedinUrl" title="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              </a>
+              <a [href]="editInstagramUrl" target="_blank" class="preview-social-btn" *ngIf="editInstagramUrl" title="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="social-icon"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </a>
+              <a [href]="editWebsiteUrl" target="_blank" class="preview-social-btn" *ngIf="editWebsiteUrl" title="Site">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="social-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-.1-8.086-.279m16.172 0a21.86 21.86 0 00-16.172 0" /></svg>
+              </a>
+            </div>
+
+            <!-- Empty state -->
+            <div class="preview-empty-hint" *ngIf="!editNome && !editBio && editTechnologies.length === 0">
+              <span>✨ Preencha o formulário ao lado para ver sua pré-visualização aqui.</span>
+            </div>
+          </div>
+
+          <!-- Completeness Meter -->
+          <div class="preview-completeness">
+            <div class="completeness-header">
+              <span class="completeness-label">Completude do Perfil</span>
+              <span class="completeness-value">{{ getProfileCompleteness() }}%</span>
+            </div>
+            <div class="completeness-bar">
+              <div class="completeness-fill"
+                [style.width.%]="getProfileCompleteness()"
+                [class.good]="getProfileCompleteness() >= 70"
+                [class.medium]="getProfileCompleteness() >= 40 && getProfileCompleteness() < 70">
+              </div>
+            </div>
+            <p class="completeness-tip" *ngIf="getProfileCompleteness() < 100">
+              {{ getCompletenessTip() }}
+            </p>
+          </div>
+
+        </div>
+      </div><!-- end edit-preview-column -->
+
+    </div><!-- end edit-mode-layout -->
+  </div>
+</div>

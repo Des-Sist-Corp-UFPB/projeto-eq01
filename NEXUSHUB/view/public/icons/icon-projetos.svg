@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="nexus-icon nexus-icon-projetos">
+  <!-- Folder Outline -->
+  <path d="M4 8 C4 6.9 4.9 6 6 6 H12 L15 9 H26 C27.1 9 28 9.9 28 11 V24 C28 25.1 27.1 26 26 26 H6 C4.9 26 4 25.1 4 24 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Network Connections inside folder -->
+  <line x1="10" y1="18" x2="16" y2="18" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+  <line x1="16" y1="18" x2="22" y2="15" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+  <line x1="16" y1="18" x2="22" y2="21" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Central Core Nexus Node -->
+  <circle cx="16" cy="18" r="3.5" fill="#3B6EF4" class="logo-core"/>
+
+  <!-- Connected Sub-nodes -->
+  <circle cx="10" cy="18" r="1.8" fill="currentColor" class="logo-dot"/>
+  <circle cx="22" cy="15" r="1.8" fill="currentColor" class="logo-dot"/>
+  <circle cx="22" cy="21" r="1.8" fill="currentColor" class="logo-dot"/>
+  
+  <!-- Folder Tab Accent Node -->
+  <circle cx="6" cy="6" r="1.5" fill="currentColor" class="logo-dot"/>
+</svg>

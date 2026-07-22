@@ -1,0 +1,127 @@
+<div class="auth-wrapper animate-fade-in">
+      <div class="auth-card">
+        <header class="auth-header">
+          <span class="logo-badge">N</span>
+          <h2>Crie sua conta acadêmica</h2>
+          <p>Faça parte da rede acadêmica e divulgue seus projetos</p>
+        </header>
+
+        <div class="alert alert-danger" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <div class="alert alert-success" *ngIf="successMessage()">
+          {{ successMessage() }}
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #cadForm="ngForm" *ngIf="!successMessage()">
+          <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input 
+              type="text" 
+              id="nome" 
+              name="nome" 
+              [(ngModel)]="nome" 
+              required 
+              placeholder="Ex: Rodrigo Silva" 
+              #nomeInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome é obrigatório.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail Acadêmico</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="email" 
+              required 
+              email
+              placeholder="Ex: rodrigo@nexushub.com" 
+              #emailInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="cargo">Cargo Acadêmico</label>
+              <select id="cargo" name="cargo" [(ngModel)]="cargo" required>
+                <option value="ESTUDANTE">Estudante</option>
+                <option value="PROFESSOR">Professor / Orientador</option>
+                <option value="ADMINISTRATIVO">Técnico Administrativo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label for="senha">Senha</label>
+            <input 
+              type="password" 
+              id="senha" 
+              name="senha" 
+              [(ngModel)]="senha" 
+              required 
+              minlength="6"
+              placeholder="Crie uma senha de acesso (mínimo 6 dígitos)"
+              #senhaInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-group">
+            <label for="confirmarSenha">Confirmar Senha *</label>
+            <input 
+              type="password" 
+              id="confirmarSenha" 
+              name="confirmarSenha" 
+              [(ngModel)]="confirmarSenha" 
+              required 
+              placeholder="Digite a senha novamente" 
+              #confirmInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="confirmarSenha !== senha && confirmInput.touched">As senhas não coincidem.</span>
+          </div>
+
+          <!-- Consentimento LGPD -->
+          <div class="form-group checkbox-group" style="display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; margin-bottom: 16px;">
+            <input 
+              type="checkbox" 
+              id="lgpdConsent" 
+              name="lgpdConsent" 
+              [(ngModel)]="lgpdConsent" 
+              required 
+              #lgpdInput="ngModel"
+              style="margin-top: 3px; width: auto; flex-shrink: 0;"
+            />
+            <label for="lgpdConsent" style="font-size: 13px; font-weight: normal; line-height: 1.4; color: var(--color-muted); cursor: pointer;">
+              Estou ciente e aceito os <a routerLink="/privacidade" target="_blank" style="color: var(--color-primary); font-weight: 600;">Termos de Uso e Política de Privacidade</a> em conformidade com a LGPD para o tratamento dos meus dados cadastrais. *
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="cadForm.invalid || senha !== confirmarSenha || !lgpdConsent || isLoading()">
+            {{ isLoading() ? 'Cadastrando...' : 'Registrar Conta' }}
+          </button>
+        </form>
+
+        <div class="auth-divider" *ngIf="!successMessage()">
+          <span>ou continue com</span>
+        </div>
+
+        <div class="social-login-container" *ngIf="!successMessage()">
+          <div id="google-btn"></div>
+        </div>
+
+        <div class="success-actions animate-fade-in" *ngIf="successMessage()">
+          <button class="btn btn-primary w-full" routerLink="/login">Ir para o Login</button>
+        </div>
+
+        <footer class="auth-footer" *ngIf="!successMessage()">
+          <p>Já possui cadastro? <a routerLink="/login">Faça o login aqui</a></p>
+        </footer>
+      </div>
+    </div>
+

@@ -1,0 +1,349 @@
+.pessoas-page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── FILTER BOX CARD (INTEGRADO COM TOKENS DA MARCA) ─── */
+.filter-box-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+.filter-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+}
+
+.filter-box-card .filter-box-header:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.filter-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.btn-toggle-filter {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-box-body {
+  padding: 20px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Selects Grid (Papel, Curso, Projeto) */
+.filter-selects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .filter-selects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label,
+.filter-competencies-section label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sub-label {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.filter-control {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.filter-control:focus {
+  border-color: var(--action-primary);
+}
+
+.competency-input {
+  padding-left: 14px;
+}
+
+/* Filter Chips */
+.filter-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.filter-chip {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--border-subtle);
+  color: var(--action-primary);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-chip button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-chip button:hover {
+  color: #ef4444;
+}
+
+/* Action Buttons */
+.filter-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-filtrar {
+  background-color: var(--action-primary);
+  color: white;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-filtrar:hover {
+  opacity: 0.9;
+}
+
+.btn-limpar {
+  background-color: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-limpar:hover {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ─── CARDS GRID (4 COLUNAS - MARCA OFICIAL) ─── */
+.pessoas-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .pessoas-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
+  .pessoas-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 550px) {
+  .pessoas-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card individual da Pessoa */
+.pessoa-user-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 24px 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.pessoa-user-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--action-primary);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Avatar circular */
+.card-avatar-wrapper {
+  margin-bottom: 12px;
+}
+
+.card-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-subtle);
+}
+
+.card-avatar-initial {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Nome do Usuário */
+.card-user-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Badges & Seguidores */
+.card-badges-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.role-badge.prof-badge {
+  background-color: #7c3aed;
+  color: white;
+  border-color: #7c3aed;
+}
+
+.role-badge.si-badge {
+  background-color: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.followers-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Moldura e Botão Seguir */
+.card-follow-frame {
+  width: 100%;
+  margin-top: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.btn-follow-card {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-follow-card:hover {
+  background-color: var(--bg-primary);
+}
+
+.btn-follow-card.is-following {
+  background-color: var(--action-primary);
+  color: white;
+}
+
+/* Loading and Empty State */
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-secondary);
+}
+
+.loading-state .animate-spin {
+  font-size: 36px;
+  color: var(--action-primary);
+  margin-bottom: 12px;
+}

@@ -1,343 +1,176 @@
-# Sistema Mercado — Projeto Base DSC/UFPB
+# 🎓 NexusHub
 
-Projeto base (boilerplate) para a disciplina **Desenvolvimento de Sistemas Corporativos**.
+> Plataforma acadêmica gamificada para centralizar projetos, grupos, eventos, lojinha comunitária e oportunidades universitárias.
 
-**Professor**: Rodrigo Rebouças | **UFPB — Campus IV**
-
----
-
-## Tecnologias
-
-| Camada | Tecnologia |
-|--------|-----------|
-| Backend | Java 21 + Spring Boot 3.4.5 |
-| Templates | Thymeleaf + HTMX 2.0 |
-| Frontend | Bootstrap 5.3 |
-| Banco | PostgreSQL 16 |
-| Migrações | Flyway 11 |
-| Segurança | Spring Security 6 |
-| Build | Maven 3.9 |
-| CI/CD | GitHub Actions |
+NexusHub conecta estudantes, professores, projetos, grupos e oportunidades em um único ambiente digital. A ideia é reduzir a perda de informações espalhadas e transformar participação acadêmica em reconhecimento por meio de pontos, rankings, conquistas e perfis acadêmicos personalizados.
 
 ---
 
-## Guia de Instalação para Alunos
+## 🛠️ Tecnologias Utilizadas
 
-### Passo 1 — Instale o Java 21
+O projeto utiliza um conjunto de tecnologias modernas e robustas:
 
-O projeto requer Java 21. Recomendamos o **Eclipse Temurin** (distribuição gratuita da Adoptium).
+* **Backend:** Java 21, Spring Boot (REST API), JPA/Hibernate, Flyway (Migrações do banco), Maven
+* **Frontend:** Angular 21 (TypeScript, RxJS, Signals)
+* **Banco de Dados:** PostgreSQL 16
+* **Containerização:** Docker & Docker Compose
 
-**Windows / macOS / Linux:**
-1. Acesse https://adoptium.net/temurin/releases/?version=21
-2. Baixe o instalador para seu sistema operacional
-3. Execute o instalador e siga as instruções
+---
 
-**Verificar se está correto:**
+## 📐 Estrutura do Projeto
+
+O projeto segue o padrão **MVC (Model-View-Controller)** de forma explícita, organizado nos seguintes diretórios:
+
+```text
+projeto-eq01
+└── NEXUSHUB
+    ├── model          # Módulo Java com entidades, DTOs, repositórios e regras de negócio.
+    ├── controller     # Módulo Spring Boot (API REST).
+    ├── view           # Aplicação Angular (interface com usuário).
+    └── Dockerfile & docker-compose.yml
+```
+
+### Links Rápidos dos Componentes:
+* [Módulo Model](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model)
+* [Módulo Controller](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller)
+* [Módulo Frontend (Angular)](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/view)
+* [Configuração do Docker Compose](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/docker-compose.yml)
+
+---
+
+## 🌟 Funcionalidades do Projeto
+
+### 1. Perfil Acadêmico Completo e Flexível
+* **Onboarding Acadêmico**: Passo a passo de boas-vindas para registrar nome, data de nascimento (com controle de visibilidade), curso e período.
+* **Período Customizado**: O campo período suporta formatos textuais como `2023.1` ou numéricos simples (`5`). A renderização é inteligente para remover a formatação ordinal (`º`) caso contenha caracteres de semestre (ex: `.1`).
+* **Seções Detalhadas**: Biografia, histórico de experiências, formação, competências técnicas e stacks de tecnologias.
+* **Redes & Contatos**: Integração direta com WhatsApp, LinkedIn, GitHub, Instagram e sites pessoais.
+
+### 2. Comunidades (Grupos e Projetos vinculados)
+* **Estrutura Hierárquica**: Um grupo acadêmico pode possuir múltiplos projetos, porém todo projeto deve obrigatoriamente estar vinculado a um grupo responsável.
+* **Mural de Mensagens**: Murais de comunicação em tempo real tanto no detalhe de Grupos quanto no de Projetos para interação ativa e compartilhamento de avisos entre os participantes.
+
+### 3. Lojinha Universitária (Community Marketplace)
+* **Perfil do Vendedor**: Ativação condicionada ao aceite dos "Termos de Uso do Campus". Suporta personalização de Logo e Banner da loja.
+* **Definição de Campus & Pontos de Encontro**: Parametrizado para os Campi de Mamanguape e Rio Tinto. Permite escolher pontos fixos (como Biblioteca, RE, RU, Laboratórios) ou cadastrar locais customizados.
+* **Gestão de Produtos**: Cadastro de itens com fotos, descrição e preço. Monitoramento de visualizações e cliques.
+* **WhatsApp Checkout**: Geração de mensagens estruturadas para direcionamento direto ao WhatsApp do vendedor, com dados do pedido, ponto de encontro e método de pagamento (Pix integrado).
+
+### 4. Recomendações e Conexões (Social)
+* **Depoimentos (Testimonials)**: Usuários podem enviar recomendações para os perfis de outros alunos/servidores. Requer aprovação explícita do destinatário para aparecer na aba pública do perfil.
+* **Sistema de Follow**: Possibilidade de seguir e ser seguido por outros membros, gerando notificações.
+
+### 5. Painel Administrativo, Auditoria e LGPD
+* **Logs de Auditoria (Conformidade LGPD)**: Rastreamento completo de eventos sensíveis (logins, alterações de senha, downloads de dados e cadastros). Sanitização avançada para não expor segredos.
+* **Moderação de Denúncias**: Usuários podem denunciar postagens ou perfis. Administradores moderam as ocorrências a partir de um painel integrado.
+
+---
+
+## 🚀 Como Executar o Projeto
+
+Você pode rodar o projeto usando **Docker Compose** (recomendado para desenvolvimento rápido) ou executando os serviços **manualmente**.
+
+### Opção 1: Usando Docker Compose (Recomendado)
+
+Certifique-se de ter o Docker e o Docker Compose instalados.
+
+1. Navegue até o diretório principal:
+   ```bash
+   cd NEXUSHUB
+   ```
+2. Inicie os containers com build atualizado:
+   ```bash
+   docker-compose up --build
+   ```
+3. Acesse a aplicação:
+   * **Frontend (Angular):** [http://localhost:4200](http://localhost:4200)
+   * **Backend (Spring Boot):** [http://localhost:8080](http://localhost:8080)
+
+---
+
+### Opção 2: Execução Manual
+
+#### 1. Executando o Backend (Spring Boot)
+1. Navegue até o diretório `NEXUSHUB`:
+   ```bash
+   cd NEXUSHUB
+   ```
+2. Execute o comando Spring Boot do Maven:
+   ```bash
+   mvn spring-boot:run -pl controller
+   ```
+   * O backend rodará em `http://localhost:8080`
+
+#### 2. Executando o Frontend (Angular)
+1. Navegue até a pasta `view`:
+   ```bash
+   cd NEXUSHUB/view
+   ```
+2. Instale os pacotes:
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor:
+   ```bash
+   npm run start
+   ```
+   * O frontend estará disponível em `http://localhost:4200`
+
+---
+
+## 🧪 Como Executar os Testes
+
+O projeto conta com testes unitários e de integração abrangentes tanto para o Backend quanto para o Frontend.
+
+### 1. Backend (Java / JUnit 5 / Mockito)
+Para rodar a suíte inteira de testes automatizados do Spring:
 ```bash
-java -version
-# Esperado: openjdk version "21.x.x" ...
+cd NEXUSHUB
+mvn clean test
 ```
+* **Classes de Testes Principais:**
+  * [IdentityServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/identity/service/IdentityServiceImplTest.java)
+  * [HumanServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/people/service/HumanServiceImplTest.java)
+  * [FeedServiceImplTest.java](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/test/java/br/ufpb/dsc/nexushub/model/people/service/FeedServiceImplTest.java)
 
-> **Dica para Windows:** durante a instalação, marque a opção *"Add to PATH"* e *"Set JAVA_HOME"*.
-
----
-
-### Passo 2 — Instale o Maven
-
-O Maven é a ferramenta de build do projeto.
-
-**macOS (com Homebrew):**
+### 2. Frontend (Angular / Vitest)
+Para rodar os testes de componentes Angular de forma não-interativa (Single Run):
 ```bash
-brew install maven
+cd NEXUSHUB/view
+npm run test -- --watch=false
 ```
 
-**Windows:**
-1. Acesse https://maven.apache.org/download.cgi
-2. Baixe o arquivo `apache-maven-3.x.x-bin.zip`
-3. Extraia para uma pasta (ex.: `C:\maven`)
-4. Adicione `C:\maven\bin` à variável de ambiente `PATH`
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt install maven
-```
-
-**Verificar:**
-```bash
-mvn -version
-# Esperado: Apache Maven 3.x.x
-```
+### 3. Cobertura de Testes (Coverage)
+O projeto mantém uma das metas de qualidade mais altas, superando **93%** de cobertura de código em ambas as frentes:
+* **Relatório Backend (JaCoCo):** [cobertura/backend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/cobertura/backend/index.html)
+* **Relatório Frontend (Vitest Coverage):** [cobertura/frontend/index.html](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/cobertura/frontend/index.html)
 
 ---
 
-### Passo 3 — Instale o Docker Desktop
+## 🔮 Sugestões de Melhorias Futuras
 
-O Docker sobe o banco de dados PostgreSQL sem precisar instalar nada manualmente.
+1. **Chat Interno em Tempo Real**:
+   * Substituir o redirecionamento ao WhatsApp por um chat baseado em WebSockets (Spring Websockets + STOMP) diretamente na plataforma. Isso centraliza as conversas e aumenta a segurança e privacidade de compradores/vendedores.
 
-1. Acesse https://www.docker.com/products/docker-desktop/
-2. Baixe e instale o Docker Desktop para seu sistema
-3. Abra o Docker Desktop e aguarde ele inicializar (ícone na barra de tarefas)
+2. **Sistema Avançado de Recompensas (Badges e Conquistas)**:
+   * Conceder distintivos e medalhas ("Badges") automaticamente para usuários por marcos atingidos, como: "Primeiro post no feed", "10 depoimentos recebidos", "Vendedor Destaque" (mais de 5 vendas realizadas com sucesso na lojinha).
 
-**Verificar:**
-```bash
-docker -v
-# Esperado: Docker version 27.x.x ...
-```
+3. **Feed Inteligente e Recomendação de Projetos**:
+   * Desenvolver um algoritmo básico de recomendação (pode ser com base nas competências cadastradas pelo estudante) para sugerir projetos de pesquisa, extensão ou grupos de estudo que buscam as tecnologias dominadas por ele.
 
-> **Importante:** o Docker Desktop deve estar **em execução** sempre que você for rodar o projeto.
+4. **Notificações Push / E-mail Avançadas**:
+   * Envio de notificações push para avisos importantes no mural dos projetos e novos depoimentos recebidos.
+   * Integração de templates de e-mail responsivos em HTML (via Spring Mail + Thymeleaf) para substituição de avisos simples.
 
----
-
-### Passo 4 — Clone o repositório
-
-```bash
-git clone <URL-DO-REPOSITÓRIO>
-cd base_projeto
-```
-
-> Substitua `<URL-DO-REPOSITÓRIO>` pela URL fornecida pelo professor.
+5. **Gamificação com Ranking de Pontos**:
+   * Quadro de classificação geral ("Leaderboard") público exibindo os estudantes mais ativos nas comunidades, engajamento em projetos e atividades extracurriculares.
 
 ---
 
-### Passo 5 — Execute o projeto
+## 👥 Contribuintes
 
-Você tem duas opções. **Recomendamos a Opção A para a primeira execução.**
+Este projeto foi desenvolvido com a colaboração de:
 
-#### Opção A: Tudo com Docker (mais simples)
-
-Um único comando sobe o banco, a aplicação e o Adminer (interface web do banco):
-
-```bash
-docker compose -f docker/docker-compose.dev.yml up --build
-```
-
-Aguarde as mensagens de inicialização. Quando aparecer algo como:
-```
-Started MercadoApplication in X.XXX seconds
-```
-...a aplicação está pronta.
-
-#### Opção B: Banco no Docker + aplicação local (recomendado para desenvolvimento)
-
-Esta opção permite editar o código e ver as mudanças mais rápido:
-
-```bash
-# Terminal 1 — sobe o banco de dados
-docker compose -f docker/docker-compose.dev.yml up postgres adminer
-
-# Terminal 2 — roda a aplicação (em outro terminal, na mesma pasta)
-mvn spring-boot:run
-```
-
----
-
-### Passo 6 — Acesse no browser
-
-| O que | Endereço |
-|-------|----------|
-| Aplicação | http://localhost:8080 |
-| Login | usuário: `admin` / senha: `admin123` |
-| Adminer (banco) | http://localhost:8888 |
-| Health check | http://localhost:8080/actuator/health |
-
----
-
-### Parando o projeto
-
-```bash
-# Parar a aplicação: Ctrl+C no terminal onde está rodando
-
-# Parar os containers Docker:
-docker compose -f docker/docker-compose.dev.yml down
-```
-
----
-
-## Solução de Problemas Comuns
-
-### "Port 8080 already in use"
-Outra aplicação está usando a porta 8080. Para liberar:
-```bash
-# macOS / Linux
-lsof -ti:8080 | xargs kill
-
-# Windows (PowerShell)
-netstat -ano | findstr :8080
-# Anote o PID da última coluna e execute:
-taskkill /PID <número-do-pid> /F
-```
-
-### "Cannot connect to the Docker daemon"
-O Docker Desktop não está em execução. Abra o aplicativo Docker Desktop e aguarde inicializar.
-
-### "Connection refused" ao banco de dados
-O container do PostgreSQL ainda não subiu. Aguarde alguns segundos e tente novamente. Você pode verificar com:
-```bash
-docker compose -f docker/docker-compose.dev.yml ps
-# O container "mercado-postgres-dev" deve estar com status "healthy"
-```
-
-### Erro de compilação Java
-Verifique se o Java 21 está sendo usado pelo Maven:
-```bash
-mvn -version
-# A linha "Java version:" deve mostrar 21.x.x
-```
-Se mostrar outra versão, configure a variável `JAVA_HOME` apontando para o Java 21.
-
-### Flyway: "Found non-empty schema(s) with no schema history table"
-O banco existe mas foi criado sem as migrations. Apague os dados e recomece:
-```bash
-docker compose -f docker/docker-compose.dev.yml down -v
-docker compose -f docker/docker-compose.dev.yml up postgres
-```
-
----
-
-## Testes
-
-```bash
-# Rodar todos os testes (requer Docker em execução — usa Testcontainers)
-mvn test
-
-# Rodar com relatório de cobertura (JaCoCo)
-mvn verify
-# Relatório: abra o arquivo target/site/jacoco/index.html no browser
-```
-
----
-
-## Análise de Segurança (SAST)
-
-```bash
-# SpotBugs + FindSecBugs + OWASP Dependency Check
-mvn verify -Psecurity
-
-# Trivy: scan de vulnerabilidades no filesystem
-docker compose -f docker/docker-compose.dev.yml --profile scan up trivy
-
-# Verificar dependências desatualizadas
-mvn versions:display-dependency-updates -Pversions
-```
-
-Veja `docs/SECURITY.md` para detalhes.
-
----
-
-## Configurando o Deploy Automático (GitHub Actions)
-
-O projeto inclui um pipeline de CI/CD em `.github/workflows/deploy.yml` que:
-- roda os testes automaticamente a cada `push` na branch `main`
-- executa análise de segurança (SAST) no código e nas dependências
-- constrói a imagem Docker de produção e faz o deploy no servidor da disciplina
-
-Para ativar o deploy, você precisa configurar **dois secrets** e uma **variável** no seu repositório GitHub.
-
----
-
-### Secret 1 — Chave SSH de deploy (`SSH_DEPLOY_KEY`)
-
-O servidor da disciplina (`dsc.rodrigor.com`) já está preparado para receber deploys.
-A chave SSH que autoriza o acesso está disponível na página da disciplina:
-
-**Acesse: https://gd.dsc.rodrigor.com** e copie a chave SSH privada disponibilizada pelo professor.
-
-Depois, adicione no seu repositório:
-
-1. No GitHub, acesse seu repositório → **Settings**
-2. No menu lateral: **Secrets and variables → Actions**
-3. Clique em **New repository secret**
-4. Nome: `SSH_DEPLOY_KEY`
-5. Valor: cole a chave privada copiada do portal (o texto completo, incluindo as linhas `-----BEGIN...` e `-----END...`)
-6. Clique em **Add secret**
-
----
-
-### Secret 2 — Chave da API do NVD (`NVD_API_KEY`)
-
-#### O que é o NVD?
-
-**NVD** significa *National Vulnerability Database* — é o banco de dados oficial do governo americano (NIST) que cataloga todas as vulnerabilidades de segurança conhecidas em softwares. Cada vulnerabilidade recebe um identificador chamado **CVE** (ex.: CVE-2024-12345) e uma nota de gravidade chamada **CVSS** (de 0 a 10).
-
-O **OWASP Dependency Check** (uma das ferramentas de segurança do projeto) consulta esse banco para verificar se as bibliotecas que o seu projeto usa possuem vulnerabilidades conhecidas.
-
-#### Por que preciso de uma chave?
-
-Sem a chave, o download do banco de dados NVD é muito lento (pode levar 20+ minutos no CI/CD, ou até falhar por timeout). Com a chave gratuita, o download é feito via API e leva menos de 2 minutos.
-
-#### Como obter (gratuito, leva ~1 minuto)
-
-1. Acesse https://nvd.nist.gov/developers/request-an-api-key
-2. Preencha seu e-mail institucional (use o e-mail da UFPB se possível)
-3. Marque a caixa de uso não-comercial
-4. Clique em **Submit**
-5. Acesse seu e-mail — você receberá a chave em segundos
-
-#### Adicionando ao repositório
-
-1. No GitHub: **Settings → Secrets and variables → Actions**
-2. Clique em **New repository secret**
-3. Nome: `NVD_API_KEY`
-4. Valor: cole a chave recebida por e-mail
-5. Clique em **Add secret**
-
-> **Sem a chave ainda?** O pipeline funciona mesmo sem ela, mas o OWASP Dependency Check
-> pode demorar muito ou falhar por timeout. Configure assim que possível.
-
----
-
-### Variável — Nome da imagem Docker (`APP_IMAGE`)
-
-O pipeline publica a imagem Docker no GitHub Container Registry (GHCR) com o nome do seu repositório. Você não precisa configurar isso manualmente — o workflow usa `${{ github.repository }}` para montar o nome automaticamente.
-
-Mas o arquivo `.env` no servidor precisa saber qual imagem usar. O script de deploy atualiza isso automaticamente na primeira execução.
-
----
-
-### Verificando se o deploy funcionou
-
-Após configurar os secrets e fazer um `push` na branch `main`:
-
-1. No GitHub, clique na aba **Actions**
-2. Você verá o workflow **"Build & Deploy"** em execução
-3. Ele tem 3 etapas: **Testes e SAST → Build e push → Deploy em produção**
-4. Se tudo der certo, a aplicação estará disponível em `https://dsc.rodrigor.com`
-
-Se alguma etapa falhar, clique nela para ver os logs detalhados.
-
----
-
-## Estrutura do Projeto
-
-```
-base_projeto/
-├── .github/workflows/
-│   └── deploy.yml           # Pipeline CI/CD (GitHub Actions)
-├── src/main/java/br/ufpb/dsc/mercado/
-│   ├── config/              # Configurações (Security, GlobalModelAttributes, etc.)
-│   ├── controller/          # Controllers HTTP + HTMX
-│   ├── domain/              # Entidades JPA
-│   ├── dto/                 # Data Transfer Objects (Records)
-│   ├── exception/           # Exceções de domínio
-│   ├── repository/          # Interfaces Spring Data JPA
-│   └── service/             # Lógica de negócio
-├── src/main/resources/
-│   ├── db/migration/        # Scripts Flyway (V1__, V2__, ...)
-│   └── templates/           # Templates Thymeleaf
-├── docker/                  # Dockerfiles + docker-compose
-├── docs/                    # Documentação técnica
-├── CLAUDE.md                # Memória para Claude Code
-└── pom.xml
-```
-
----
-
-## Para Alunos: Adaptando o Boilerplate
-
-1. **Renomear** a entidade `Produto` para sua entidade principal
-2. **Criar migration** Flyway com a nova estrutura da tabela (`src/main/resources/db/migration/V2__...sql`)
-3. **Atualizar** Repository, Service, Controller e templates seguindo os mesmos padrões
-4. **Manter** a estrutura de pacotes e convenções (ver `docs/CONVENTIONS.md`)
-5. **Nunca editar** migrations já aplicadas — sempre criar uma nova (`V3__`, `V4__`, ...)
-
-> Dúvidas? Consulte a documentação em `docs/` ou o professor.
+* **Gabriel Cardoso da Silva** ([silvacardoso987@gmail.com](mailto:silvacardoso987@gmail.com))
+* **John Wesley Pinto** ([john.silva@dcx.ufpb.br](mailto:john.silva@dcx.ufpb.br))
+* **Kássio Lima** ([kassio_leite2@hotmail.com](mailto:kassio_leite2@hotmail.com))

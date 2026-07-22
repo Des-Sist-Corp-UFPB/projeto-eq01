@@ -1,0 +1,53 @@
+<section class="privacy-page">
+  <header>
+    <span class="eyebrow">SEUS DADOS, SUAS ESCOLHAS</span>
+    <h2>Privacidade e LGPD</h2>
+    <p>Gerencie como seus dados são utilizados e exerça seus direitos de forma simples.</p>
+  </header>
+
+  <p class="feedback success" *ngIf="message()">{{ message() }}</p>
+  <p class="feedback error" *ngIf="error()">{{ error() }}</p>
+
+  <div class="privacy-grid">
+    <article>
+      <div class="icon">◉</div>
+      <div>
+        <h3>Métricas de uso</h3>
+        <p>Permita o uso de dados para entendermos como a plataforma é utilizada e melhorarmos sua experiência.</p>
+        <span class="status" *ngIf="analyticsAllowed() !== null" [class.allowed]="analyticsAllowed()">
+          {{ analyticsAllowed() ? 'Autorizado nesta sessão' : 'Não autorizado nesta sessão' }}
+        </span>
+      </div>
+      <div class="buttons">
+        <button class="btn btn-primary" (click)="consent(true)" [disabled]="loading() === 'consent'">
+          {{ loading() === 'consent' ? 'Salvando...' : 'Autorizar' }}
+        </button>
+        <button class="btn btn-secondary" (click)="consent(false)" [disabled]="loading() === 'consent'">Revogar</button>
+      </div>
+    </article>
+
+    <article>
+      <div class="icon">⇩</div>
+      <div>
+        <h3>Baixar meus dados</h3>
+        <p>Receba um arquivo JSON com os dados da sua conta, consentimentos, solicitações e pagamentos.</p>
+      </div>
+      <button class="btn btn-primary" (click)="downloadData()" [disabled]="loading() === 'export'">
+        {{ loading() === 'export' ? 'Gerando arquivo...' : 'Baixar arquivo' }}
+      </button>
+    </article>
+
+    <article class="danger-card">
+      <div class="icon">!</div>
+      <div>
+        <h3>Anonimizar minha conta</h3>
+        <p>Solicite a remoção dos seus dados identificáveis. A equipe analisará obrigações legais antes de concluir.</p>
+      </div>
+      <button class="btn danger" (click)="anonymize()" [disabled]="loading() === 'anonymize'">
+        {{ loading() === 'anonymize' ? 'Enviando...' : 'Solicitar anonimização' }}
+      </button>
+    </article>
+  </div>
+
+  <p class="legal-note">As solicitações e alterações ficam registradas no log de auditoria para comprovação de conformidade.</p>
+</section>

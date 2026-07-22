@@ -1,0 +1,415 @@
+<div class="animate-fade-in" *ngIf="isLoggedIn()">
+  <!-- Search Mode results -->
+  <div class="main-content" *ngIf="searchQuery().trim() !== ''">
+    <section class="search-results-section">
+      <div class="section-header">
+        <h2 class="section-title">Resultados da Busca ({{ getFilteredProjects().length }})</h2>
+        <button class="clear-search-btn" (click)="searchQuery.set('')">Limpar Busca</button>
+      </div>
+      
+      <div class="projects-grid" *ngIf="getFilteredProjects().length > 0">
+        <div class="grid-item" *ngFor="let proj of getFilteredProjects()">
+          <app-project-card [projeto]="proj"></app-project-card>
+        </div>
+      </div>
+      
+      <div class="no-results" *ngIf="getFilteredProjects().length === 0">
+        <span class="material-symbols-rounded empty-icon">search_off</span>
+        <h3>Nenhum projeto encontrado</h3>
+        <p>Tente buscar por termos diferentes, tags ou nomes de integrantes.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Dashboard Mode with Concept 1 Grid Layout -->
+  <div *ngIf="searchQuery().trim() === ''">
+    
+    <div class="dashboard-page-header">
+      <h2 class="dashboard-title">Dashboard</h2>
+    </div>
+
+    <!-- Outer container for 2-column layout (Feed Left, Sidebar Right) -->
+    <div class="dashboard-layout-container">
+      
+      <!-- COLUMN 1: LEFT MAIN FEED AREA -->
+      <div class="feed-main-column">
+        
+        <!-- Header row with search and filter chips on the same line, and create button -->
+        <header class="feed-main-header">
+          <div class="header-search-and-filter">
+            <!-- Search bar -->
+            <div class="header-search-container">
+              <span class="material-symbols-rounded search-icon">search</span>
+              <input 
+                type="text" 
+                placeholder="" 
+                [ngModel]="searchQuery()" 
+                (ngModelChange)="searchQuery.set($event)"
+                class="header-search-input"
+              />
+            </div>
+
+            <!-- Feed category selector chips -->
+            <div class="filter-chips">
+              <button class="filter-chip" [class.active]="feedFilter() === 'ALL'" (click)="feedFilter.set('ALL')">All</button>
+              <button class="filter-chip" [class.active]="feedFilter() === 'STORE'" (click)="feedFilter.set('STORE')">Lojinha</button>
+              <button class="filter-chip" [class.active]="feedFilter() === 'COMMUNITY'" (click)="feedFilter.set('COMMUNITY')">Comunidade</button>
+              <button class="filter-chip" [class.active]="feedFilter() === 'USER'" (click)="feedFilter.set('USER')">Usuario</button>
+            </div>
+          </div>
+
+          <!-- Create button -->
+          <button class="btn-create-proj-modern" (click)="openCreateModal()">
+            <span class="material-symbols-rounded plus-icon">add</span>
+            Novo Projeto
+          </button>
+        </header>
+
+        <!-- Create Post Box (Mockup style) -->
+        <div 
+          class="create-post-box card" 
+          [class.drag-over]="dragOverActive()"
+          (dragover)="$event.preventDefault(); dragOverActive.set(true)"
+          (dragleave)="dragOverActive.set(false)"
+          (drop)="$event.preventDefault(); dragOverActive.set(false); onFileDropped($event)"
+        >
+          <div class="create-post-header">
+            <div class="avatar-small" *ngIf="currentUser()?.fotoUrl; else postAvatarInitials">
+              <img [src]="currentUser()?.fotoUrl" alt="Sua foto de perfil" class="avatar-img" />
+            </div>
+            <ng-template #postAvatarInitials>
+              <div class="avatar-small">{{ currentUser()?.nome?.charAt(0) }}</div>
+            </ng-template>
+            <textarea 
+              placeholder="Compartilhe uma atualização... (Arraste imagens aqui!)" 
+              [ngModel]="newPostContent()"
+              (ngModelChange)="newPostContent.set($event)"
+              maxlength="3000"
+              rows="2"
+            ></textarea>
+          </div>
+          
+          <div class="create-post-footer">
+            <div class="create-post-actions-left">
+              <button class="action-btn-upload" type="button" (click)="triggerFileSelect(fileInput)">
+                <span class="material-symbols-rounded icon" title="Anexar Imagem">image</span>
+                <span>{{ newPostImageUrl() ? 'Imagem Anexada' : 'Anexar Imagem' }}</span>
+              </button>
+              <input 
+                type="file" 
+                #fileInput 
+                style="display: none;" 
+                (change)="onFileSelected($event)" 
+                accept="image/*" 
+              />
+              <div class="post-image-preview-thumbnail" *ngIf="newPostImageUrl()">
+                <img [src]="newPostImageUrl()" alt="Preview" />
+                <button class="remove-preview-btn" (click)="newPostImageUrl.set('')" title="Remover">&times;</button>
+              </div>
+              <span class="bold-hint-text">Ctrl/cmd B negrito</span>
+            </div>
+            
+            <button 
+              class="btn btn-primary btn-publish-feed" 
+              (click)="onCreatePost()"
+              [disabled]="!newPostContent().trim() || isCreatingPost()"
+            >
+              {{ isCreatingPost() ? 'Publicando...' : 'Publicar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Community Posts List -->
+        <div class="posts-container">
+          <div class="alert alert-danger" *ngIf="feedErrorMessage()">
+            {{ feedErrorMessage() }}
+          </div>
+
+          <!-- Feed Skeletons (Initial Loading) -->
+          <div class="feed-skeletons" *ngIf="isInitialFeedLoading()">
+            <div class="skeleton-card card" *ngFor="let i of [1, 2, 3]">
+              <div class="skeleton-header">
+                <div class="skeleton-avatar skeleton-pulse"></div>
+                <div class="skeleton-info">
+                  <div class="skeleton-line skeleton-title skeleton-pulse"></div>
+                  <div class="skeleton-line skeleton-meta skeleton-pulse"></div>
+                </div>
+              </div>
+              <div class="skeleton-content">
+                <div class="skeleton-line skeleton-text skeleton-pulse"></div>
+                <div class="skeleton-line skeleton-text skeleton-pulse" style="width: 85%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-feed" *ngIf="filteredFeedPosts().length === 0 && !isInitialFeedLoading()">
+            <div class="empty-feed-visual"><span class="material-symbols-rounded" style="font-size:48px">chat_bubble</span></div>
+            <h4>Nenhuma postagem encontrada</h4>
+            <p>Seja o primeiro a publicar algo interessante nesta categoria!</p>
+          </div>
+
+          <!-- Post Cards Loop -->
+          <div class="post-card card" *ngFor="let post of filteredFeedPosts()">
+            <header class="post-card-header">
+              <a [routerLink]="['/perfil', post.authorUsername]" class="post-author-link">
+                <div class="avatar-small" *ngIf="post.authorPhotoUrl; else postAuthorInitials">
+                  <img [src]="post.authorPhotoUrl" alt="Foto do autor" class="avatar-img" />
+                </div>
+                <ng-template #postAuthorInitials>
+                  <div class="avatar-small avatar-initial" [style.background]="getGroupGradient(post.authorName)">
+                    {{ post.authorName.charAt(0) }}
+                  </div>
+                </ng-template>
+              </a>
+              <div class="author-info">
+                <a [routerLink]="['/perfil', post.authorUsername]" class="author-name-link">
+                  <h5>{{ post.authorName }}</h5>
+                </a>
+                <span class="post-separator">·</span>
+                <span class="post-time">{{ getRelativeTime(post.timestamp) }}</span>
+                <span class="post-system-tag" *ngIf="post.postType">
+                  <ng-container [ngSwitch]="post.postType">
+                    <span *ngSwitchCase="'SYSTEM'">automático</span>
+                    <span *ngSwitchCase="'STORE'">lojinha</span>
+                    <span *ngSwitchCase="'COMMUNITY'">comunidade</span>
+                    <span *ngSwitchDefault>automático</span>
+                  </ng-container>
+                </span>
+              </div>
+            </header>
+
+            <div class="post-body">
+              <p class="post-content" [innerHTML]="formatPostContent(post.content)"></p>
+              <div class="post-image-wrapper" *ngIf="post.imageUrl">
+                <img [src]="post.imageUrl" alt="Imagem da postagem" class="post-image" />
+              </div>
+            </div>
+
+            <!-- Post Interactions -->
+            <div class="post-actions">
+              <button 
+                class="action-btn like-btn" 
+                [class.liked]="post.likedByCurrentUser" 
+                (click)="onToggleLike(post)"
+                [disabled]="!isLoggedIn()"
+              >
+                <span class="material-symbols-rounded icon" [class.filled-icon]="post.likedByCurrentUser">thumb_up</span>
+                {{ post.likedByCurrentUser ? 'Curtido' : 'Curtir' }}
+                <span class="count" *ngIf="post.likesCount > 0">({{ post.likesCount }})</span>
+              </button>
+              <div class="action-btn comment-count-btn">
+                <span class="material-symbols-rounded icon">chat_bubble</span>
+                Comentários ({{ post.comments.length }})
+              </div>
+              
+              <!-- Denunciar Post Button -->
+              <button class="action-btn report-btn" (click)="onReportPost(post)">
+                <span class="material-symbols-rounded icon">report</span>
+                Denunciar
+              </button>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+              <!-- Comments list -->
+              <div class="comments-list" *ngIf="post.comments.length > 0">
+                <div class="comment-item" *ngFor="let comment of post.comments">
+                  <a [routerLink]="['/perfil', comment.authorUsername]" class="comment-author-link">
+                    <div class="avatar-tiny" *ngIf="comment.authorPhotoUrl; else tinyInitials">
+                      <img [src]="comment.authorPhotoUrl" alt="Foto do comentador" class="avatar-img" />
+                    </div>
+                    <ng-template #tinyInitials>
+                      <div class="avatar-tiny">{{ comment.authorName.charAt(0) }}</div>
+                    </ng-template>
+                  </a>
+                  <div class="comment-bubble">
+                    <div class="comment-header">
+                      <a [routerLink]="['/perfil', comment.authorUsername]" class="comment-author-name-link">
+                        <h6>{{ comment.authorName }}</h6>
+                      </a>
+                      <span class="comment-time">{{ getRelativeTime(comment.timestamp) }}</span>
+                    </div>
+                    <p class="comment-text">{{ comment.content }}</p>
+                    <div class="comment-likes-row" *ngIf="isLoggedIn()">
+                      <button 
+                        class="comment-like-btn" 
+                        [class.liked]="comment.likedByCurrentUser" 
+                        (click)="onToggleCommentLike(post, comment)"
+                      >
+                        <span class="material-symbols-rounded" [class.filled-icon]="comment.likedByCurrentUser" style="font-size: 14px">thumb_up</span>
+                        {{ comment.likedByCurrentUser ? 'Curtido' : 'Curtir' }}
+                        <span class="likes-count" *ngIf="comment.likesCount && comment.likesCount > 0">({{ comment.likesCount }})</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add Comment box -->
+              <div class="add-comment-box" *ngIf="isLoggedIn()">
+                <div class="comment-input-wrapper">
+                  <input 
+                    type="text" 
+                    placeholder="Escreva um comentário..." 
+                    [(ngModel)]="commentInputs[post.id]"
+                    (keydown.enter)="onAddComment(post.id)"
+                    class="comment-input"
+                  />
+                  <button class="send-comment-btn" (click)="onAddComment(post.id)" [disabled]="!commentInputs[post.id]?.trim()">Comentar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading More Indicator -->
+          <div class="feed-load-more-skeleton" *ngIf="feedLoadingMore()">
+            <div class="skeleton-card card" style="margin-top: 15px;">
+              <div class="skeleton-header">
+                <div class="skeleton-avatar skeleton-pulse"></div>
+                <div class="skeleton-info">
+                  <div class="skeleton-line skeleton-title skeleton-pulse" style="width: 30%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: RIGHT SIDEBAR (Welcome + Project Metrics + Recently Updated) -->
+      <aside class="sidebar-column">
+        <!-- 1. Welcome Card -->
+        <div class="welcome-widget card">
+          <h2 class="welcome-title">Olá, {{ currentUser()?.nome?.split(' ')?.at(0) }}</h2>
+          <p class="welcome-subtitle">Confira o andamento dos projetos e comunidades do NexusHub.</p>
+        </div>
+
+        <!-- 2. Project Statistics Card -->
+        <div class="project-stats-widget card">
+          <h4 class="widget-title">Projetos</h4>
+          
+          <div class="stats-counters-grid">
+            <div class="stat-counter-box proposto">
+              <span class="counter-value">{{ propostoCount() }}</span>
+              <span class="counter-label">Propostos</span>
+            </div>
+            
+            <div class="stat-counter-box ativo">
+              <span class="counter-value">{{ ativoCount() }}</span>
+              <span class="counter-label">Ativos</span>
+            </div>
+
+            <div class="stat-counter-box em-espera">
+              <span class="counter-value">{{ emEsperaCount() }}</span>
+              <span class="counter-label">Em espera</span>
+            </div>
+
+            <div class="stat-counter-box concluido">
+              <span class="counter-value">{{ concluidoCount() }}</span>
+              <span class="counter-label">Concluídos</span>
+            </div>
+
+            <div class="stat-counter-box cancelado">
+              <span class="counter-value">{{ canceladoCount() }}</span>
+              <span class="counter-label">Cancelados</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Recently Updated Projects Card -->
+        <div class="recent-projects-widget card">
+          <h4 class="widget-title">Atualizados recentemente</h4>
+          
+          <div class="recent-projects-list">
+            <div class="recent-project-item" *ngFor="let proj of recentlyUpdatedProjects()">
+              <div class="recent-project-main">
+                <span class="recent-project-name" [routerLink]="['/projetos']">{{ proj.nome }}</span>
+                <span class="recent-project-author">por {{ proj.autor }}</span>
+              </div>
+              <span class="recent-project-status-badge" [class]="'status-' + proj.status">
+                <ng-container [ngSwitch]="proj.status">
+                  <span *ngSwitchCase="'1'">Proposto</span>
+                  <span *ngSwitchCase="'2'">Ativo</span>
+                  <span *ngSwitchCase="'3'">Em espera</span>
+                  <span *ngSwitchCase="'4'">Concluído</span>
+                  <span *ngSwitchCase="'5'">Cancelado</span>
+                  <span *ngSwitchDefault>Pendente</span>
+                </ng-container>
+              </span>
+            </div>
+            <p class="empty-list-text" *ngIf="recentlyUpdatedProjects().length === 0">Nenhum projeto cadastrado.</p>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+  </div>
+
+  <!-- Modal Component Integration -->
+  <app-new-project-modal 
+    *ngIf="showCreateModal()" 
+    (closed)="closeCreateModal()"
+    (saved)="onProjectSaved()"
+  ></app-new-project-modal>
+</div>
+
+<!-- LANDING PAGE FOR PUBLIC/UNAUTHENTICATED GUESTS (SPLIT LAYOUT) -->
+<div class="landing-split-layout" *ngIf="!isLoggedIn()">
+  <!-- Left Side: Content / Value Proposition -->
+  <div class="landing-content-side">
+    <div class="landing-brand-logo">
+      <svg class="nexus-logo-svg animate-logo-spin" viewBox="0 0 1024 1024" style="width: 72px; height: 72px;">
+        <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+        <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+        <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+      </svg>
+      <span>NEXUS<span>HUB</span></span>
+    </div>
+
+    <div class="landing-text-content">
+      <span class="landing-eyebrow">A sua universidade conectada</span>
+      <h1>Conectando a comunidade acadêmica da <span>UFPB</span></h1>
+      <p class="landing-lead">
+        Um ecossistema exclusivo que une os campi de Mamanguape e Rio Tinto. Encontre oportunidades, compre e venda na lojinha, e impulsione a sua jornada acadêmica.
+      </p>
+
+      <div class="landing-feature-list">
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-green">storefront</span>
+          <div>
+            <strong>Lojinha Universitária</strong>
+            <span>Compre lanches e anuncie produtos diretamente no seu campus.</span>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-blue">work</span>
+          <div>
+            <strong>Oportunidades e Projetos</strong>
+            <span>Encontre bolsas, estágios e conecte-se com projetos acadêmicos.</span>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <span class="material-symbols-rounded feature-icon bg-yellow">forum</span>
+          <div>
+            <strong>Feed de Classificados</strong>
+            <span>Interaja, anuncie serviços rápidos e acompanhe novidades.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Login Integration -->
+  <div class="landing-login-side">
+    <app-login-page></app-login-page>
+  </div>
+</div>
