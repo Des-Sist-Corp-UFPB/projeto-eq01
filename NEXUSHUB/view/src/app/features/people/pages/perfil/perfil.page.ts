@@ -493,7 +493,7 @@ export class PerfilPageComponent implements OnInit {
   }
 
   onUsernameInput(value: string) {
-    let clean = value.toLowerCase().trim().replace(/[^a-z0-9._-]/g, '');
+    const clean = value.toLowerCase().trim().replace(/[^a-z0-9._-]/g, '');
     this.editUsername = clean;
 
     if (this.usernameCheckTimer) {
@@ -561,8 +561,8 @@ export class PerfilPageComponent implements OnInit {
       img.src = base64Str;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+        const width = img.width;
+        const height = img.height;
 
         const minDim = Math.min(width, height);
         const startX = (width - minDim) / 2;
