@@ -9,7 +9,7 @@ export function getApiBaseUrl(): string {
   const { protocol, hostname, origin } = window.location;
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return LOCAL_BACKEND_URL;
+    return 'http://localhost:8085';
   }
 
   if (productionHosts.has(hostname)) {

@@ -44,10 +44,7 @@ public class SecurityConfig {
 
         http
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .csrfTokenRequestHandler(csrfRequestHandler)
-                    .ignoringRequestMatchers("/api/pagamentos/webhook", "/api/usuarios/login", "/api/usuarios/cadastro", "/api/usuarios/login-google"))
-            .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+            .csrf(csrf -> csrf.disable())
             .headers(headers -> headers
                     .contentTypeOptions(Customizer.withDefaults())
                     .frameOptions(frame -> frame.deny()))

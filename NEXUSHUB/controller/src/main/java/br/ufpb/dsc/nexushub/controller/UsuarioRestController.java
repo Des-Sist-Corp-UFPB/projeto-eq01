@@ -237,8 +237,8 @@ public class UsuarioRestController {
                 br.ufpb.dsc.nexushub.model.people.domain.Human h = u.getHuman();
 
                 UUID id = h != null ? h.getId() : u.getId();
-                String name = (h != null && h.getName() != null && !h.getName().trim().isEmpty()) ? h.getName() : u.getUsername();
-                String username = u.getUsername();
+                String username = h != null && h.getUsername() != null ? h.getUsername() : u.getEmail();
+                String name = (h != null && h.getName() != null && !h.getName().trim().isEmpty()) ? h.getName() : username;
                 String cargo = u.getRole() != null ? u.getRole().getName() : "USER";
                 String userType = h != null ? h.getUserType() : "GERAL";
                 String photoUrl = h != null ? h.getPhotoUrl() : null;
