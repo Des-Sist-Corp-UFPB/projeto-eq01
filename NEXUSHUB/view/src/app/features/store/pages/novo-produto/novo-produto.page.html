@@ -1,0 +1,142 @@
+<div class="novo-produto-wrapper animate-fade-in" *ngIf="!loading()">
+  <header class="page-header card">
+    <div class="header-content">
+      <button class="btn btn-secondary back-btn" (click)="goBack()">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Voltar para a Loja
+      </button>
+      <h2>{{ editingProductId() ? 'Editar Anúncio' : 'Novo Anúncio' }}</h2>
+    </div>
+  </header>
+
+  <form class="main-form-container card" (submit)="saveProduct(); $event.preventDefault()">
+    <div class="modal-body-split">
+      <!-- Form Side -->
+      <div class="form-side">
+        <div class="form-group">
+          <label for="prod-title">Título do Anúncio *</label>
+          <input type="text" id="prod-title" [(ngModel)]="productFormTitle" name="title" required placeholder="Ex: Bolo de Pote de Chocolate" />
+        </div>
+
+        <div class="form-group">
+          <label for="prod-desc">Descrição Detalhada</label>
+          <textarea id="prod-desc" [(ngModel)]="productFormDescription" name="description" rows="3" placeholder="Ingredientes, tamanho, peso, horários de entrega..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prod-category">Categoria *</label>
+            <select id="prod-category" [(ngModel)]="productFormCategory" name="category">
+              <option value="Alimentos">Alimentos</option>
+              <option value="Eletrônicos">Eletrônicos</option>
+              <option value="Serviços">Serviços</option>
+              <option value="Livros">Livros</option>
+              <option value="Vestuário">Vestuário</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="!creatingAsShop()">
+            <label for="prod-campus">Campus de Entrega *</label>
+            <select id="prod-campus" [(ngModel)]="productFormCampus" name="campus">
+              <option value="Rio Tinto">Rio Tinto</option>
+              <option value="Mamanguape">Mamanguape</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prod-price">Preço R$ *</label>
+            <input type="number" id="prod-price" [(ngModel)]="productFormPrice" name="price" required step="0.01" min="0.05" placeholder="Ex: 5.50" />
+          </div>
+
+          <div class="form-group">
+            <label for="prod-stock">Estoque Inicial un. *</label>
+            <input type="number" id="prod-stock" [(ngModel)]="productFormStock" name="stock" required min="1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prod-pay">Métodos de Pagamento Aceitos</label>
+          <select id="prod-pay" [(ngModel)]="productFormPaymentMethods" name="paymentMethods">
+            <option value="Pix">Apenas Pix</option>
+            <option value="Dinheiro">Apenas Dinheiro / Presencial</option>
+            <option value="Pix; Dinheiro">Pix e Dinheiro</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="productFormPaymentMethods.includes('Pix')">
+          <label for="prod-pix">Chave Pix para Recebimento *</label>
+          <input type="text" id="prod-pix" [(ngModel)]="productFormPixKey" name="pixKey" placeholder="E-mail, celular, CPF ou chave aleatória" />
+        </div>
+
+        <div class="form-group">
+          <label for="prod-locs">Locais de Encontro Comuns</label>
+          <input type="text" id="prod-locs" [(ngModel)]="productFormMeetLocations" name="meetLocations" placeholder="Ex: Cantina do Bloco A; Estacionamento Central" />
+        </div>
+
+        <div class="form-group">
+          <label for="prod-photos">Fotos do Produto (Upload)</label>
+          <input type="file" id="prod-photos" (change)="onProductPhotosUpload($event)" accept="image/*" multiple />
+        </div>
+
+        <div class="form-group checkbox-group" style="margin-top: 16px;">
+          <label>
+            <input type="checkbox" [(ngModel)]="productFormActive" name="active" />
+            Anúncio está visível para compradores (Online)
+          </label>
+        </div>
+      </div>
+
+      <!-- Preview Side -->
+      <div class="preview-side">
+        <h4>Pré-visualização do Anúncio</h4>
+        <div class="preview-card-wrapper">
+          <article class="product-card card">
+            <div class="product-badge" [class.online]="productFormActive" [class.offline]="!productFormActive">
+              {{ productFormActive ? 'Online' : 'Offline' }}
+            </div>
+            
+            <div class="product-image-container">
+              <img *ngIf="productFormPhotos" [src]="productFormPhotos.split('|#|')[0]" alt="Foto do produto" />
+              <div *ngIf="!productFormPhotos" class="no-image-placeholder">
+                <span class="material-symbols-rounded">image</span>
+              </div>
+            </div>
+
+            <div class="product-details">
+              <span class="product-category">{{ productFormCategory || 'Categoria' }}</span>
+              <h3 class="product-title">{{ productFormTitle || 'Título do Produto' }}</h3>
+              
+              <div class="vendor-link">
+                <span class="vendor-profile-tag" *ngIf="!creatingAsShop()">Vendedor: {{ currentUser()?.nome || 'Você' }}</span>
+                <span class="vendor-shop-tag" *ngIf="creatingAsShop() && myShop()">Loja: {{ myShop()?.name }}</span>
+              </div>
+
+              <div class="product-footer">
+                <strong class="product-price">{{ (productFormPrice || 0) | currency:'BRL' }}</strong>
+                <span class="product-location">
+                  <span class="material-symbols-rounded" style="font-size: 14px; vertical-align: middle; margin-right: 2px;">location_on</span>
+                  {{ productFormCampus || 'Campus' }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <footer class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="goBack()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="savingProduct()">
+        {{ savingProduct() ? 'Enviando...' : 'Publicar Anúncio' }}
+      </button>
+    </footer>
+  </form>
+</div>
+
+<div class="loading-wrapper" *ngIf="loading()">
+  <div class="spinner"></div>
+  <p>Carregando dados...</p>
+</div>

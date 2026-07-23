@@ -236,7 +236,7 @@
                 <div class="post-card card" *ngFor="let post of userPosts()">
                   <header class="post-card-header">
                     <div class="avatar-small">
-                      <img *ngIf="post.authorPhotoUrl" [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+                      <img *ngIf="post.authorPhotoUrl" [src]="post.authorPhotoUrl" (error)="post.authorPhotoUrl = ''" alt="Avatar" class="avatar-img" />
                       <span *ngIf="!post.authorPhotoUrl">{{ post.authorName?.charAt(0) }}</span>
                     </div>
                     <div class="author-info">
@@ -563,7 +563,7 @@
 
             <div class="form-group">
               <label for="birthDate">Data de Aniversário</label>
-              <input type="text" id="edit-birthDate" name="birthDate" [(ngModel)]="editBirthDateInput" (input)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
+              <input type="text" id="edit-birthDate" name="birthDate" [ngModel]="editBirthDateInput" (ngModelChange)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
             </div>
           </div>
 

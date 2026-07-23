@@ -169,8 +169,11 @@ export class GruposPageComponent implements OnInit {
         this.carregarDados();
       },
       error: (err) => {
-        console.error('Erro ao cadastrar grupo', err);
-        alert('Ocorreu um erro ao criar o grupo. Verifique se o backend está rodando!');
+        console.error('Erro ao cadastrar grupo:', err);
+        if (err.error) {
+          console.error('Detalhes do erro do backend:', err.error);
+        }
+        alert('Ocorreu um erro ao criar o grupo. Verifique o console para mais detalhes.');
       }
     });
   }

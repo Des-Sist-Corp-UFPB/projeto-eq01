@@ -30,7 +30,7 @@
       <div class="form-row">
         <div class="form-group">
           <label for="birthDate">Data de Aniversário *</label>
-          <input type="text" id="birthDate" name="birthDate" [(ngModel)]="birthDateInput" (input)="onBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" required #birthInput="ngModel" />
+          <input type="text" id="birthDate" name="birthDate" [ngModel]="birthDateInput" (ngModelChange)="onBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" required #birthInput="ngModel" />
           <span class="error-msg" *ngIf="birthInput.invalid && birthInput.touched">A data de aniversário é obrigatória (use DD/MM/AAAA).</span>
         </div>
 

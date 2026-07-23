@@ -603,8 +603,12 @@ export class PerfilPageComponent implements OnInit {
     this.editWhatsapp = value;
   }
 
-  onEditBirthDateInput(event: Event) {
-    let value = (event.target as HTMLInputElement).value.replace(/\D/g, '');
+  onEditBirthDateInput(newValue: string) {
+    if (!newValue) {
+      this.editBirthDateInput = '';
+      return;
+    }
+    let value = newValue.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
     
     if (value.length >= 5) {
@@ -702,7 +706,7 @@ export class PerfilPageComponent implements OnInit {
       experience: this.editExperience,
       education: this.editEducation,
       certification: this.editCertification,
-      technologies: this.editTechnologies
+      technologies: this.editTechnologies.filter(t => t && t.trim().length > 0)
     };
 
     if (this.editBirthDateInput.length === 10) {

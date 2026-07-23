@@ -154,7 +154,7 @@
             <header class="post-card-header">
               <a [routerLink]="['/perfil', post.authorUsername]" class="post-author-link">
                 <div class="avatar-small" *ngIf="post.authorPhotoUrl; else postAuthorInitials">
-                  <img [src]="post.authorPhotoUrl" alt="Foto do autor" class="avatar-img" />
+                  <img [src]="post.authorPhotoUrl" (error)="post.authorPhotoUrl = ''" alt="Foto do autor" class="avatar-img" />
                 </div>
                 <ng-template #postAuthorInitials>
                   <div class="avatar-small avatar-initial" [style.background]="getGroupGradient(post.authorName)">

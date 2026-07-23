@@ -4,7 +4,7 @@ import { authGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
-  { path: 'login', loadComponent: () => import('./features/auth/pages/login/login.page').then(m => m.LoginPageComponent) },
+  { path: 'login', redirectTo: '', pathMatch: 'full' },
   { path: 'cadastro', loadComponent: () => import('./features/auth/pages/cadastro/cadastro.page').then(m => m.CadastroPageComponent) },
   { path: 'esqueci-senha', loadComponent: () => import('./features/auth/pages/esqueci-senha/esqueci-senha.page').then(m => m.EsqueciSenhaPageComponent) },
   { path: 'onboarding', loadComponent: () => import('./features/auth/pages/onboarding/onboarding.page').then(m => m.OnboardingPageComponent) },
@@ -20,6 +20,8 @@ export const routes: Routes = [
       { path: 'grupos', loadComponent: () => import('./features/groups/pages/grupos/grupos.page').then(m => m.GruposPageComponent), canActivate: [authGuard] },
       { path: 'grupos/:id', loadComponent: () => import('./features/groups/pages/grupo-detalhe/grupo-detalhe.page').then(m => m.GrupoDetalhePageComponent), canActivate: [authGuard] },
       { path: 'loja', loadComponent: () => import('./features/store/pages/loja/loja.page').then(m => m.LojaPageComponent), canActivate: [authGuard] },
+      { path: 'loja/novo-produto', loadComponent: () => import('./features/store/pages/novo-produto/novo-produto.page').then(m => m.NovoProdutoPageComponent), canActivate: [authGuard] },
+      { path: 'loja/editar-produto/:id', loadComponent: () => import('./features/store/pages/novo-produto/novo-produto.page').then(m => m.NovoProdutoPageComponent), canActivate: [authGuard] },
       { path: 'oportunidades', loadComponent: () => import('./features/opportunities/pages/oportunidades/oportunidades.page').then(m => m.OportunidadesPageComponent), canActivate: [authGuard] },
       { path: 'pessoas', loadComponent: () => import('./features/people/pages/pessoas/pessoas.page').then(m => m.PessoasPageComponent), canActivate: [authGuard] },
       { path: 'admin', loadComponent: () => import('./features/administration/pages/admin/admin.page').then(m => m.AdminPageComponent), canActivate: [adminGuard] },
