@@ -468,8 +468,27 @@ export class LojaPageComponent implements OnInit {
     }
   }
 
-  // compressImage moved to novo-produto.page.ts
-
+  private compressImage(base64Str: string): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 300;
+        let width = img.width;
+        let height = img.height;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  }
   onBannerUpload(event: any) {
     const file = event.target.files[0];
     if (file) {
