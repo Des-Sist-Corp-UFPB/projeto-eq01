@@ -563,7 +563,7 @@
 
             <div class="form-group">
               <label for="birthDate">Data de Aniversário</label>
-              <input type="text" id="edit-birthDate" name="birthDate" [ngModel]="editBirthDateInput" (ngModelChange)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\\d{2}/\\d{2}/\\d{4}" />
+              <input type="text" id="edit-birthDate" name="birthDate" [ngModel]="editBirthDateInput" (ngModelChange)="onEditBirthDateInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="^$|^[0-9]{2}/[0-9]{2}/[0-9]{4}$" />
             </div>
           </div>
 
