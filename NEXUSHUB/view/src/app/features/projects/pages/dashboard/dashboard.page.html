@@ -152,7 +152,7 @@
           <!-- Post Cards Loop -->
           <div class="post-card card" *ngFor="let post of filteredFeedPosts()">
             <header class="post-card-header">
-              <a [routerLink]="['/perfil', post.authorUsername]" class="post-author-link">
+              <a [routerLink]="['/perfil', post.authorUsername || post.authorId]" class="post-author-link">
                 <div class="avatar-small" *ngIf="post.authorPhotoUrl; else postAuthorInitials">
                   <img [src]="post.authorPhotoUrl" alt="Foto do autor" class="avatar-img" />
                 </div>
@@ -163,7 +163,7 @@
                 </ng-template>
               </a>
               <div class="author-info">
-                <a [routerLink]="['/perfil', post.authorUsername]" class="author-name-link">
+                <a [routerLink]="['/perfil', post.authorUsername || post.authorId]" class="author-name-link">
                   <h5>{{ post.authorName }}</h5>
                 </a>
                 <span class="post-separator">·</span>
@@ -215,7 +215,7 @@
               <!-- Comments list -->
               <div class="comments-list" *ngIf="post.comments.length > 0">
                 <div class="comment-item" *ngFor="let comment of post.comments">
-                  <a [routerLink]="['/perfil', comment.authorUsername]" class="comment-author-link">
+                  <a [routerLink]="['/perfil', comment.authorUsername || comment.authorName]" class="comment-author-link">
                     <div class="avatar-tiny" *ngIf="comment.authorPhotoUrl; else tinyInitials">
                       <img [src]="comment.authorPhotoUrl" alt="Foto do comentador" class="avatar-img" />
                     </div>
@@ -225,7 +225,7 @@
                   </a>
                   <div class="comment-bubble">
                     <div class="comment-header">
-                      <a [routerLink]="['/perfil', comment.authorUsername]" class="comment-author-name-link">
+                      <a [routerLink]="['/perfil', comment.authorUsername || comment.authorName]" class="comment-author-name-link">
                         <h6>{{ comment.authorName }}</h6>
                       </a>
                       <span class="comment-time">{{ getRelativeTime(comment.timestamp) }}</span>

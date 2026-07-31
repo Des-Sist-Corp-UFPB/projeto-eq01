@@ -257,12 +257,20 @@
   font-size: 14.5px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 8px 0;
+  margin: 0 0 2px 0;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   width: 100%;
+}
+
+.card-user-username {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--action-primary);
+  margin-bottom: 10px;
+  display: block;
 }
 
 /* Badges & Seguidores */

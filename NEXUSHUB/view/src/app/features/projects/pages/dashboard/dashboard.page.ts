@@ -343,7 +343,7 @@ export class DashboardPageComponent implements OnInit {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    return safeContent.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+    return safeContent.replace(/@([a-zA-Z0-9_.-]+)/g, '<a href="/perfil/$1" class="mention">@$1</a>');
   }
 
   openCreateModal() {

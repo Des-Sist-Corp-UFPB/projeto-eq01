@@ -4,7 +4,7 @@ import { authGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
-  { path: 'login', loadComponent: () => import('./features/auth/pages/login/login.page').then(m => m.LoginPageComponent) },
+  { path: 'login', redirectTo: '', pathMatch: 'full' },
   { path: 'cadastro', loadComponent: () => import('./features/auth/pages/cadastro/cadastro.page').then(m => m.CadastroPageComponent) },
   { path: 'esqueci-senha', loadComponent: () => import('./features/auth/pages/esqueci-senha/esqueci-senha.page').then(m => m.EsqueciSenhaPageComponent) },
   { path: 'onboarding', loadComponent: () => import('./features/auth/pages/onboarding/onboarding.page').then(m => m.OnboardingPageComponent) },

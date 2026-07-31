@@ -22,6 +22,9 @@ export class NewProjectModalComponent implements OnInit {
   protected readonly currentStep = signal(1);
   protected readonly myGroups = signal<Grupo[]>([]);
   protected readonly hasNoGroups = signal(false);
+  protected readonly generatingDraft = signal(false);
+  protected readonly aiError = signal('');
+  protected aiIdea = '';
 
   protected readonly presetCovers = [
     'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500',
@@ -105,6 +108,25 @@ export class NewProjectModalComponent implements OnInit {
   selectPreset(url: string) {
     this.formModel.imagemCardUrl = url;
     this.formModel.imagemLandingUrl = url;
+  }
+
+  generateDraft() {
+    const idea = this.aiIdea.trim();
+    if (idea.length < 10 || this.generatingDraft()) return;
+
+    this.generatingDraft.set(true);
+    this.aiError.set('');
+    this.projectService.sugerirRascunho(idea).subscribe({
+      next: (draft) => {
+        this.formModel = { ...this.formModel, ...draft };
+        this.generatingDraft.set(false);
+      },
+      error: (error) => {
+        const message = error?.error?.message || error?.error?.detail;
+        this.aiError.set(message || 'Nao foi possivel gerar a sugestao agora. Tente novamente.');
+        this.generatingDraft.set(false);
+      }
+    });
   }
 
   isStepValid(): boolean {

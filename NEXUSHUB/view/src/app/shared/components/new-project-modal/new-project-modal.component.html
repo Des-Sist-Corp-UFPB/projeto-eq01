@@ -37,6 +37,28 @@
             
             <!-- STEP 1: Basic Info -->
             <div *ngIf="currentStep() === 1" class="step-content animate-fade-in">
+              <section class="ai-assistant" aria-labelledby="ai-assistant-title">
+                <div class="ai-heading">
+                  <span class="ai-spark" aria-hidden="true">&#10024;</span>
+                  <div>
+                    <h3 id="ai-assistant-title">Comece com a IA</h3>
+                    <p>Conte sua ideia e receba um rascunho editavel. Nada sera salvo automaticamente.</p>
+                  </div>
+                </div>
+                <label for="aiIdea">Ideia do projeto</label>
+                <textarea id="aiIdea" name="aiIdea" rows="3" maxlength="1200" [(ngModel)]="aiIdea"
+                  placeholder="Ex: uma plataforma para conectar estudantes a projetos de extensao..."></textarea>
+                <div class="ai-actions">
+                  <span>{{ aiIdea.length }}/1200</span>
+                  <button type="button" class="btn-ai" (click)="generateDraft()"
+                    [disabled]="aiIdea.trim().length < 10 || generatingDraft()">
+                    {{ generatingDraft() ? 'Criando rascunho...' : 'Preencher com IA' }}
+                  </button>
+                </div>
+                <p class="ai-error" role="alert" *ngIf="aiError()">{{ aiError() }}</p>
+                <p class="ai-notice">Revise as sugestoes antes de continuar. Nao informe dados pessoais ou confidenciais.</p>
+              </section>
+
               <div class="form-group">
                 <label for="nome">Nome do Projeto *</label>
                 <input type="text" id="nome" name="nome" [(ngModel)]="formModel.nome" required placeholder="Ex: Portal de Bolsas Acadêmicas" #nomeInput="ngModel" />

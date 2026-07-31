@@ -52,8 +52,8 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg",
                         "/*.woff", "/*.woff2", "/*.map", "/assets/**").permitAll()
-                .requestMatchers("/", "/index.html", "/ping", "/actuator/health", "/health", "/api/health", "/api/usuarios/login",
-                        "/api/usuarios/cadastro", "/api/usuarios/login-google", "/api/pagamentos/webhook",
+                .requestMatchers("/", "/index.html", "/ping", "/actuator/health", "/health", "/api/health", "/api/usuarios/sessao",
+                        "/api/usuarios/login", "/api/usuarios/cadastro", "/api/usuarios/login-google", "/api/pagamentos/webhook",
                         "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .requestMatchers("/login", "/cadastro", "/esqueci-senha", "/perfil",
                         "/projetos/**", "/grupos", "/grupos/**", "/loja", "/admin",
