@@ -62,7 +62,56 @@ projeto-eq01
 
 ### 5. Painel Administrativo, Auditoria e LGPD
 * **Logs de Auditoria (Conformidade LGPD)**: Rastreamento completo de eventos sensíveis (logins, alterações de senha, downloads de dados e cadastros). Sanitização avançada para não expor segredos.
+* **Módulo de Conformidade LGPD**: Gestão de consentimento do titular, portabilidade de dados em JSON e solicitação de revogação/exclusão (Documentação: [LGPD_COMPLIANCE.md](LGPD_COMPLIANCE.md)).
 * **Moderação de Denúncias**: Usuários podem denunciar postagens ou perfis. Administradores moderam as ocorrências a partir de um painel integrado.
+
+---
+
+## 📋 Log de Auditoria
+
+O NexusHub possui um sistema nativo de auditoria de eventos sensíveis para garantir segurança, rastreabilidade e conformidade com a LGPD.
+
+* **O que é auditado**: Ações de ciclo de vida do usuário e autenticação, como:
+  * Cadastro de novos usuários (`USER_REGISTERED`)
+  * Autenticação via e-mail/senha (`LOGIN` e falhas `LOGIN_FAILED`)
+  * Autenticação via provedor externo (`LOGIN_GOOGLE`)
+  * Atualizações de perfil (`PROFILE_UPDATED`)
+  * Troca e redefinição de senha (`PASSWORD_CHANGED`)
+  * Conclusão do onboarding (`ONBOARDING_COMPLETED`)
+* **Onde fica armazenado**: Tabela `adm_audit` no PostgreSQL, mapeada pela entidade `AuditLog.java`.
+  * **Principais campos**: `idaudit` (UUID), `idactor` (UUID do usuário), `cdaction` (ação realizada), `nmentity` (entidade afetada), `identity` (ID da entidade), `dsresult` (SUCCESS/DENIED), `dsip` (IP da requisição), `cdcorrelation` (Correlation-ID HTTP), `dsafter` (dados sanitizados) e `tscreated` (timestamp).
+  * **Sanitização de dados**: Senhas, tokens e cabeçalhos de autorização são automaticamente convertidos para `[REDACTED]`.
+* **Como foi implementado**: Chamadas diretas através do serviço de auditoria `AuditService.java` invocados nos controllers REST nos momentos estratégicos da requisição.
+* **Quais classes/arquivos participam**:
+  * Entity: [`NEXUSHUB/model/.../administration/domain/AuditLog.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/domain/AuditLog.java)
+  * Repository: [`NEXUSHUB/model/.../administration/repository/AuditLogRepository.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/repository/AuditLogRepository.java)
+  * Service: [`NEXUSHUB/model/.../administration/service/AuditService.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/model/src/main/java/br/ufpb/dsc/nexushub/model/administration/service/AuditService.java)
+  * Controller / Invocador: [`NEXUSHUB/controller/.../UsuarioRestController.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/UsuarioRestController.java)
+
+---
+
+## 🔌 Integração com Serviço Externo
+
+O NexusHub realiza integração com dois serviços externos principais: **Google OAuth 2.0 API** e **Serviço de Inteligência Artificial (OpenAI / LLM Compatible)**.
+
+### 1. Google OAuth 2.0 (Autenticação Social)
+* **Serviço Externo**: Google Identity / OAuth 2.0 (`google-api-client`).
+* **Para que é usado**: Permitir o login de estudantes e servidores utilizando suas contas institucionais ou pessoais do Google sem necessidade de cadastrar senha local.
+* **Classes/Arquivos que participam**:
+  * Backend Controller: [`NEXUSHUB/controller/.../UsuarioRestController.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/UsuarioRestController.java) (endpoint `/api/usuarios/login-google`)
+  * Frontend Component/Auth: [`NEXUSHUB/view/src/app/core/auth/auth.service.ts`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/view/src/app/core/auth/auth.service.ts)
+* **Como é configurado**:
+  * Variável de ambiente no `application.yml`: `app.google.client-id` (configurada no ambiente sem expor segredos).
+
+### 2. Assistente de IA para Projetos Acadêmicos
+* **Serviço Externo**: OpenAI API / LLM Provider REST API.
+* **Para que é usado**: Transformar ideias em texto bruto dos estudantes em rascunhos estruturados de projetos acadêmicos (com título, resumo, objetivos, categoria, tipo e tags), com validação rigorosa via prompt de sistema.
+* **Classes/Arquivos que participam**:
+  * Controller: [`NEXUSHUB/controller/.../ai/AiProjectRestController.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/ai/AiProjectRestController.java)
+  * Service: [`NEXUSHUB/controller/.../ai/ProjectDraftAiService.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/ai/ProjectDraftAiService.java)
+  * Rate Limiter: [`NEXUSHUB/controller/.../ai/AiRateLimiter.java`](file:///home/john/Desktop/ESTUDO_PESSOAL/DSC%20Rodrigo/AytyHub/AytyHub/NEXUSHUB/controller/src/main/java/br/ufpb/dsc/nexushub/controller/ai/AiRateLimiter.java)
+* **Como é configurado**:
+  * Variáveis no `application.yml`: `app.ai.base-url`, `app.ai.api-key` e `app.ai.model`.
 
 ---
 

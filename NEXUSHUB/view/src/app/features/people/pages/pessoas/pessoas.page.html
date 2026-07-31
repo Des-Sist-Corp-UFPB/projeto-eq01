@@ -111,13 +111,14 @@
         </ng-template>
       </div>
 
-      <!-- NOME -->
+      <!-- NOME E USERNAME -->
       <h3 class="card-user-name" title="{{ p.nome }}">{{ p.nome }}</h3>
+      <span class="card-user-username" *ngIf="p.username">@{{ p.username }}</span>
 
       <!-- BADGES & SEGUIDORES -->
       <div class="card-badges-info">
         <span class="role-badge" [class.prof-badge]="p.cargo === 'PROFESSOR'" [class.si-badge]="p.curso?.includes('Sistemas')">
-          {{ getRoleBadgeDisplay(p).label }}
+          {{ p.curso ? p.curso : getRoleBadgeDisplay(p).label }}
         </span>
         <span class="followers-text">{{ p.seguidoresCount }} seguidor{{ p.seguidoresCount === 1 ? '' : 'es' }}</span>
       </div>

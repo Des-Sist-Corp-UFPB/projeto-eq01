@@ -14,9 +14,11 @@ Para facilitar a navegação, os documentos estão agrupados por suas respectiva
 * [Estrutura do Projeto (PROJECT_STRUCTURE.md)](PROJECT_STRUCTURE.md) - Detalhes físicos da divisão de módulos e pacotes.
 * [Dicionário de Dados (DATA_DICTIONARY_STANDARD.md)](DATA_DICTIONARY_STANDARD.md) - Mapeamento das tabelas e tipos de dados do PostgreSQL.
 * [Modelo de Classes UML (CLASS_MODEL.md)](CLASS_MODEL.md) - Estrutura de entidades e associações de domínio.
+* [Assistente de IA para Projetos (AI_PROJECT_DRAFT.md)](AI_PROJECT_DRAFT.md) - Arquitetura, configuração, segurança e contrato da geração de rascunhos.
 
 ### 🛍️ Produto & Especificações
 * [Visão do Produto (PRODUCT.md)](PRODUCT.md) - Definição de metas de negócio e o valor do NexusHub.
+* [Conformidade LGPD e Privacidade (LGPD_COMPLIANCE.md)](LGPD_COMPLIANCE.md) - Arquitetura de consentimento, portabilidade e direitos do titular.
 * [Casos de Uso e Requisitos (USE_CASES.md)](USE_CASES.md) - Descrição detalhada dos fluxos de sistema e lacunas mapeadas.
 * [Roadmap de Evolução (ROADMAP.md)](ROADMAP.md) - Planejamento estratégico de entregas e fases.
 

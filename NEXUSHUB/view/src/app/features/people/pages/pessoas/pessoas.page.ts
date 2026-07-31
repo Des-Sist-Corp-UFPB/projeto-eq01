@@ -81,23 +81,14 @@ export class PessoasPageComponent implements OnInit {
 
   loadPessoas() {
     this.isLoading.set(true);
-    this.http.get<PessoaCardResponse[]>(`${apiUrl}/api/usuarios/comunidade`).subscribe({
+    this.http.get<PessoaCardResponse[]>(apiUrl('/api/usuarios/comunidade')).subscribe({
       next: (data) => {
         this.pessoas.set(data);
         this.isLoading.set(false);
       },
-      error: () => {
-        // Fallback to /usuarios/comunidade if legacy endpoint
-        this.http.get<PessoaCardResponse[]>(`${apiUrl}/usuarios/comunidade`).subscribe({
-          next: (data) => {
-            this.pessoas.set(data);
-            this.isLoading.set(false);
-          },
-          error: (err) => {
-            console.error('Erro ao carregar pessoas', err);
-            this.isLoading.set(false);
-          }
-        });
+      error: (err) => {
+        console.error('Erro ao carregar pessoas', err);
+        this.isLoading.set(false);
       }
     });
   }

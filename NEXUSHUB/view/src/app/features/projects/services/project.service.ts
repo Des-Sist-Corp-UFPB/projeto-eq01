@@ -41,6 +41,15 @@ export interface ProjetoRequest {
   xpDistribuido?: number;
 }
 
+export interface ProjetoRascunhoIa {
+  nome: string;
+  resumo: string;
+  objetivos: string;
+  categoria: string;
+  tipo: string;
+  tags: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -78,5 +87,9 @@ export class ProjectService {
 
   obterPorId(id: string): Observable<Projeto> {
     return this.http.get<Projeto>(`${this.apiUrl}/${id}`);
+  }
+
+  sugerirRascunho(idea: string): Observable<ProjetoRascunhoIa> {
+    return this.http.post<ProjetoRascunhoIa>(apiUrl('/api/ai/project-draft'), { idea });
   }
 }
