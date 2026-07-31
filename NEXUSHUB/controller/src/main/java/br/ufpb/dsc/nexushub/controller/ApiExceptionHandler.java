@@ -16,7 +16,17 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDto> handleValidation(MethodArgumentNotValidException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDto("Dados invalidos para a requisicao."));
+        String errors = exception.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("Erro de validacao");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDto("Dados invalidos: " + errors));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleAll(Exception exception) {
+        exception.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorDto("Erro interno: " + exception.getMessage()));
     }
 
     public record ErrorDto(String message) {

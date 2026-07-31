@@ -45,7 +45,7 @@ export class NovoProdutoPageComponent implements OnInit {
   protected loading = signal(true);
 
   ngOnInit() {
-    this.http.get<Shop>(`${apiUrl}/marketplace/loja`).subscribe({
+    this.http.get<Shop>(apiUrl('/api/marketplace/loja')).subscribe({
       next: (shop) => {
         this.myShop.set(shop);
         this.checkRouteParams();
@@ -92,7 +92,7 @@ export class NovoProdutoPageComponent implements OnInit {
   }
 
   private loadProduct(id: string) {
-    this.http.get<Product>(`${apiUrl}/marketplace/produtos/${id}`).subscribe({
+    this.http.get<Product>(apiUrl(`/api/marketplace/produtos/${id}`)).subscribe({
       next: (product) => {
         this.creatingAsShop.set(!!(product as any).shopId);
         this.productFormTitle = product.title;
@@ -190,8 +190,8 @@ export class NovoProdutoPageComponent implements OnInit {
 
     const isEdit = this.editingProductId();
     const request$ = isEdit 
-      ? this.http.put(`${apiUrl}/marketplace/produtos/${isEdit}`, payload)
-      : this.http.post(`${apiUrl}/marketplace/produtos`, payload);
+      ? this.http.put(apiUrl(`/api/marketplace/produtos/${isEdit}`), payload)
+      : this.http.post(apiUrl('/api/marketplace/produtos'), payload);
 
     request$.subscribe({
       next: () => {

@@ -142,7 +142,7 @@ export class LojaPageComponent implements OnInit {
 
   loadProducts() {
     this.loadingProducts.set(true);
-    let url = `${apiUrl}/marketplace/produtos`;
+    let url = apiUrl('/api/marketplace/produtos');
     const params: string[] = [];
     if (this.filterSearch()) {
       params.push(`search=${encodeURIComponent(this.filterSearch())}`);
@@ -171,14 +171,14 @@ export class LojaPageComponent implements OnInit {
 
   loadSellerData() {
     this.loadingSellerData.set(true);
-    this.http.get<Shop>(`${apiUrl}/marketplace/loja`).subscribe({
+    this.http.get<Shop>(apiUrl('/api/marketplace/loja')).subscribe({
       next: (shop) => {
         this.myShop.set(shop);
       },
       error: () => this.myShop.set(null)
     });
 
-    this.http.get<Product[]>(`${apiUrl}/marketplace/loja/dashboard`).subscribe({
+    this.http.get<Product[]>(apiUrl('/api/marketplace/loja/dashboard')).subscribe({
       next: (products) => {
         this.myProducts.set(products);
         this.loadingSellerData.set(false);
@@ -211,7 +211,7 @@ export class LojaPageComponent implements OnInit {
     this.purchaseQuantity = 1;
     const locations = product.meetLocations ? product.meetLocations.split(';').map(l => l.trim()) : [];
     this.purchaseLocation = locations.length > 0 ? locations[0] : '';
-    this.http.get<Product>(`${apiUrl}/marketplace/produtos/${product.id}`).subscribe();
+    this.http.get<Product>(apiUrl(`/api/marketplace/produtos/${product.id}`)).subscribe();
     this.showPurchaseModal.set(true);
   }
 
@@ -238,7 +238,7 @@ export class LojaPageComponent implements OnInit {
       return;
     }
 
-    this.http.post(`${apiUrl}/marketplace/produtos/${product.id}/click`, {}).subscribe();
+    this.http.post(apiUrl(`/api/marketplace/produtos/${product.id}/click`), {}).subscribe();
 
     const buyer = this.currentUser();
     const buyerName = buyer?.nome || 'Comprador';
@@ -348,7 +348,7 @@ export class LojaPageComponent implements OnInit {
       active: this.shopFormActive
     };
 
-    this.http.post<Shop>(`${apiUrl}/marketplace/loja`, payload).subscribe({
+    this.http.post<Shop>(apiUrl('/api/marketplace/loja'), payload).subscribe({
       next: (shop) => {
         this.myShop.set(shop);
         this.savingShop.set(false);
@@ -380,7 +380,7 @@ export class LojaPageComponent implements OnInit {
       active: !shop.active
     };
 
-    this.http.post<Shop>(`${apiUrl}/marketplace/loja`, payload).subscribe({
+    this.http.post<Shop>(apiUrl('/api/marketplace/loja'), payload).subscribe({
       next: (updatedShop) => {
         this.myShop.set(updatedShop);
         this.savingShop.set(false);
@@ -447,7 +447,7 @@ export class LojaPageComponent implements OnInit {
       active: !product.active
     };
 
-    this.http.put(`${apiUrl}/marketplace/produtos/${product.id}`, payload).subscribe({
+    this.http.put(apiUrl(`/api/marketplace/produtos/${product.id}`), payload).subscribe({
       next: () => {
         this.toastService.showSuccess(product.active ? 'Produto desativado.' : 'Produto ativado.');
         this.loadSellerData();
@@ -458,7 +458,7 @@ export class LojaPageComponent implements OnInit {
 
   deleteProduct(productId: string) {
     if (confirm('Tem certeza que deseja remover este anúncio permanentemente?')) {
-      this.http.delete(`${apiUrl}/marketplace/produtos/${productId}`).subscribe({
+      this.http.delete(apiUrl(`/api/marketplace/produtos/${productId}`)).subscribe({
         next: () => {
           this.toastService.showSuccess('Anúncio removido.');
           this.loadSellerData();
