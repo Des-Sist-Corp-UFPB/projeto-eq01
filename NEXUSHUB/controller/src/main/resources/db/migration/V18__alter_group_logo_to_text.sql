@@ -1,0 +1,1 @@
+ALTER TABLE grp_group ALTER COLUMN urllogo TYPE TEXT;

@@ -10,9 +10,9 @@
       
       <!-- Search and Action Bar -->
       <div style="display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
-        <button class="btn-create-group" (click)="toggleCreateForm()">
+        <button class="btn-create-group" (click)="openCreateModal()">
           <span class="material-symbols-rounded plus-icon">add</span>
-          {{ showCreateForm() ? 'Fechar Cadastro' : 'Criar Novo Grupo' }}
+          Criar Novo Grupo
         </button>
         <div class="search-container" style="flex-grow: 1; max-width: 400px; display: flex; align-items: center; position: relative;">
           <span class="material-symbols-rounded search-icon" style="position: absolute; left: 12px; color: var(--color-muted);">search</span>
@@ -27,140 +27,8 @@
         </div>
       </div>
 
-      <!-- Create Group Panel (Form + Preview) -->
-      <div class="create-panel-wrapper" *ngIf="showCreateForm()">
-        <div class="create-panel">
-          <!-- Left: Form -->
-          <div class="form-section">
-            <h3>Identidade do Grupo</h3>
-            <form (ngSubmit)="onSubmit()">
-              <div class="form-group">
-                <label for="nome">Nome do Grupo *</label>
-                <input type="text" id="nome" name="nome" [(ngModel)]="newGroup.nome" required placeholder="Ex: Núcleo de Design Computacional" />
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="categoria">Categoria</label>
-                  <select id="categoria" name="area" [(ngModel)]="newGroup.area">
-                    <option value="Institucional">Institucional (Pesquisa, Extensão, Laboratórios)</option>
-                    <option value="Comunidade">Comunidade (Estudantes, Diretórios, Ligas)</option>
-                    <option value="Externo">Externo (Parceiros, Mercado, Ex-alunos)</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="tipo">Tipo de Grupo</label>
-                  <select id="tipo" name="tipo" [(ngModel)]="newGroup.tipo">
-                    <option value="Aberto">Aberto (Livre entrada)</option>
-                    <option value="Restrito">Restrito (Apenas convidados/aprovados)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="descricao">Descrição do Grupo *</label>
-                <textarea id="descricao" name="descricao" [(ngModel)]="newGroup.descricao" required rows="3" placeholder="Descreva os objetivos do grupo..."></textarea>
-              </div>
-
-              <!-- Visual Identity: Image Upload -->
-              <div class="form-group">
-                <label>Imagem de Capa (Foto da Galeria)</label>
-                <div class="image-upload-area">
-                  <input 
-                    type="file" 
-                    id="logoUpload" 
-                    (change)="onLogoUpload($event)" 
-                    accept="image/*"
-                    class="file-input-hidden"
-                  />
-                  <label for="logoUpload" class="file-upload-trigger">
-                    <span class="material-symbols-rounded upload-icon-small">upload</span>
-                    <span>Selecionar foto local...</span>
-                  </label>
-                </div>
-                
-                <div class="url-input-fallback">
-                  <label for="logoUrl">Ou cole uma URL de imagem direta:</label>
-                  <input 
-                    type="text" 
-                    id="logoUrl" 
-                    name="logo" 
-                    [(ngModel)]="newGroup.logo" 
-                    placeholder="Ex: https://images.unsplash.com/photo-..."
-                  />
-                </div>
-              </div>
-
-              <!-- Visual Identity: Colors -->
-              <div class="form-group">
-                <label>Cor Temática do Grupo</label>
-                <div class="color-presets">
-                  <button 
-                    type="button" 
-                    *ngFor="let color of colorPresets" 
-                    [style.background]="color" 
-                    class="color-dot" 
-                    [class.active]="newGroup.cor === color"
-                    (click)="newGroup.cor = color"
-                  ></button>
-                </div>
-              </div>
-
-              <button type="submit" class="btn-submit" [disabled]="!newGroup.nome || !newGroup.descricao">Salvar e Publicar Grupo</button>
-            </form>
-          </div>
-
-          <!-- Right: Live Preview -->
-          <div class="preview-section">
-            <h3>Pré-visualização do Card</h3>
-            <div class="preview-card-container">
-              <!-- Rendered Card following project-card formatting exactly -->
-              <article class="project-card max-w-card">
-                <div class="card-cover">
-                  <img [src]="newGroup.logo || fallbackCover" alt="Capa do grupo" />
-                  <div class="card-badge">
-                    {{ newGroup.tipo || 'Aberto' }}
-                  </div>
-                </div>
-                
-                <div class="card-content">
-                  <div class="card-meta">
-                    <span class="group-name">GRUPO {{ (newGroup.area || 'Institucional') | uppercase }}</span>
-                    <button class="like-button" type="button">
-                      <span class="material-symbols-rounded heart-icon">favorite</span>
-                      <span class="likes-count">0</span>
-                    </button>
-                  </div>
-
-                  <h3 class="project-title">{{ newGroup.nome || 'Nome do Grupo Acadêmico' }}</h3>
-                  <p class="project-summary">{{ newGroup.descricao || 'Descreva a identidade e regras do grupo.' }}</p>
-                  
-                  <div class="tags-container">
-                    <span class="tag-badge">#{{ newGroup.area }}</span>
-                    <span class="tag-badge">#{{ newGroup.tipo }}</span>
-                  </div>
-
-                  <div class="card-footer">
-                    <div class="author-info">
-                      <span class="avatar">V</span>
-                      <span class="author-name">Por <strong>Você (Coord.)</strong></span>
-                    </div>
-                    
-                    <div class="members-info">
-                      <span class="material-symbols-rounded users-icon">group</span>
-                      <span>0 Proj.</span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Categories & Carousels -->
-      <div class="categories-list" *ngIf="!showCreateForm() || searchQuery()">
+      <div class="categories-list">
         <!-- 1. Institutional -->
         <section class="category-section" *ngIf="getFilteredByCategory('Institucional').length > 0">
           <div class="section-title">
@@ -378,4 +246,11 @@
         <p>Tente alterar sua busca ou filtre por termos diferentes.</p>
       </div>
     </div>
+
+<!-- Create Group Modal Component -->
+<app-new-group-modal 
+  *ngIf="showCreateModal()" 
+  (closed)="onModalClosed()" 
+  (saved)="onGroupCreated()">
+</app-new-group-modal>
 

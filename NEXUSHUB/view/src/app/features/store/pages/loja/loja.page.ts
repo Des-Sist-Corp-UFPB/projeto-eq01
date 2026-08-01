@@ -107,25 +107,11 @@ export class LojaPageComponent implements OnInit {
   protected currentShopStep = 1;
   protected customLocationInput = '';
   protected showProductTypeModal = signal(false);
-  protected creatingAsShop = signal(false);
+  protected creatingAsShop = signal(true);
   protected termsAccepted = false;
   protected shopFormCampus = 'Rio Tinto';
   protected shopFormActive = true;
   protected savingShop = signal(false);
-
-  protected showProductModal = signal(false);
-  protected editingProductId = signal<string | null>(null);
-  protected productFormTitle = '';
-  protected productFormDescription = '';
-  protected productFormCategory = 'Alimentos';
-  protected productFormPrice: number | null = null;
-  protected productFormStock = 1;
-  protected productFormPhotos = '';
-  protected productFormPaymentMethods = 'Pix';
-  protected productFormPixKey = '';
-  protected productFormMeetLocations = '';
-  protected productFormCampus = 'Rio Tinto';
-  protected productFormActive = true;
 
   protected showShopSettings = signal(false);
 
@@ -156,7 +142,7 @@ export class LojaPageComponent implements OnInit {
 
   loadProducts() {
     this.loadingProducts.set(true);
-    let url = `${apiUrl}/marketplace/produtos`;
+    let url = apiUrl('/api/marketplace/produtos');
     const params: string[] = [];
     if (this.filterSearch()) {
       params.push(`search=${encodeURIComponent(this.filterSearch())}`);
@@ -185,14 +171,14 @@ export class LojaPageComponent implements OnInit {
 
   loadSellerData() {
     this.loadingSellerData.set(true);
-    this.http.get<Shop>(`${apiUrl}/marketplace/loja`).subscribe({
+    this.http.get<Shop>(apiUrl('/api/marketplace/loja')).subscribe({
       next: (shop) => {
         this.myShop.set(shop);
       },
       error: () => this.myShop.set(null)
     });
 
-    this.http.get<Product[]>(`${apiUrl}/marketplace/loja/dashboard`).subscribe({
+    this.http.get<Product[]>(apiUrl('/api/marketplace/loja/dashboard')).subscribe({
       next: (products) => {
         this.myProducts.set(products);
         this.loadingSellerData.set(false);
@@ -225,7 +211,7 @@ export class LojaPageComponent implements OnInit {
     this.purchaseQuantity = 1;
     const locations = product.meetLocations ? product.meetLocations.split(';').map(l => l.trim()) : [];
     this.purchaseLocation = locations.length > 0 ? locations[0] : '';
-    this.http.get<Product>(`${apiUrl}/marketplace/produtos/${product.id}`).subscribe();
+    this.http.get<Product>(apiUrl(`/api/marketplace/produtos/${product.id}`)).subscribe();
     this.showPurchaseModal.set(true);
   }
 
@@ -252,7 +238,7 @@ export class LojaPageComponent implements OnInit {
       return;
     }
 
-    this.http.post(`${apiUrl}/marketplace/produtos/${product.id}/click`, {}).subscribe();
+    this.http.post(apiUrl(`/api/marketplace/produtos/${product.id}/click`), {}).subscribe();
 
     const buyer = this.currentUser();
     const buyerName = buyer?.nome || 'Comprador';
@@ -362,7 +348,7 @@ export class LojaPageComponent implements OnInit {
       active: this.shopFormActive
     };
 
-    this.http.post<Shop>(`${apiUrl}/marketplace/loja`, payload).subscribe({
+    this.http.post<Shop>(apiUrl('/api/marketplace/loja'), payload).subscribe({
       next: (shop) => {
         this.myShop.set(shop);
         this.savingShop.set(false);
@@ -394,7 +380,7 @@ export class LojaPageComponent implements OnInit {
       active: !shop.active
     };
 
-    this.http.post<Shop>(`${apiUrl}/marketplace/loja`, payload).subscribe({
+    this.http.post<Shop>(apiUrl('/api/marketplace/loja'), payload).subscribe({
       next: (updatedShop) => {
         this.myShop.set(updatedShop);
         this.savingShop.set(false);
@@ -431,122 +417,19 @@ export class LojaPageComponent implements OnInit {
       return;
     }
 
-    this.editingProductId.set(null);
-    this.productFormTitle = '';
-    this.productFormDescription = '';
-    this.productFormCategory = 'Alimentos';
-    this.productFormPrice = null;
-    this.productFormStock = 1;
-    this.productFormPhotos = '';
-
-    if (asShop && this.myShop()) {
-      this.productFormPaymentMethods = (this.myShop() as any).paymentMethods || 'Pix; Dinheiro';
-      this.productFormPixKey = (this.myShop() as any).pixKey || '';
-      this.productFormMeetLocations = this.myShop()?.meetLocations || '';
-      this.productFormCampus = this.myShop()?.campus || 'Rio Tinto';
-    } else {
-      this.productFormPaymentMethods = 'Pix';
-      this.productFormPixKey = '';
-      this.productFormMeetLocations = '';
-      this.productFormCampus = 'Rio Tinto';
-    }
-
-    this.productFormActive = true;
-    
     this.showProductTypeModal.set(false);
-    this.showProductModal.set(true);
+    if (asShop) {
+      this.router.navigate(['/loja/novo-produto']);
+    } else {
+      this.router.navigate(['/loja/novo-produto'], { queryParams: { avulso: 'true' } });
+    }
   }
 
   openEditProduct(product: Product) {
-    this.creatingAsShop.set(!!(product as any).shopId);
-    this.editingProductId.set(product.id);
-    this.productFormTitle = product.title;
-    this.productFormDescription = product.description || '';
-    this.productFormCategory = product.category || 'Outros';
-    this.productFormPrice = product.price;
-    this.productFormStock = product.stock;
-    this.productFormPhotos = product.photos || '';
-    this.productFormPaymentMethods = product.paymentMethods;
-    this.productFormPixKey = product.pixKey || '';
-    this.productFormMeetLocations = product.meetLocations || '';
-    this.productFormCampus = product.campus;
-    this.productFormActive = product.active;
-    this.showProductModal.set(true);
+    this.router.navigate(['/loja/editar-produto', product.id]);
   }
 
-  closeProductModal() {
-    this.showProductModal.set(false);
-    this.editingProductId.set(null);
-  }
-
-  onProductPhotosUpload(event: any) {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const promises = Array.from(files).map((file: any) => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-            this.compressImage(e.target.result).then(resolve);
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-
-      Promise.all(promises).then((compressedImages) => {
-        this.productFormPhotos = compressedImages.join(';');
-      });
-    }
-  }
-
-  saveProduct() {
-    if (!this.productFormTitle.trim()) {
-      this.toastService.showWarning('Título do anúncio é obrigatório.');
-      return;
-    }
-    if (this.productFormPrice === null || this.productFormPrice <= 0) {
-      this.toastService.showWarning('Preço deve ser maior que zero.');
-      return;
-    }
-    if (this.productFormPaymentMethods.includes('Pix') && !this.productFormPixKey.trim()) {
-      this.toastService.showWarning('A chave Pix é obrigatória se Pix for método de pagamento.');
-      return;
-    }
-
-    this.savingProduct.set(true);
-    const shop = this.myShop();
-    const payload = {
-      shopId: this.creatingAsShop() && shop ? shop.id : null,
-      title: this.productFormTitle.trim(),
-      description: this.productFormDescription.trim(),
-      category: this.productFormCategory,
-      price: this.productFormPrice,
-      stock: this.productFormStock,
-      photos: this.productFormPhotos,
-      paymentMethods: this.productFormPaymentMethods,
-      pixKey: this.productFormPixKey.trim(),
-      meetLocations: this.productFormMeetLocations.trim(),
-      campus: this.productFormCampus,
-      active: this.productFormActive
-    };
-
-    const isEdit = this.editingProductId();
-    const request$ = isEdit 
-      ? this.http.put(`${apiUrl}/marketplace/produtos/${isEdit}`, payload)
-      : this.http.post(`${apiUrl}/marketplace/produtos`, payload);
-
-    request$.subscribe({
-      next: () => {
-        this.savingProduct.set(false);
-        this.showProductModal.set(false);
-        this.toastService.showSuccess(isEdit ? 'Anúncio atualizado!' : 'Anúncio cadastrado!');
-        this.loadSellerData();
-      },
-      error: (err) => {
-        this.savingProduct.set(false);
-        this.toastService.showError(err.error?.message || 'Erro ao salvar anúncio.');
-      }
-    });
-  }
+  // Product form save logic moved to novo-produto.page.ts
 
   toggleProductActive(product: Product) {
     const payload = {
@@ -564,7 +447,7 @@ export class LojaPageComponent implements OnInit {
       active: !product.active
     };
 
-    this.http.put(`${apiUrl}/marketplace/produtos/${product.id}`, payload).subscribe({
+    this.http.put(apiUrl(`/api/marketplace/produtos/${product.id}`), payload).subscribe({
       next: () => {
         this.toastService.showSuccess(product.active ? 'Produto desativado.' : 'Produto ativado.');
         this.loadSellerData();
@@ -575,7 +458,7 @@ export class LojaPageComponent implements OnInit {
 
   deleteProduct(productId: string) {
     if (confirm('Tem certeza que deseja remover este anúncio permanentemente?')) {
-      this.http.delete(`${apiUrl}/marketplace/produtos/${productId}`).subscribe({
+      this.http.delete(apiUrl(`/api/marketplace/produtos/${productId}`)).subscribe({
         next: () => {
           this.toastService.showSuccess('Anúncio removido.');
           this.loadSellerData();
@@ -606,7 +489,6 @@ export class LojaPageComponent implements OnInit {
       };
     });
   }
-
   onBannerUpload(event: any) {
     const file = event.target.files[0];
     if (file) {

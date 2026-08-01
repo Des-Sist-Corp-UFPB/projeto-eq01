@@ -221,9 +221,13 @@ public class IdentityServiceImpl implements IdentityService {
             for (String tName : request.technologies()) {
                 if (tName == null || tName.trim().isBlank()) continue;
                 String cleanName = tName.trim();
-                br.ufpb.dsc.nexushub.model.people.domain.Technology tech = technologyRepository.findByName(cleanName)
-                        .orElseGet(() -> technologyRepository.save(new br.ufpb.dsc.nexushub.model.people.domain.Technology(cleanName, userId)));
-                techSet.add(tech);
+                try {
+                    br.ufpb.dsc.nexushub.model.people.domain.Technology tech = technologyRepository.findByName(cleanName)
+                            .orElseGet(() -> technologyRepository.save(new br.ufpb.dsc.nexushub.model.people.domain.Technology(cleanName, userId)));
+                    techSet.add(tech);
+                } catch (Exception e) {
+                    // Ignore single tag saving errors so it doesn't block the whole profile update
+                }
             }
         }
         human.setTechnologies(techSet);

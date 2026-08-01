@@ -26,8 +26,12 @@ export class OnboardingPageComponent {
   protected period = '';
   protected lgpdConsent = false;
 
-  onBirthDateInput(event: Event) {
-    let value = (event.target as HTMLInputElement).value.replace(/\D/g, '');
+  onBirthDateInput(newValue: string) {
+    if (!newValue) {
+      this.birthDateInput = '';
+      return;
+    }
+    let value = newValue.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
     
     if (value.length >= 5) {

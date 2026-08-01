@@ -108,7 +108,9 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional
     public void deleteGroup(UUID groupId) {
-        groupRepository.delete(getGroup(groupId));
+        Group group = getGroup(groupId);
+        memberRepository.deleteAll(memberRepository.findByGroup(group));
+        groupRepository.delete(group);
     }
 
     private Integer parseType(String value, Integer fallback) {

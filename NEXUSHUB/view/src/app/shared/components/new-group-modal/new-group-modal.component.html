@@ -1,0 +1,160 @@
+<div class="modal-backdrop animate-fade-in" (click)="close()">
+  <div class="modal-card animate-scale-up" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <header class="modal-header">
+      <h2>Cadastrar Novo Grupo</h2>
+      <button class="close-btn" (click)="close()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Stepper / Tabs Indicator -->
+    <div class="stepper">
+      <div class="step" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
+        <span class="step-num">1</span>
+        <span class="step-name">Info. Básica</span>
+      </div>
+      <div class="step-line" [class.active]="currentStep() > 1"></div>
+      
+      <div class="step" [class.active]="currentStep() === 2" [class.completed]="currentStep() > 2">
+        <span class="step-num">2</span>
+        <span class="step-name">Identidade Visual</span>
+      </div>
+    </div>
+
+    <!-- Modal Body / Form Steps -->
+    <div class="modal-body">
+      <form #groupForm="ngForm" (ngSubmit)="submitForm()">
+        
+        <!-- STEP 1: Basic Info -->
+        <div *ngIf="currentStep() === 1" class="step-content animate-fade-in">
+          <section class="ai-assistant" aria-labelledby="ai-assistant-title">
+            <div class="ai-heading">
+              <span class="ai-spark" aria-hidden="true">&#10024;</span>
+              <div>
+                <h3 id="ai-assistant-title">Comece com a IA</h3>
+                <p>Conte a ideia do seu grupo e receba um rascunho preenchido. Nada será salvo automaticamente.</p>
+              </div>
+            </div>
+            <label for="aiIdea">Ideia do Grupo</label>
+            <textarea id="aiIdea" name="aiIdea" rows="3" maxlength="1200" [(ngModel)]="aiIdea"
+              placeholder="Ex: um núcleo acadêmico focado em inovação de software e mentoria..."></textarea>
+            <div class="ai-actions">
+              <span>{{ aiIdea.length }}/1200</span>
+              <button type="button" class="btn-ai" (click)="generateDraft()"
+                [disabled]="aiIdea.trim().length < 10 || generatingDraft()">
+                {{ generatingDraft() ? 'Criando rascunho...' : 'Preencher com IA' }}
+              </button>
+            </div>
+            <p class="ai-error" role="alert" *ngIf="aiError()">{{ aiError() }}</p>
+            <p class="ai-notice">Revise as sugestões antes de continuar. Não informe dados pessoais.</p>
+          </section>
+
+          <div class="form-group">
+            <label for="nome">Nome do Grupo *</label>
+            <input type="text" id="nome" name="nome" [(ngModel)]="formModel.nome" required placeholder="Ex: Núcleo de Design Computacional" #nomeInput="ngModel" />
+            <span class="error-msg" *ngIf="nomeInput.invalid && nomeInput.touched">O nome do grupo é obrigatório.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="descricao">Descrição do Grupo *</label>
+            <textarea id="descricao" name="descricao" rows="3" [(ngModel)]="formModel.descricao" required placeholder="Descreva os objetivos do grupo..." #descricaoInput="ngModel"></textarea>
+            <span class="error-msg" *ngIf="descricaoInput.invalid && descricaoInput.touched">A descrição do grupo é obrigatória.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="categoria">Categoria *</label>
+              <select id="categoria" name="area" [(ngModel)]="formModel.area" required>
+                <option value="Institucional">Institucional</option>
+                <option value="Comunidade">Comunidade</option>
+                <option value="Externo">Externo</option>
+              </select>
+            </div>
+            
+            <div class="form-group col">
+              <label for="tipo">Tipo de Grupo *</label>
+              <select id="tipo" name="tipo" [(ngModel)]="formModel.tipo" required>
+                <option value="Aberto">Aberto (Livre entrada)</option>
+                <option value="Restrito">Restrito (Apenas convidados)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Identidade Visual -->
+        <div *ngIf="currentStep() === 2" class="step-content animate-fade-in">
+          
+          <div class="form-group">
+            <label>Cor Temática do Grupo</label>
+            <div class="color-presets">
+              <button 
+                type="button" 
+                *ngFor="let color of colorPresets" 
+                [style.background]="color" 
+                class="color-dot" 
+                [class.active]="formModel.cor === color"
+                (click)="formModel.cor = color"
+              ></button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Imagem de Capa (Foto Local)</label>
+            <div class="image-upload-area">
+              <input 
+                type="file" 
+                id="logoUpload" 
+                (change)="onLogoUpload($event)" 
+                accept="image/*"
+                class="file-input-hidden"
+              />
+              <label for="logoUpload" class="file-upload-trigger">
+                <span class="material-symbols-rounded upload-icon-small">upload</span>
+                <span>Selecionar foto local...</span>
+              </label>
+            </div>
+            
+            <div class="url-input-fallback" style="margin-top: 16px;">
+              <label for="logoUrl">Ou cole uma URL de imagem direta:</label>
+              <input 
+                type="text" 
+                id="logoUrl" 
+                name="logo" 
+                [(ngModel)]="formModel.logo" 
+                placeholder="Ex: https://images.unsplash.com/photo-..."
+              />
+            </div>
+          </div>
+
+          <!-- Live Preview Minimal -->
+          <div class="preview-mini" *ngIf="formModel.logo">
+            <label>Pré-visualização da Capa:</label>
+            <img [src]="formModel.logo" alt="Preview Capa" style="max-height: 120px; border-radius: 8px; object-fit: cover; margin-top: 8px; width: 100%; border: 1px solid var(--color-border);" />
+          </div>
+
+        </div>
+
+        <!-- Modal Footer Controls -->
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="prevStep()" *ngIf="currentStep() > 1">
+            Voltar
+          </button>
+          
+          <button type="button" class="btn btn-primary" (click)="nextStep()" *ngIf="currentStep() < 2" [disabled]="!isStepValid()">
+            Continuar
+          </button>
+
+          <button type="submit" class="btn btn-primary" *ngIf="currentStep() === 2" [disabled]="groupForm.invalid">
+            Salvar Grupo
+          </button>
+        </footer>
+
+      </form>
+    </div>
+
+  </div>
+</div>

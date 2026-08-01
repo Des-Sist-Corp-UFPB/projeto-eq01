@@ -90,6 +90,15 @@ body.dark-mode {
   --nav-wrapper-bg: rgba(11, 29, 58, 0.98);
 }
 
+body.dark-mode p,
+body.dark-mode label,
+body.dark-mode li,
+body.dark-mode strong,
+body.dark-mode th,
+body.dark-mode td {
+  color: var(--color-text);
+}
+
 /* Dark Mode UI Adaptations and Button Fixes */
 body.dark-mode input[type="text"],
 body.dark-mode input[type="email"],
