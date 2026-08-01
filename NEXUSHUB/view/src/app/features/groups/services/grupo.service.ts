@@ -37,4 +37,15 @@ export class GrupoService {
   deletar(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  sugerirRascunho(idea: string): Observable<GrupoRascunhoIa> {
+    return this.http.post<GrupoRascunhoIa>(apiUrl('/api/ai/group-draft'), { idea });
+  }
+}
+
+export interface GrupoRascunhoIa {
+  nome: string;
+  descricao: string;
+  area: string;
+  tipo: string;
 }

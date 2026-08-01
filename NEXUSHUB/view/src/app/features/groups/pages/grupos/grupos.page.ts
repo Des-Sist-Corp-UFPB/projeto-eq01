@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { GrupoService, Grupo } from '../../services/grupo.service';
 import { ProjectService, Projeto } from '../../../projects/services/project.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { NewGroupModalComponent } from '../../../../shared/components/new-group-modal/new-group-modal.component';
 
 @Component({
   selector: 'app-grupos-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, NewGroupModalComponent],
   templateUrl: './grupos.page.html',
   styleUrl: './grupos.page.css'
 })
@@ -24,34 +25,12 @@ export class GruposPageComponent implements OnInit {
   // Search Query state
   protected readonly searchQuery = signal<string>('');
 
-  // Show creation panel state
-  protected readonly showCreateForm = signal<boolean>(false);
+  // Show creation modal state
+  protected readonly showCreateModal = signal<boolean>(false);
 
   // States for groups and projects
   protected readonly grupos = signal<Grupo[]>([]);
   protected readonly allProjects = signal<Projeto[]>([]);
-
-  // Presets for Creation Visual Identity
-  protected readonly colorPresets = [
-    '#1e3a8a', // Dark Navy
-    '#0f766e', // Teal
-    '#4338ca', // Indigo
-    '#b91c1c', // Crimson Red
-    '#b45309', // Amber
-    '#059669', // Emerald
-    '#7c3aed', // Purple
-    '#db2777'  // Pink/Rose
-  ];
-
-  // Form Model
-  protected newGroup: Grupo = {
-    nome: '',
-    descricao: '',
-    area: 'Institucional',
-    tipo: 'Aberto',
-    cor: '#1e3a8a',
-    logo: ''
-  };
 
   ngOnInit() {
     this.carregarDados();
@@ -67,44 +46,16 @@ export class GruposPageComponent implements OnInit {
     });
   }
 
-  toggleCreateForm() {
-    this.showCreateForm.update(val => !val);
+  openCreateModal() {
+    this.showCreateModal.set(true);
   }
 
-  // Handle Logo Upload and convert to Base64 DataURL (with Canvas compression)
-  onLogoUpload(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      if (!file.type.startsWith('image/')) return;
+  onModalClosed() {
+    this.showCreateModal.set(false);
+  }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxWidth = 300;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            this.newGroup.logo = canvas.toDataURL('image/jpeg', 0.7);
-          }
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
+  onGroupCreated() {
+    this.carregarDados();
   }
 
   // Horizontal scroll utility for custom carousels
@@ -137,46 +88,6 @@ export class GruposPageComponent implements OnInit {
     );
   }
 
-  onSubmit() {
-    if (!this.newGroup.nome || !this.newGroup.descricao) return;
-
-    const user = this.authService.currentUser();
-    if (!user) {
-      alert('Voce precisa estar logado para criar um grupo.');
-      return;
-    }
-
-    const request: Grupo = {
-      ...this.newGroup,
-      responsavel: user.nome,
-      criadorId: user.id
-    };
-
-    this.grupoService.criar(request).subscribe({
-      next: () => {
-        // Reset form and close
-        this.newGroup = {
-          nome: '',
-          descricao: '',
-          area: 'Institucional',
-          tipo: 'Aberto',
-          cor: '#1e3a8a',
-          logo: '',
-          responsavel: ''
-        };
-        this.showCreateForm.set(false);
-        // Reload list
-        this.carregarDados();
-      },
-      error: (err) => {
-        console.error('Erro ao cadastrar grupo:', err);
-        if (err.error) {
-          console.error('Detalhes do erro do backend:', err.error);
-        }
-        alert('Ocorreu um erro ao criar o grupo. Verifique o console para mais detalhes.');
-      }
-    });
-  }
 
   isGroupLeader(gp: Grupo): boolean {
     const user = this.authService.currentUser();
