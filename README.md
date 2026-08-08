@@ -223,3 +223,15 @@ Este projeto foi desenvolvido com a colaboração de:
 * **Gabriel Cardoso da Silva** ([silvacardoso987@gmail.com](mailto:silvacardoso987@gmail.com))
 * **John Wesley Pinto** ([john.silva@dcx.ufpb.br](mailto:john.silva@dcx.ufpb.br))
 * **Kássio Lima** ([kassio_leite2@hotmail.com](mailto:kassio_leite2@hotmail.com))
+
+  ## 🎥 Apresentação Final — NexusHub
+
+Confira a apresentação final do **NexusHub**, na qual demonstramos a proposta do projeto, suas principais funcionalidades, as tecnologias utilizadas e os resultados alcançados durante o desenvolvimento.
+
+<div align="center">
+
+[![Apresentação final do NexusHub](https://img.youtube.com/vi/XpsQEXEm17o/maxresdefault.jpg)](https://www.youtube.com/watch?v=XpsQEXEm17o)
+
+### ▶️ [Assista à apresentação completa no YouTube](https://www.youtube.com/watch?v=XpsQEXEm17o)
+
+</div>
