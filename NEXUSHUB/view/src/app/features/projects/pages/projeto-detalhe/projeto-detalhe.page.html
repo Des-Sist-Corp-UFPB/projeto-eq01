@@ -1,0 +1,338 @@
+<div class="detail-container animate-fade-in" *ngIf="projeto()">
+      <!-- Back navigation link -->
+      <a routerLink="/" class="back-link">
+        <span class="material-symbols-rounded arrow-icon">arrow_back</span>
+        Voltar para o Dashboard
+      </a>
+
+      <!-- Large Hero Header Card -->
+      <header class="detail-hero">
+        <img [src]="projeto()?.imagemLandingUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&auto=format&fit=crop'" alt="Capa" class="hero-cover" />
+        <div class="hero-overlay">
+          <div class="category-badge" *ngIf="projeto()?.tipo">{{ projeto()?.tipo }}</div>
+          <h1 class="project-title">{{ projeto()?.nome }}</h1>
+          <p class="project-tagline">{{ projeto()?.resumo }}</p>
+        </div>
+      </header>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-navigation-container">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'info'"
+          [style.border-bottom-color]="activeTab() === 'info' ? '#00b4d8' : 'transparent'"
+          [style.color]="activeTab() === 'info' ? '#00b4d8' : '#64748b'"
+          (click)="setTab('info')"
+        >
+          <span class="material-symbols-rounded">info</span>
+          Informações
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab() === 'feed'"
+          [style.border-bottom-color]="activeTab() === 'feed' ? '#00b4d8' : 'transparent'"
+          [style.color]="activeTab() === 'feed' ? '#00b4d8' : '#64748b'"
+          (click)="setTab('feed')"
+        >
+          <span class="material-symbols-rounded">forum</span>
+          Mural de Mensagens
+        </button>
+      </div>
+
+      <!-- Main Columns Layout -->
+      <div class="detail-grid">
+        <!-- Left Column: Details -->
+        <main class="detail-main">
+          <ng-container *ngIf="activeTab() === 'info'">
+            <section class="card-section">
+              <h2 class="card-title">Objetivos do Projeto</h2>
+              <p class="objective-text">
+                {{ projeto()?.objetivos || 'Sem objetivos cadastrados para esta iniciativa acadêmica.' }}
+              </p>
+            </section>
+
+            <section class="card-section">
+              <h2 class="card-title">Tecnologias & Competências</h2>
+              <div class="tags-row" *ngIf="projeto()?.tags">
+                <span class="tag-badge" *ngFor="let tag of getTags()">#{{ tag.trim() }}</span>
+              </div>
+              <p class="tags-empty" *ngIf="!projeto()?.tags">Nenhuma tecnologia/competência mapeada ainda.</p>
+            </section>
+
+            <!-- 1. AUTHOR WORKSPACE: membership requests pending approval -->
+            <section class="card-section admin-section" *ngIf="isOwner()">
+              <div class="admin-header">
+                <span class="admin-badge">Dono do Projeto</span>
+                <h2 class="card-title">Solicitações de Entrada Acadêmica</h2>
+                <p class="admin-subtitle">Avalie os estudantes que desejam colaborar no seu projeto.</p>
+              </div>
+
+              <div class="requests-list" *ngIf="solicitacoes().length > 0">
+                <div class="request-card" *ngFor="let sol of solicitacoes()">
+                  <div class="request-meta">
+                    <div class="applicant-info">
+                      <span class="applicant-avatar">{{ sol.usuarioNome.charAt(0) }}</span>
+                      <div>
+                        <h4 class="applicant-name">{{ sol.usuarioNome }}</h4>
+                        <p class="applicant-email">{{ sol.usuarioEmail }}</p>
+                      </div>
+                    </div>
+                    <span class="status-badge" [class]="sol.status?.toLowerCase()">{{ sol.status }}</span>
+                  </div>
+                  
+                  <p class="applicant-motivation">
+                    <strong>Motivação:</strong> "{{ sol.motivo }}"
+                  </p>
+
+                  <!-- Action buttons (only visible for pending) -->
+                  <div class="request-actions" *ngIf="sol.status === 'PENDENTE'">
+                    <button class="btn btn-secondary btn-sm" (click)="responderSolicitacao(sol.id!, false)">
+                      Recusar
+                    </button>
+                    <button class="btn btn-primary btn-sm" (click)="responderSolicitacao(sol.id!, true)">
+                      Aprovar Candidato
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="no-requests" *ngIf="solicitacoes().length === 0">
+                <p>Nenhuma solicitação de entrada cadastrada para este projeto por enquanto.</p>
+              </div>
+            </section>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab() === 'feed'">
+            <!-- Create Post Card -->
+            <div class="group-create-post-card animate-fade-in" *ngIf="isLoggedIn()">
+              <div 
+                class="drag-drop-zone"
+                [class.drag-over]="dragOverActive()"
+                (dragover)="$event.preventDefault(); dragOverActive.set(true)"
+                (dragleave)="dragOverActive.set(false)"
+                (drop)="$event.preventDefault(); dragOverActive.set(false); onFileDropped($event)"
+              >
+                <textarea 
+                  [(ngModel)]="newPostContent" 
+                  [placeholder]="'Compartilhe avisos, dúvidas ou atualizações sobre o projeto...'" 
+                  rows="3"
+                  maxLength="3000"
+                  class="post-textarea"
+                ></textarea>
+
+                <div class="post-preview-image-container" *ngIf="newPostImageUrl()">
+                  <img [src]="newPostImageUrl()" alt="Preview da imagem" class="attached-preview-img" />
+                  <button class="remove-preview-btn" (click)="newPostImageUrl.set('')">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+
+                <div class="post-actions-row">
+                  <div class="attachment-triggers">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+                    <button class="attach-btn" (click)="triggerFileSelect(fileInput)">
+                      <span class="material-symbols-rounded">image</span>
+                      Anexar Imagem
+                    </button>
+                    <span class="char-counter" [class.warning]="newPostContent().length > 2500">
+                      {{ 3000 - newPostContent().length }}
+                    </span>
+                  </div>
+
+                  <button 
+                    class="btn-publish-post"
+                    style="background: #00b4d8;"
+                    [disabled]="!newPostContent().trim() || isCreatingPost()"
+                    (click)="onCreateProjectPost()"
+                  >
+                    {{ isCreatingPost() ? 'Publicando...' : 'Publicar' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logged out Prompt -->
+            <div class="join-prompt-banner animate-fade-in" *ngIf="!isLoggedIn()">
+              <span class="material-symbols-rounded info-icon">lock</span>
+              <div class="prompt-text">
+                <h5>Mural Restrito a Usuários Logados</h5>
+                <p>Faça login na plataforma para interagir e publicar no feed do projeto.</p>
+              </div>
+            </div>
+
+            <!-- Feed Loading -->
+            <div class="feed-loading-wrapper" *ngIf="isFeedLoading()">
+              <div class="spinner"></div>
+              <p>Carregando mensagens do projeto...</p>
+            </div>
+
+            <!-- Feed Posts List -->
+            <div class="group-feed-list" *ngIf="!isFeedLoading() && projectFeedPosts().length > 0">
+              <div class="group-post-card animate-fade-in" *ngFor="let post of projectFeedPosts()">
+                <div class="post-card-header">
+                  <img [src]="post.authorPhotoUrl || 'assets/default-avatar.png'" alt="Avatar" class="post-author-avatar" />
+                  <div class="post-header-metadata">
+                    <span class="author-name">{{ post.authorName }}</span>
+                    <span class="author-username" *ngIf="post.authorUsername">@{{ post.authorUsername }}</span>
+                    <span class="post-time">{{ post.timestamp | date:'short' }}</span>
+                  </div>
+                </div>
+
+                <div class="post-card-body">
+                  <p class="post-content-text">{{ post.content }}</p>
+                  <img [src]="post.imageUrl" alt="Publicação" class="post-attached-img" *ngIf="post.imageUrl" />
+                </div>
+
+                <!-- Footer Interativo: Likes e Comentários -->
+                <div class="post-card-footer">
+                  <button 
+                    class="footer-interactive-btn like-btn" 
+                    [class.liked]="post.likedByCurrentUser"
+                    (click)="onToggleLike(post)"
+                  >
+                    <span class="material-symbols-rounded footer-icon">favorite</span>
+                    {{ post.likesCount }} {{ post.likesCount === 1 ? 'Curtida' : 'Curtidas' }}
+                  </button>
+                  <div class="comment-count-label">
+                    <span class="material-symbols-rounded footer-icon">chat_bubble</span>
+                    {{ post.comments.length }} {{ post.comments.length === 1 ? 'Comentário' : 'Comentários' }}
+                  </div>
+                </div>
+
+                <!-- Section de Comentários -->
+                <div class="post-comments-section">
+                  <div class="comment-item" *ngFor="let comment of post.comments">
+                    <img [src]="comment.authorPhotoUrl || 'assets/default-avatar.png'" alt="Avatar" class="comment-author-avatar" />
+                    <div class="comment-details">
+                      <div class="comment-header-row">
+                        <span class="c-author">{{ comment.authorName }}</span>
+                        <span class="c-time">{{ comment.timestamp | date:'short' }}</span>
+                      </div>
+                      <p class="c-content">{{ comment.content }}</p>
+                      
+                      <button 
+                        class="comment-like-btn" 
+                        [class.liked]="comment.likedByCurrentUser"
+                        (click)="onToggleCommentLike(post, comment)"
+                      >
+                        <span class="material-symbols-rounded c-like-icon">thumb_up</span>
+                        {{ comment.likesCount || 0 }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Campo de Adicionar Comentário -->
+                  <div class="add-comment-box" *ngIf="isLoggedIn()">
+                    <input 
+                      type="text" 
+                      placeholder="Escreva um comentário..." 
+                      [(ngModel)]="commentInputs[post.id]"
+                      (keyup.enter)="onAddComment(post.id)"
+                      class="comment-input"
+                    />
+                    <button class="btn-send-comment" style="color: #00b4d8;" (click)="onAddComment(post.id)">
+                      <span class="material-symbols-rounded">send</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty Feed State -->
+            <div class="empty-feed-state animate-fade-in" *ngIf="!isFeedLoading() && projectFeedPosts().length === 0">
+              <span class="material-symbols-rounded empty-icon">forum</span>
+              <h4>Nenhuma mensagem ainda</h4>
+              <p>Seja o primeiro a publicar algo interessante no mural deste projeto!</p>
+            </div>
+          </ng-container>
+        </main>
+
+        <!-- Right Column: Sidebar -->
+        <aside class="detail-sidebar">
+          <!-- Information Card -->
+          <section class="card-section">
+            <h3 class="sidebar-title">Detalhes Acadêmicos</h3>
+            
+            <div class="sidebar-info-row">
+              <span class="info-label">Coordenador/Autor</span>
+              <span class="info-value"><strong>{{ projeto()?.autor || 'Anônimo' }}</strong></span>
+            </div>
+
+            <div class="sidebar-info-row" *ngIf="projeto()?.grupoPertencente">
+              <span class="info-label">Grupo / Núcleo</span>
+              <span class="info-value"><strong>{{ projeto()?.grupoPertencente }}</strong></span>
+            </div>
+
+            <div class="sidebar-info-row">
+              <span class="info-label">Total de Membros</span>
+              <span class="info-value"><strong>{{ projeto()?.quantidadeMembros || 1 }} participante(s)</strong></span>
+            </div>
+
+            <div class="sidebar-info-row" *ngIf="projeto()?.status">
+              <span class="info-label">Status de Entrada</span>
+              <span class="info-value">
+                <span class="status-indicator" [class.aberto]="projeto()?.status === 'ABERTO'">
+                  {{ projeto()?.status }}
+                </span>
+              </span>
+            </div>
+          </section>
+
+          <!-- Gamification Highlight -->
+          <section class="card-section gamification-card">
+            <div class="xp-banner">
+              <span class="xp-badge">+{{ projeto()?.xpDistribuido || 100 }} XP</span>
+              <div>
+                <h4 class="xp-title">Recompensa de Atividade</h4>
+                <p class="xp-subtitle">Ganhe experiência na modalidade <strong>{{ projeto()?.tipo }}</strong> ao ingressar e realizar contribuições aprovadas.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. STUDENT WORKSPACE: Request entrance -->
+          <section class="card-section join-section" *ngIf="!isOwner() && projeto()?.status === 'ABERTO'">
+            <h3 class="sidebar-title">Quer participar do time?</h3>
+            
+            <!-- Logged out prompt -->
+            <div class="auth-prompt" *ngIf="!isLoggedIn()">
+              <p>Você precisa estar logado na plataforma acadêmica para enviar uma solicitação de entrada.</p>
+              <button class="btn btn-primary w-full" routerLink="/login">Fazer Login</button>
+            </div>
+
+            <!-- Logged in join request form -->
+            <div *ngIf="isLoggedIn() && !solicitacaoSucesso()">
+              <p class="join-desc">Envie uma justificativa ao coordenador explicando o porquê do seu interesse e suas habilidades.</p>
+              
+              <div class="alert alert-danger" *ngIf="joinError()">
+                {{ joinError() }}
+              </div>
+
+              <form (ngSubmit)="enviarSolicitacao()">
+                <div class="form-group">
+                  <label for="motivo">Sua Justificativa</label>
+                  <textarea 
+                    id="motivo" 
+                    name="motivo" 
+                    [(ngModel)]="motivo" 
+                    required 
+                    rows="4" 
+                    placeholder="Ex: Gostaria de participar pois tenho interesse em pesquisar sobre essa área e possuo conhecimentos prévios de Angular/Spring..."
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" [disabled]="!motivo.trim() || isSending()">
+                  {{ isSending() ? 'Enviando...' : 'Enviar Solicitação de Entrada' }}
+                </button>
+              </form>
+            </div>
+
+            <!-- Join request success card -->
+            <div class="success-prompt animate-fade-in" *ngIf="solicitacaoSucesso()">
+              <span class="material-symbols-rounded success-icon" style="color:#13a37c;font-size:36px">check_circle</span>
+              <h4>Solicitação Enviada!</h4>
+              <p>Sua mensagem foi enviada ao autor. Você receberá uma notificação quando a solicitação for avaliada.</p>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+

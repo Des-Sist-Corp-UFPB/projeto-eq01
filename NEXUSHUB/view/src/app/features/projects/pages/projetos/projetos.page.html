@@ -1,0 +1,159 @@
+<div class="projetos-wrapper animate-fade-in">
+
+  <!-- Page Header -->
+  <div class="page-hero">
+    <div class="hero-content animate-fade-in" style="display: flex; flex-direction: column; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <svg class="nexus-icon" viewBox="0 0 32 32" style="width: 28px; height: 28px;">
+          <path d="M4 8 C4 6.9 4.9 6 6 6 H12 L15 9 H26 C27.1 9 28 9.9 28 11 V24 C28 25.1 27.1 26 26 26 H6 C4.9 26 4 25.1 4 24 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="10" y1="18" x2="16" y2="18" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <line x1="16" y1="18" x2="22" y2="15" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <line x1="16" y1="18" x2="22" y2="21" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="16" cy="18" r="3.5" fill="#3B6EF4" class="logo-core"/>
+          <circle cx="10" cy="18" r="1.8" fill="currentColor"/>
+          <circle cx="22" cy="15" r="1.8" fill="currentColor"/>
+          <circle cx="22" cy="21" r="1.8" fill="currentColor"/>
+          <circle cx="6" cy="6" r="1.5" fill="currentColor"/>
+        </svg>
+        <span class="hero-tag" style="margin-bottom: 0;">Hub Acadêmico</span>
+      </div>
+      <h1 style="margin-bottom: 8px;">Explore <span>Projetos</span></h1>
+      <p>Pesquisa, extensão, monitorias e inovação do campus em um só lugar.</p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+    <button class="btn-create-project" (click)="openCreateModal()">
+      <span class="material-symbols-rounded plus-icon">add</span>
+      Novo Projeto
+    </button>
+
+    <!-- Search Bar -->
+    <div class="projetos-search-bar" style="flex-grow: 1; max-width: 400px; display: flex; align-items: center; position: relative;">
+      <span class="material-symbols-rounded search-icon" style="position: absolute; left: 12px; color: var(--color-muted);">search</span>
+      <input
+        type="text"
+        placeholder="Buscar por nome, tag ou resumo…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        class="search-input"
+        style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid var(--color-border);"
+      />
+      <button class="clear-search-btn" *ngIf="searchQuery().trim() !== ''" (click)="searchQuery.set('')" style="position: absolute; right: 12px; background: transparent; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+    </div>
+  </div>
+
+  <!-- Search Results -->
+  <div *ngIf="searchQuery().trim() !== ''">
+    <div class="section-header-row">
+      <h3 class="section-label">Resultados ({{ getFilteredProjects().length }})</h3>
+    </div>
+    <div class="projects-grid" *ngIf="getFilteredProjects().length > 0">
+      <div class="grid-item" *ngFor="let proj of getFilteredProjects()">
+        <app-project-card [projeto]="proj"></app-project-card>
+      </div>
+    </div>
+    <div class="empty-state" *ngIf="getFilteredProjects().length === 0">
+      <p>Nenhum projeto encontrado para "{{ searchQuery() }}".</p>
+    </div>
+  </div>
+
+  <!-- Default Carousels + Grid (no search active) -->
+  <div *ngIf="searchQuery().trim() === ''">
+
+    <!-- 1. Meus Projetos (only if logged in and participating) -->
+    <section class="carousel-section" *ngIf="myProjects().length > 0">
+      <div class="section-header">
+        <span class="section-tag journey">Sua Jornada</span>
+        <h2 class="section-title">Projetos que você Participa</h2>
+      </div>
+      <app-carousel [items]="myProjects()"></app-carousel>
+    </section>
+
+    <!-- 2. Em Destaque -->
+    <section class="carousel-section">
+      <div class="section-header">
+        <span class="section-tag hot">Em Destaque</span>
+        <h2 class="section-title">Projetos Mais Quentes</h2>
+        <p class="section-subtitle">Iniciativas com maior engajamento e relevância acadêmica.</p>
+      </div>
+      <app-carousel [items]="hotProjects()"></app-carousel>
+    </section>
+
+    <!-- 3. Recém Lançados -->
+    <section class="carousel-section">
+      <div class="section-header">
+        <span class="section-tag recent">Novidades</span>
+        <h2 class="section-title">Recém Lançados</h2>
+        <p class="section-subtitle">Novidades acadêmicas que acabaram de surgir.</p>
+      </div>
+      <app-carousel [items]="recentProjects()"></app-carousel>
+    </section>
+
+    <!-- 4. Colabs -->
+    <section class="carousel-section">
+      <div class="section-header">
+        <span class="section-tag colab">Oportunidades</span>
+        <h2 class="section-title">Colaborações em Aberto (Colabs)</h2>
+        <p class="section-subtitle">Grupos recrutando ativamente novos talentos.</p>
+      </div>
+      <app-carousel [items]="colabs()"></app-carousel>
+    </section>
+
+    <!-- 5. Explorar por Tag -->
+    <section class="carousel-section tags-carousel-section">
+      <div class="section-header">
+        <span class="section-tag categories">Interesses</span>
+        <h2 class="section-title">Explorar por Interesse</h2>
+      </div>
+      <div class="tags-chips-row">
+        <button
+          class="tag-chip"
+          *ngFor="let tag of tagsList"
+          [class.active]="selectedTag() === tag"
+          (click)="loadTagProjects(tag)"
+        >
+          #{{ tag }}
+        </button>
+      </div>
+      <app-carousel [items]="tagProjects()"></app-carousel>
+    </section>
+
+    <!-- Divider -->
+    <div class="all-projects-divider">
+      <span>Todos os Projetos Ativos</span>
+    </div>
+
+    <!-- All Active Projects Grid -->
+    <div class="loading-spinner" *ngIf="isLoading()">
+      Carregando projetos...
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading() && activeProjects().length === 0">
+      <p>Nenhum projeto ativo encontrado no momento.</p>
+      <button class="btn-create-project" (click)="openCreateModal()" style="margin-bottom: 20px;">Criar o primeiro projeto</button>
+      <div class="academic-importance-box text-center" style="max-width: 600px; margin: 0 auto; text-align: left;">
+        <span class="material-symbols-rounded importance-icon">school</span>
+        <div class="importance-info-text">
+          <strong>A importância de projetos e comunidades:</strong>
+          <p>Participar ativamente de projetos de inovação e comunidades acadêmicas é um pilar vital para a sua formação. Eles conectam o conhecimento teórico à prática, desenvolvem competências de liderança e comunicação, e criam uma rede valiosa de contatos para o seu futuro.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="projects-grid" *ngIf="!isLoading() && activeProjects().length > 0">
+      <div class="grid-item" *ngFor="let proj of activeProjects()">
+        <app-project-card [projeto]="proj"></app-project-card>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Create Project Modal -->
+<app-new-project-modal
+  *ngIf="showCreateModal()"
+  (closed)="closeCreateModal()"
+  (saved)="onProjectSaved()"
+></app-new-project-modal>

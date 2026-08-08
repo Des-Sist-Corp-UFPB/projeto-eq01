@@ -1,0 +1,92 @@
+<div class="auth-wrapper animate-fade-in">
+      <div class="auth-card">
+        <header class="auth-header">
+          <div class="auth-logo-wrapper">
+            <svg class="nexus-logo-svg auth-logo animate-logo-spin" viewBox="0 0 1024 1024">
+              <circle cx="512" cy="512" r="120" fill="#3B6EF4" class="logo-core"/>
+              <circle cx="512" cy="200" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="512" cy="824" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="200" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="824" cy="512" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="300" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="724" cy="300" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="300" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+              <circle cx="724" cy="724" r="60" fill="currentColor" class="logo-dot"/>
+            </svg>
+          </div>
+          <h2>Acesse sua conta</h2>
+          <p>Conecte-se ao ecossistema acadêmico Nexus</p>
+        </header>
+
+        <div class="alert alert-danger" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="form-group">
+            <label for="email">E-mail Acadêmico</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="email" 
+              required 
+              email
+              placeholder="Ex: rodrigo@nexushub.com" 
+              #emailInput="ngModel"
+            />
+            <span class="error-msg" *ngIf="emailInput.invalid && emailInput.touched">Insira um e-mail válido.</span>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label for="senha">Senha</label>
+              <a routerLink="/esqueci-senha" class="forgot-link">Esqueceu a senha?</a>
+            </div>
+            
+            <!-- Password Input with Visibility Toggle -->
+            <div class="password-input-wrapper">
+              <input 
+                [type]="showPassword() ? 'text' : 'password'" 
+                id="senha" 
+                name="senha" 
+                [(ngModel)]="senha" 
+                required 
+                minlength="6"
+                placeholder="Digite sua senha de acesso" 
+                #senhaInput="ngModel"
+              />
+              <button type="button" class="toggle-password-btn" (click)="showPassword.set(!showPassword())" aria-label="Visualizar senha">
+                <!-- Eye icon when hidden, eye-slash when visible -->
+                <svg *ngIf="!showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="eye-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg *ngIf="showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="eye-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              </button>
+            </div>
+            
+            <span class="error-msg" *ngIf="senhaInput.invalid && senhaInput.touched">A senha deve ter pelo menos 6 caracteres.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="loginForm.invalid || isLoading()">
+            {{ isLoading() ? 'Carregando...' : 'Entrar na Plataforma' }}
+          </button>
+        </form>
+
+        <div class="auth-divider">
+          <span>ou continue com</span>
+        </div>
+
+        <div class="social-login-container">
+          <div id="google-btn"></div>
+        </div>
+
+        <footer class="auth-footer">
+          <p>Não tem cadastro? <a routerLink="/cadastro">Crie sua conta agora</a></p>
+        </footer>
+      </div>
+    </div>
+

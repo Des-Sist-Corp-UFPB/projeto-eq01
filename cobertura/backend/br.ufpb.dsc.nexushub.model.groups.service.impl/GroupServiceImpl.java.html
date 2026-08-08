@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NEXUS HUB Model</a> &gt; <a href="index.source.html" class="el_package">br.ufpb.dsc.nexushub.model.groups.service.impl</a> &gt; <span class="el_source">GroupServiceImpl.java</span></div><h1>GroupServiceImpl.java</h1><pre class="source lang-java linenums">package br.ufpb.dsc.nexushub.model.groups.service.impl;
+
+import br.ufpb.dsc.nexushub.model.groups.domain.Group;
+import br.ufpb.dsc.nexushub.model.groups.domain.GroupHumanMember;
+import br.ufpb.dsc.nexushub.model.dto.GrupoRequest;
+import br.ufpb.dsc.nexushub.model.groups.repository.GroupHumanMemberRepository;
+import br.ufpb.dsc.nexushub.model.groups.repository.GroupRepository;
+import br.ufpb.dsc.nexushub.model.groups.service.GroupService;
+import br.ufpb.dsc.nexushub.model.identity.domain.User;
+import br.ufpb.dsc.nexushub.model.identity.repository.UserRepository;
+import br.ufpb.dsc.nexushub.model.identity.service.IdentityService;
+import br.ufpb.dsc.nexushub.model.people.domain.Human;
+import br.ufpb.dsc.nexushub.model.people.repository.HumanRepository;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class GroupServiceImpl implements GroupService {
+
+    private final GroupRepository groupRepository;
+    private final HumanRepository humanRepository;
+    private final GroupHumanMemberRepository memberRepository;
+    private final UserRepository userRepository;
+    private final IdentityService identityService;
+
+    public GroupServiceImpl(
+            GroupRepository groupRepository,
+            HumanRepository humanRepository,
+            GroupHumanMemberRepository memberRepository,
+            UserRepository userRepository,
+            IdentityService identityService
+<span class="fc" id="L34">    ) {</span>
+<span class="fc" id="L35">        this.groupRepository = groupRepository;</span>
+<span class="fc" id="L36">        this.humanRepository = humanRepository;</span>
+<span class="fc" id="L37">        this.memberRepository = memberRepository;</span>
+<span class="fc" id="L38">        this.userRepository = userRepository;</span>
+<span class="fc" id="L39">        this.identityService = identityService;</span>
+<span class="fc" id="L40">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;Group&gt; listActiveGroups() {
+<span class="fc" id="L45">        return groupRepository.findAll().stream()</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                .filter(group -&gt; group.getRecordStatus() == 1)</span>
+<span class="fc" id="L47">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Group getGroup(UUID groupId) {
+<span class="fc" id="L53">        return groupRepository.findById(groupId)</span>
+<span class="fc" id="L54">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Grupo nao encontrado.&quot;));</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getResponsibleName(UUID groupId) {
+<span class="fc" id="L60">        Group group = getGroup(groupId);</span>
+<span class="fc" id="L61">        return memberRepository.findByGroup(group).stream()</span>
+<span class="fc" id="L62">                .filter(member -&gt; Boolean.TRUE.equals(member.getAdmin()))</span>
+<span class="fc" id="L63">                .findFirst()</span>
+<span class="fc" id="L64">                .map(member -&gt; member.getHuman().getName())</span>
+<span class="fc" id="L65">                .orElse(null);</span>
+    }
+
+    @Override
+    @Transactional
+    public Group createGroup(String name, String description, Integer type, UUID creatorHumanId, UUID updatedById) {
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        UUID updater = updatedById == null ? identityService.firstUser().getId() : updatedById;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        Group group = groupRepository.save(new Group(name, description, type == null ? 1 : type, &quot;#1e3a8a&quot;, null, updater));</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (creatorHumanId != null) {</span>
+<span class="nc" id="L74">            addHumanToGroup(group.getId(), creatorHumanId, true, updater);</span>
+        }
+<span class="fc" id="L76">        return group;</span>
+    }
+
+    @Override
+    @Transactional
+    public Group createGroup(GrupoRequest request) {
+<span class="fc" id="L82">        User creator = resolveCreator(request.criadorId());</span>
+<span class="fc" id="L83">        UUID updater = creator.getId();</span>
+<span class="fc" id="L84">        Group group = groupRepository.save(new Group(</span>
+<span class="fc" id="L85">                request.nome(),</span>
+<span class="fc" id="L86">                request.descricao(),</span>
+<span class="fc" id="L87">                parseGroupType(request.area()),</span>
+<span class="fc" id="L88">                parseGroupStatus(request.tipo()),</span>
+<span class="pc bpc" id="L89" title="2 of 4 branches missed.">                request.cor() == null || request.cor().isBlank() ? &quot;#1e3a8a&quot; : request.cor(),</span>
+<span class="fc" id="L90">                request.logo(),</span>
+                updater
+        ));
+<span class="fc" id="L93">        addHumanToGroup(group.getId(), creator.getHuman().getId(), true, updater);</span>
+<span class="fc" id="L94">        return group;</span>
+    }
+
+    @Override
+    @Transactional
+    public GroupHumanMember addHumanToGroup(UUID groupId, UUID humanId, boolean admin, UUID updatedById) {
+<span class="fc" id="L100">        Group group = groupRepository.findById(groupId)</span>
+<span class="fc" id="L101">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Grupo nao encontrado.&quot;));</span>
+<span class="fc" id="L102">        Human human = humanRepository.findById(humanId)</span>
+<span class="fc" id="L103">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Pessoa nao encontrada.&quot;));</span>
+<span class="fc" id="L104">        return memberRepository.findByGroupAndHuman(group, human)</span>
+<span class="fc" id="L105">                .orElseGet(() -&gt; memberRepository.save(new GroupHumanMember(group, human, admin, updatedById)));</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteGroup(UUID groupId) {
+<span class="fc" id="L111">        groupRepository.delete(getGroup(groupId));</span>
+<span class="fc" id="L112">    }</span>
+
+    private Integer parseType(String value, Integer fallback) {
+        try {
+<span class="nc bnc" id="L116" title="All 4 branches missed.">            return value == null || value.isBlank() ? fallback : Integer.parseInt(value);</span>
+<span class="nc" id="L117">        } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L118">            return fallback;</span>
+        }
+    }
+
+    private Integer parseGroupType(String value) {
+<span class="pc bpc" id="L123" title="2 of 4 branches missed.">        if (value == null || value.isBlank()) {</span>
+<span class="nc" id="L124">            return 1;</span>
+        }
+<span class="pc bpc" id="L126" title="2 of 3 branches missed.">        return switch (value.trim().toLowerCase()) {</span>
+<span class="fc" id="L127">            case &quot;comunidade&quot; -&gt; 2;</span>
+<span class="nc" id="L128">            case &quot;externo&quot; -&gt; 3;</span>
+<span class="nc" id="L129">            default -&gt; 1;</span>
+        };
+    }
+
+    private Integer parseGroupStatus(String value) {
+<span class="pc bpc" id="L134" title="2 of 4 branches missed.">        if (value == null || value.isBlank()) {</span>
+<span class="nc" id="L135">            return 1;</span>
+        }
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        return &quot;restrito&quot;.equalsIgnoreCase(value.trim()) ? 2 : 1;</span>
+    }
+
+    private User resolveCreator(UUID creatorId) {
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (creatorId == null) {</span>
+<span class="fc" id="L142">            throw new IllegalArgumentException(&quot;Criador do grupo e obrigatorio.&quot;);</span>
+        }
+<span class="fc" id="L144">        return userRepository.findById(creatorId)</span>
+<span class="pc" id="L145">                .or(() -&gt; userRepository.findAll().stream()</span>
+<span class="nc" id="L146">                        .filter(user -&gt; user.getHuman().getId().equals(creatorId))</span>
+<span class="nc" id="L147">                        .findFirst())</span>
+<span class="pc" id="L148">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Criador do grupo nao encontrado.&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,605 @@
+<div class="opportunities-container">
+  <!-- Header section with dynamic gradient background and titles -->
+  <div class="opportunities-hero">
+    <div class="hero-content animate-fade-in">
+      <span class="hero-tag">Aba Oportunidades</span>
+      <h1>Explore e publique vagas de <span>estágio, pesquisa e extensão</span></h1>
+      <p>Conecte-se com projetos, grupos e editais do campus em um feed dinâmico e inteligente.</p>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'explorar'" 
+      (click)="setTab('explorar')">
+      <span class="material-symbols-rounded">explore</span>
+      Explorar Vagas
+    </button>
+    <button 
+      *ngIf="isLoggedIn()" 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'dashboard'" 
+      (click)="setTab('dashboard')">
+      <span class="material-symbols-rounded">dashboard</span>
+      Painel do Criador
+    </button>
+  </div>
+
+  <!-- TAB CONTENT: EXPLORAR VAGAS -->
+  <div *ngIf="activeTab() === 'explorar'" class="tab-content explorar-tab animate-fade-in">
+    <!-- Filters Panel -->
+    <div class="filters-bar">
+      <div class="search-input-wrapper">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input 
+          type="text" 
+          placeholder="Pesquisar vagas por título, descrição..." 
+          [value]="filterSearch()"
+          (input)="filterSearch.set($any($event.target).value)" />
+      </div>
+
+      <div class="filters-selectors">
+        <select 
+          [value]="filterTag()" 
+          (change)="onFilterTagChange($event)">
+          <option value="Todos">Todas as Tags</option>
+          <option value="1">Edital</option>
+          <option value="2">Vaga Interna</option>
+          <option value="3">Vaga Externa</option>
+          <option value="4">Grupo</option>
+        </select>
+
+        <select 
+          [value]="filterPaid()" 
+          (change)="filterPaid.set($any($event.target).value)">
+          <option value="Todos">Todas as Remunerações</option>
+          <option value="Bolsa">Remunerada (Bolsa)</option>
+          <option value="Voluntaria">Voluntária</option>
+        </select>
+
+        <button 
+          *ngIf="isLoggedIn()" 
+          class="btn-create-opp" 
+          (click)="openCreateOpportunity()">
+          <span class="material-symbols-rounded">add_circle</span>
+          Nova Oportunidade
+        </button>
+      </div>
+    </div>
+
+    <!-- Feed Grid -->
+    <div *ngIf="loadingOpportunities()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Buscando vagas no hub...</p>
+    </div>
+
+    <div *ngIf="!loadingOpportunities() && filteredOpportunities().length === 0" class="empty-state">
+      <span class="material-symbols-rounded empty-icon">work_off</span>
+      <h3>Nenhuma vaga encontrada</h3>
+      <p>Tente ajustar os termos de busca ou filtros.</p>
+    </div>
+
+    <div *ngIf="!loadingOpportunities() && filteredOpportunities().length > 0" class="opportunities-grid">
+      <div 
+        *ngFor="let opp of filteredOpportunities()" 
+        class="opp-card"
+        [class.professor-post]="opp.tipoUsuarioPublicador === 'Professor'">
+        
+        <div class="card-badge-row">
+          <span class="tag-badge" [class]="'tag-' + opp.tagType">
+            {{ getTagLabel(opp.tagType || 1) }}
+          </span>
+          <span class="remuneration-badge" [class.paid]="opp.pago">
+            {{ opp.pago ? '💰 Remunerada' : '🤝 Voluntária' }}
+          </span>
+        </div>
+
+        <h2 class="card-title">{{ opp.titulo }}</h2>
+        
+        <div class="publisher-row">
+          <span class="material-symbols-rounded">person</span>
+          <span class="publisher-name">{{ opp.nomePublicador }}</span>
+          <span class="publisher-role" [class.prof-badge]="opp.tipoUsuarioPublicador === 'Professor'">
+            {{ opp.tipoUsuarioPublicador }}
+          </span>
+        </div>
+
+        <p class="card-description">{{ opp.descricao | slice:0:180 }}{{ opp.descricao.length > 180 ? '...' : '' }}</p>
+
+        <div class="meta-row">
+          <div *ngIf="opp.nomeProjeto" class="meta-item">
+            <span class="material-symbols-rounded">folder_open</span>
+            <span>{{ opp.nomeProjeto }}</span>
+          </div>
+          <div *ngIf="opp.nomeGrupo" class="meta-item">
+            <span class="material-symbols-rounded">groups</span>
+            <span>{{ opp.nomeGrupo }}</span>
+          </div>
+          <div *ngIf="opp.prazo" class="meta-item date-item">
+            <span class="material-symbols-rounded">calendar_today</span>
+            <span>Prazo: {{ opp.prazo | date:'dd/MM/yyyy':'UTC' }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-secondary flex-grow-1" (click)="openDetailsModal(opp)">
+            Ver Detalhes
+          </button>
+          
+          <button 
+            *ngIf="isLoggedIn() && opp.idPublicador !== currentUser()?.id"
+            class="btn-report-card" 
+            (click)="openReportModal(opp.id)" 
+            title="Denunciar esta vaga">
+            <span class="material-symbols-rounded">campaign</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT: PAINEL DO CRIADOR (DASHBOARD) -->
+  <div *ngIf="activeTab() === 'dashboard'" class="tab-content dashboard-tab animate-fade-in">
+    <!-- Stat row -->
+    <div class="stat-cards-row">
+      <div class="stat-card">
+        <span class="material-symbols-rounded stat-icon">work</span>
+        <div class="stat-info">
+          <h3>Vagas Publicadas</h3>
+          <p>{{ totalPositions() }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="material-symbols-rounded stat-icon">group</span>
+        <div class="stat-info">
+          <h3>Total Candidatos</h3>
+          <p>{{ totalApplications() }}</p>
+        </div>
+      </div>
+      
+      <button class="btn-create-opp dashboard-create-btn" (click)="openCreateOpportunity()">
+        <span class="material-symbols-rounded">add_circle</span>
+        Nova Oportunidade
+      </button>
+    </div>
+
+    <!-- Dashboard loading -->
+    <div *ngIf="loadingDashboard()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Carregando dados das suas publicações...</p>
+    </div>
+
+    <!-- Dashboard empty -->
+    <div *ngIf="!loadingDashboard() && dashboardData().length === 0" class="empty-state">
+      <span class="material-symbols-rounded empty-icon">assignment_turned_in</span>
+      <h3>Nenhuma vaga criada por você</h3>
+      <p>Crie sua primeira vaga e acompanhe os candidatos inscritos aqui!</p>
+    </div>
+
+    <!-- Dashboard List -->
+    <div *ngIf="!loadingDashboard() && dashboardData().length > 0" class="dashboard-posts-list">
+      <div *ngFor="let item of dashboardData()" class="dashboard-post-card">
+        <div class="post-card-header">
+          <div>
+            <h2>{{ item.titulo }}</h2>
+            <span class="cand-count">{{ item.totalCandidatos }} candidato(s) inscrito(s)</span>
+          </div>
+          <div class="post-card-header-actions">
+            <button class="btn-dashboard-action edit" (click)="openEditOpportunity(item.idOportunidade)" title="Editar Vaga">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            <button class="btn-dashboard-action delete" (click)="deleteOpportunity(item.idOportunidade)" title="Fechar Vaga">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Candidate Applications Table -->
+        <div *ngIf="item.candidaturas.length === 0" class="no-candidacy-alert">
+          Nenhum candidato se inscreveu nesta vaga até o momento.
+        </div>
+
+        <div *ngIf="item.candidaturas.length > 0" class="candidacies-table-wrapper">
+          <table class="candidacies-table">
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>Mensagem / Apresentação</th>
+                <th>Telefone</th>
+                <th>Data Inscrição</th>
+                <th>Respostas do Formulário</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cand of item.candidaturas">
+                <td class="cand-identity-cell">
+                  <strong>{{ cand.nomeCandidato }}</strong>
+                  <span>{{ cand.emailCandidato }}</span>
+                </td>
+                <td>{{ cand.mensagem || 'Nenhuma mensagem adicional fornecida.' }}</td>
+                <td>
+                  <a *ngIf="cand.telefone" href="https://wa.me/{{ cand.telefone.replace('\D','') }}" target="_blank" class="phone-link">
+                    {{ cand.telefone }} 🟢
+                  </a>
+                  <span *ngIf="!cand.telefone">-</span>
+                </td>
+                <td>{{ cand.dataEnvio | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <div *ngIf="cand.respostas.length === 0" class="no-resps">-</div>
+                  <div *ngIf="cand.respostas.length > 0" class="answers-summary-box">
+                    <div *ngFor="let ans of cand.respostas" class="answer-item-pair">
+                      <strong class="q-label">{{ ans.labelPergunta }}:</strong>
+                      <span class="a-val">{{ ans.respostaText }}</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHES E CANDIDATURA -->
+  <div *ngIf="showDetailsModal() && selectedOpp()" class="modal-backdrop">
+    <div class="modal-card modal-large animate-slide-up">
+      <div class="modal-header">
+        <span class="modal-subtitle">Detalhes da Oportunidade</span>
+        <button class="btn-close-modal" (click)="closeDetailsModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-opp-headline">
+          <div class="badge-row">
+            <span class="tag-badge" [class]="'tag-' + selectedOpp()?.tagType">
+              {{ getTagLabel(selectedOpp()?.tagType || 1) }}
+            </span>
+            <span class="remuneration-badge" [class.paid]="selectedOpp()?.pago">
+              {{ selectedOpp()?.pago ? '💰 Remunerada (' + selectedOpp()?.remuneracao + ')' : '🤝 Voluntária' }}
+            </span>
+          </div>
+          <h1>{{ selectedOpp()?.titulo }}</h1>
+          <p class="modal-publisher-info">
+            Publicado por <strong>{{ selectedOpp()?.nomePublicador }}</strong> ({{ selectedOpp()?.tipoUsuarioPublicador }}) 
+            <span *ngIf="selectedOpp()?.prazo">| Inscrições até {{ selectedOpp()?.prazo | date:'dd/MM/yyyy':'UTC' }}</span>
+          </p>
+        </div>
+
+        <div class="modal-opp-body">
+          <h3>Descrição da Vaga</h3>
+          <p class="opp-desc-text">{{ selectedOpp()?.descricao }}</p>
+
+          <div class="relations-box">
+            <div *ngIf="selectedOpp()?.nomeProjeto" class="rel-item">
+              <span class="material-symbols-rounded">folder_open</span>
+              <div>
+                <strong>Projeto Relacionado</strong>
+                <span>{{ selectedOpp()?.nomeProjeto }}</span>
+              </div>
+            </div>
+            <div *ngIf="selectedOpp()?.nomeGrupo" class="rel-item">
+              <span class="material-symbols-rounded">groups</span>
+              <div>
+                <strong>Grupo Relacionado</strong>
+                <span>{{ selectedOpp()?.nomeGrupo }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Application Form section -->
+          <div *ngIf="isLoggedIn() && selectedOpp()?.idPublicador !== currentUser()?.id" class="candidacy-form-section">
+            <hr class="form-divider" />
+            <h2>Candidatar-se à Vaga</h2>
+
+            <div class="input-group">
+              <label for="apply-msg">Mensagem de Apresentação (Opcional)</label>
+              <textarea 
+                id="apply-msg" 
+                rows="3" 
+                placeholder="Escreva uma breve mensagem dizendo por que você se interessa pela vaga..."
+                [(ngModel)]="applyMessage"></textarea>
+            </div>
+
+            <!-- Custom Form Inputs -->
+            <div *ngIf="selectedOpp()?.usaFormulario && selectedOpp()?.formulario" class="custom-questions-rendered">
+              <div class="input-group">
+                <label for="apply-phone">Telefone / WhatsApp (Obrigatório) *</label>
+                <input 
+                  type="text" 
+                  id="apply-phone" 
+                  placeholder="(83) 99999-9999" 
+                  [(ngModel)]="applyPhone" />
+              </div>
+
+              <div *ngFor="let p of selectedOpp()?.formulario?.perguntas" class="input-group question-input-group">
+                <label>
+                  {{ p.label }} 
+                  <span *ngIf="p.obrigatoria" class="req-star">*</span>
+                </label>
+
+                <!-- 1 = SHORT ANSWER -->
+                <input 
+                  *ngIf="p.tipo === 1" 
+                  type="text" 
+                  [placeholder]="p.obrigatoria ? 'Resposta obrigatória' : 'Sua resposta'"
+                  [value]="applyAnswers()[p.id || ''] || ''"
+                  (input)="setSingleAnswer(p.id || '', $any($event.target).value)" />
+
+                <!-- 2 = MULTIPLE CHOICE -->
+                <div *ngIf="p.tipo === 2" class="options-checkboxes">
+                  <div *ngFor="let opt of p.opcoes" class="checkbox-option">
+                    <input 
+                      type="checkbox" 
+                      [id]="opt.id"
+                      [checked]="isCheckboxSelected(p.id || '', opt.nome)"
+                      (change)="toggleCheckboxAnswer(p.id || '', opt.nome, $any($event.target).checked)" />
+                    <label [for]="opt.id">{{ opt.nome }}</label>
+                  </div>
+                </div>
+
+                <!-- 3 = SINGLE CHOICE -->
+                <div *ngIf="p.tipo === 3" class="options-radios">
+                  <div *ngFor="let opt of p.opcoes" class="radio-option">
+                    <input 
+                      type="radio" 
+                      [name]="p.id" 
+                      [id]="opt.id"
+                      [checked]="applyAnswers()[p.id || ''] === opt.nome"
+                      (change)="setSingleAnswer(p.id || '', opt.nome)" />
+                    <label [for]="opt.id">{{ opt.nome }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div *ngIf="!selectedOpp()?.usaFormulario" class="whatsapp-only-notice">
+              <p>Esta vaga aceita candidaturas diretas. Ao clicar abaixo, você será redirecionado para o WhatsApp do anunciante.</p>
+            </div>
+
+            <div class="candidacy-actions">
+              <button 
+                *ngIf="selectedOpp()?.usaFormulario"
+                class="btn btn-primary" 
+                [disabled]="applying()"
+                (click)="submitApplication()">
+                {{ applying() ? 'Enviando...' : 'Enviar Candidatura' }}
+              </button>
+              <button 
+                *ngIf="!selectedOpp()?.usaFormulario"
+                class="btn btn-primary btn-whatsapp" 
+                (click)="openApplyWhatsApp(selectedOpp()!)">
+                <span class="material-symbols-rounded">chat</span>
+                Entrar em Contato via WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA OPORTUNIDADE (Criação/Edição) -->
+  <div *ngIf="showCreateModal()" class="modal-backdrop">
+    <div class="modal-card modal-large animate-slide-up">
+      <div class="modal-header">
+        <span class="modal-subtitle">{{ editingOppId() ? 'Editar Vaga' : 'Criar Nova Oportunidade' }}</span>
+        <button class="btn-close-modal" (click)="closeCreateModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body select-non-scrollable">
+        <div class="create-wizard-layout">
+          <!-- Form Section -->
+          <div class="wizard-details-column">
+            <h3>Informações Básicas</h3>
+            
+            <div class="input-group">
+              <label>Título da Vaga *</label>
+              <input type="text" [(ngModel)]="oppFormTitle" placeholder="Ex: Monitoria de Programação I, Desenvolvedor Frontend..." />
+            </div>
+
+            <div class="input-group">
+              <label>Descrição Completa *</label>
+              <textarea rows="4" [(ngModel)]="oppFormDescription" placeholder="Requisitos, atividades, carga horária e outras informações da vaga..."></textarea>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="input-group">
+                <label>Tipo de Vaga</label>
+                <select [(ngModel)]="oppFormType">
+                  <option [value]="1">Vaga de estágio</option>
+                  <option [value]="2">Emprego</option>
+                  <option [value]="3">Projetos pessoais</option>
+                  <option [value]="4">Projetos externos</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label>Tag de Destaque</label>
+                <select [(ngModel)]="oppFormTagType">
+                  <option [value]="1">Edital</option>
+                  <option [value]="2">Vaga Interna</option>
+                  <option [value]="3">Vaga Externa</option>
+                  <option [value]="4">Grupo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="input-group">
+                <label>Vínculo com Projeto (Opcional)</label>
+                <select [(ngModel)]="oppFormProjectId">
+                  <option value="">Nenhum</option>
+                  <option *ngFor="let p of projectsList()" [value]="p.id">{{ p.nome }}</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label>Vínculo com Grupo (Opcional)</label>
+                <select [(ngModel)]="oppFormGroupId">
+                  <option value="">Nenhum</option>
+                  <option *ngFor="let g of groupsList()" [value]="g.id">{{ g.nome }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="input-group">
+                <label>Remuneração</label>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox" id="oppFormPaid" [(ngModel)]="oppFormPaid" />
+                  <label for="oppFormPaid">Vaga Paga / Com Bolsa</label>
+                </div>
+              </div>
+
+              <div class="input-group" *ngIf="oppFormPaid">
+                <label>Remuneração / Bolsa *</label>
+                <input type="text" [(ngModel)]="oppFormRemuneration" placeholder="Ex: R$ 400,00 mensais" />
+              </div>
+            </div>
+
+            <div class="grid-2-col">
+              <div class="input-group">
+                <label>Data Limite (Opcional)</label>
+                <input type="text" [(ngModel)]="oppFormDeadlineInput" (input)="onOppFormDeadlineInput($event)" placeholder="DD/MM/AAAA" maxlength="10" pattern="\d{2}/\d{2}/\d{4}" />
+              </div>
+
+              <div class="input-group">
+                <label>Link Externo de Inscrição (Opcional)</label>
+                <input type="text" [(ngModel)]="oppFormApplyUrl" placeholder="Link do edital ou site externo" />
+              </div>
+            </div>
+
+            <hr class="form-divider" />
+            
+            <div class="input-group">
+              <label>Formulário de Inscrição</label>
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="oppFormUseForm" [(ngModel)]="oppFormUseForm" />
+                <label for="oppFormUseForm">Habilitar formulário de candidatura personalizado no Hub</label>
+              </div>
+            </div>
+
+            <!-- Case 1: No Form (Require Phone) -->
+            <div class="input-group" *ngIf="!oppFormUseForm">
+              <label>Telefone / WhatsApp de Contato *</label>
+              <input type="text" [(ngModel)]="oppFormContactPhone" placeholder="Ex: (83) 99999-9999" />
+              <span class="input-help">Os candidatos entrarão em contato direto com você via WhatsApp.</span>
+            </div>
+          </div>
+
+          <!-- Form Builder Section (Enabled when oppFormUseForm is True) -->
+          <div class="wizard-builder-column" *ngIf="oppFormUseForm">
+            <h3>Perguntas Personalizadas</h3>
+            <p class="builder-help">Crie um formulário dinâmico para os alunos responderem ao se candidatar.</p>
+
+            <!-- Add Question subform -->
+            <div class="subform-add-question">
+              <h4>Adicionar Pergunta</h4>
+              <div class="input-group">
+                <label>Enunciado da Pergunta *</label>
+                <input type="text" [(ngModel)]="newQuestionLabel" placeholder="Ex: Fale sobre sua experiência com Angular..." />
+              </div>
+
+              <div class="grid-2-col">
+                <div class="input-group">
+                  <label>Tipo de Resposta</label>
+                  <select [(ngModel)]="newQuestionType">
+                    <option [value]="1">Resposta Curta</option>
+                    <option [value]="2">Múltipla Escolha</option>
+                    <option [value]="3">Escolha Única</option>
+                  </select>
+                </div>
+
+                <div class="input-group inline-checkbox-group">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="newQuestionReq" [(ngModel)]="newQuestionRequired" />
+                    <label for="newQuestionReq">Obrigatória</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="input-group" *ngIf="newQuestionType === 2 || newQuestionType === 3">
+                <label>Opções de Escolha (Separadas por ponto e vírgula ';') *</label>
+                <input type="text" [(ngModel)]="newQuestionOptionsInput" placeholder="Ex: Iniciante; Intermediário; Avançado" />
+              </div>
+
+              <button class="btn btn-secondary btn-sm" (click)="addQuestion()">
+                Adicionar ao Formulário
+              </button>
+            </div>
+
+            <!-- Form Questions preview list -->
+            <div class="questions-preview-list">
+              <h4>Estrutura do Formulário</h4>
+              
+              <div *ngIf="oppFormQuestions().length === 0" class="empty-preview">
+                Nenhuma pergunta adicionada ao formulário ainda.
+              </div>
+
+              <div *ngFor="let q of oppFormQuestions(); let i = index" class="preview-question-card">
+                <div class="preview-question-header">
+                  <strong>#{{ i + 1 }}: {{ q.label }}</strong>
+                  <button class="btn-remove-q" (click)="removeQuestion(i)" title="Remover pergunta">
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </div>
+                <div class="preview-question-meta">
+                  <span>Tipo: {{ q.tipo === 1 ? 'Resposta Curta' : q.tipo === 2 ? 'Múltipla Escolha' : 'Escolha Única' }}</span>
+                  <span class="preview-req-badge" [class.required]="q.obrigatoria">
+                    {{ q.obrigatoria ? 'Obrigatória' : 'Opcional' }}
+                  </span>
+                </div>
+                <div *ngIf="q.opcoes && q.opcoes.length > 0" class="preview-options-list">
+                  <span *ngFor="let opt of q.opcoes" class="preview-option-badge">{{ opt }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button class="btn btn-secondary" (click)="closeCreateModal()">Cancelar</button>
+          <button class="btn btn-primary" (click)="saveOpportunity()">Salvar Oportunidade</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DENUNCIAR VAGA -->
+  <div *ngIf="showReportModal()" class="modal-backdrop">
+    <div class="modal-card animate-slide-up">
+      <div class="modal-header">
+        <span class="modal-subtitle">Denunciar Oportunidade</span>
+        <button class="btn-close-modal" (click)="closeReportModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>Informe o motivo da denúncia. A coordenação irá revisar este ticket e tomar as providências adequadas.</p>
+        
+        <div class="input-group">
+          <label for="report-reason">Justificativa da Denúncia *</label>
+          <textarea 
+            id="report-reason" 
+            rows="4" 
+            placeholder="Descreva o motivo pelo qual você considera esta vaga imprópria, fraudulenta ou violadora de termos..."
+            [(ngModel)]="reportReason"></textarea>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button class="btn btn-secondary" (click)="closeReportModal()">Cancelar</button>
+          <button class="btn btn-danger" (click)="submitReport()">Enviar Denúncia</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" modified="2026-06-07T00:00:00.000Z" agent="Codex" version="26.0.0" type="device">
+  <diagram id="nexushub-target-db" name="NEXUS HUB - Target Normalized DB">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="NEXUS HUB - Target Normalized Database Model&#xa;UUID keys, normalized relationships, no loose names as relationships" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="420" y="20" width="900" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="usr_human" value="&lt;b&gt;usr_human&lt;/b&gt;&#xa;PK idhuman UUID&#xa;nmhuman VARCHAR(255) NOT NULL&#xa;dtemail VARCHAR(255)&#xa;dtbirth DATE&#xa;tpgender VARCHAR(20)&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="70" y="130" width="330" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_user" value="&lt;b&gt;sec_user&lt;/b&gt;&#xa;PK iduser UUID&#xa;FK idhuman UUID NOT NULL UQ&#xa;FK idrole UUID NOT NULL&#xa;dsemail VARCHAR(255) NOT NULL UQ&#xa;dspasshash VARCHAR(255) NOT NULL&#xa;stemail INT NOT NULL&#xa;dhlastaccess DATETIME&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="510" y="110" width="360" height="310" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_role" value="&lt;b&gt;sec_role&lt;/b&gt;&#xa;PK idrole UUID&#xa;nmrole VARCHAR(80) NOT NULL UQ&#xa;dsrole VARCHAR(255)&#xa;tprole INT NOT NULL&#xa;strecord INT NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="990" y="130" width="310" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="usr_interest" value="&lt;b&gt;usr_interest&lt;/b&gt;&#xa;PK idinterest UUID&#xa;nminterest VARCHAR(120) NOT NULL UQ&#xa;dsinterest VARCHAR(255)&#xa;strecord INT NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="70" y="450" width="330" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="usr_humint" value="&lt;b&gt;usr_humint&lt;/b&gt;&#xa;PK idhumint UUID&#xa;FK idhuman UUID NOT NULL&#xa;FK idinterest UUID NOT NULL&#xa;strecord INT NOT NULL&#xa;UQ idhuman + idinterest" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="510" y="450" width="330" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="grp_group" value="&lt;b&gt;grp_group&lt;/b&gt;&#xa;PK idgroup UUID&#xa;nmgroup VARCHAR(255) NOT NULL&#xa;dsgroup TEXT NOT NULL&#xa;tpgroup INT NOT NULL&#xa;stgroup INT NOT NULL&#xa;cdcolor VARCHAR(20)&#xa;urllogo VARCHAR(500)&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="70" y="720" width="330" height="290" as="geometry" />
+        </mxCell>
+
+        <mxCell id="grp_hummember" value="&lt;b&gt;grp_hummember&lt;/b&gt;&#xa;PK idgrphummember UUID&#xa;FK idgroup UUID NOT NULL&#xa;FK idhuman UUID NOT NULL&#xa;fladmin BOOLEAN NOT NULL&#xa;stmember INT NOT NULL&#xa;dtjoined DATE NOT NULL&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP&#xa;UQ idgroup + idhuman" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="510" y="720" width="350" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prj_project" value="&lt;b&gt;prj_project&lt;/b&gt;&#xa;PK idproject UUID&#xa;FK idgroup UUID&#xa;FK idowner UUID NOT NULL&#xa;nmproject VARCHAR(255) NOT NULL&#xa;dsresume VARCHAR(1000) NOT NULL&#xa;dsgoals TEXT&#xa;tpproject INT NOT NULL&#xa;stproject INT NOT NULL&#xa;stvisibility INT NOT NULL&#xa;urlcover VARCHAR(500)&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="980" y="430" width="360" height="340" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prj_hummember" value="&lt;b&gt;prj_hummember&lt;/b&gt;&#xa;PK idprjhummember UUID&#xa;FK idproject UUID NOT NULL&#xa;FK idhuman UUID NOT NULL&#xa;tpprjrole INT NOT NULL&#xa;stmember INT NOT NULL&#xa;dtjoined DATE NOT NULL&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP&#xa;UQ idproject + idhuman" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="1440" y="430" width="340" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prj_request" value="&lt;b&gt;prj_request&lt;/b&gt;&#xa;PK idrequest UUID&#xa;FK idproject UUID NOT NULL&#xa;FK idhuman UUID NOT NULL&#xa;FK idevaluator UUID&#xa;dsmotive VARCHAR(1000) NOT NULL&#xa;strequest INT NOT NULL&#xa;tsrequested TIMESTAMP NOT NULL&#xa;tsevaluated TIMESTAMP&#xa;UQ idproject + idhuman + strequest(pending)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="1440" y="700" width="340" height="250" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prj_tag" value="&lt;b&gt;prj_tag&lt;/b&gt;&#xa;PK idtag UUID&#xa;nmtag VARCHAR(80) NOT NULL UQ&#xa;strecord INT NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="980" y="820" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prj_prjtag" value="&lt;b&gt;prj_prjtag&lt;/b&gt;&#xa;PK idprjtag UUID&#xa;FK idproject UUID NOT NULL&#xa;FK idtag UUID NOT NULL&#xa;UQ idproject + idtag" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="980" y="980" width="300" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="opp_opp" value="&lt;b&gt;opp_opp&lt;/b&gt;&#xa;PK idopp UUID&#xa;FK idgroup UUID&#xa;FK idproject UUID&#xa;FK idpublisher UUID NOT NULL&#xa;nmopp VARCHAR(255) NOT NULL&#xa;dsopp TEXT NOT NULL&#xa;tpopp INT NOT NULL&#xa;stopp INT NOT NULL&#xa;dtdeadline DATE&#xa;urlapply VARCHAR(500)&#xa;strecord INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="70" y="1010" width="350" height="320" as="geometry" />
+        </mxCell>
+
+        <mxCell id="opp_apply" value="&lt;b&gt;opp_apply&lt;/b&gt;&#xa;PK idapply UUID&#xa;FK idopp UUID NOT NULL&#xa;FK idhuman UUID NOT NULL&#xa;stapply INT NOT NULL&#xa;FK idupdatedby UUID NOT NULL&#xa;tsupdated TIMESTAMP&#xa;UQ idopp + idhuman" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="510" y="1030" width="330" height="250" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="&lt;b&gt;Principios corrigidos&lt;/b&gt;&#xa;- Toda relacao usa ID/FK, nunca nome solto&#xa;- Todas as PKs sao UUID&#xa;- Humano e a entidade base da pessoa&#xa;- Usuario e apenas credencial/acesso&#xa;- Tabela associativa indica as entidades relacionadas&#xa;- Auditoria enxuta: idupdatedby + tsupdated&#xa;- Para delete logico: mudar strecord e atualizar auditoria" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="1380" y="110" width="390" height="240" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_user_human" value="1:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#6c8ebf;fontSize=12" edge="1" parent="1" source="sec_user" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_user_role" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#6c8ebf;fontSize=12" edge="1" parent="1" source="sec_user" target="sec_role"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_humint_human" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#82b366;fontSize=12" edge="1" parent="1" source="usr_humint" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_humint_interest" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#82b366;fontSize=12" edge="1" parent="1" source="usr_humint" target="usr_interest"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grphummember_group" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d6b656;fontSize=12" edge="1" parent="1" source="grp_hummember" target="grp_group"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grphummember_human" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d6b656;fontSize=12" edge="1" parent="1" source="grp_hummember" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_project_group" value="N:1 optional" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_project" target="grp_group"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_project_owner" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_project" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_prjhummember_project" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_hummember" target="prj_project"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_prjhummember_human" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_hummember" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_request_project" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#b85450;fontSize=12" edge="1" parent="1" source="prj_request" target="prj_project"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_request_human" value="N:1 requester" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#b85450;fontSize=12" edge="1" parent="1" source="prj_request" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_request_eval" value="N:1 evaluator" style="endArrow=block;html=1;rounded=0;strokeWidth=2;dashed=1;strokeColor=#b85450;fontSize=12" edge="1" parent="1" source="prj_request" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_prjtag_project" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_prjtag" target="prj_project"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_prjtag_tag" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=12" edge="1" parent="1" source="prj_prjtag" target="prj_tag"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_opp_group" value="N:1 optional" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d79b00;fontSize=12" edge="1" parent="1" source="opp_opp" target="grp_group"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_opp_project" value="N:1 optional" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d79b00;fontSize=12" edge="1" parent="1" source="opp_opp" target="prj_project"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_opp_publisher" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d79b00;fontSize=12" edge="1" parent="1" source="opp_opp" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_apply_opp" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d79b00;fontSize=12" edge="1" parent="1" source="opp_apply" target="opp_opp"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_apply_human" value="N:1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d79b00;fontSize=12" edge="1" parent="1" source="opp_apply" target="usr_human"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

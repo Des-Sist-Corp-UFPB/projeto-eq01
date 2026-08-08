@@ -1,0 +1,24 @@
+<div class="carousel-container">
+      <button class="nav-button prev" (click)="scrollLeft()" *ngIf="showControls">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="arrow-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+
+      <div class="carousel-track" #track (scroll)="onScroll()">
+        <div class="carousel-item" *ngFor="let item of items">
+          <app-project-card [projeto]="item"></app-project-card>
+        </div>
+        
+        <div class="empty-state" *ngIf="items.length === 0">
+          <p>Nenhum projeto encontrado nesta seção.</p>
+        </div>
+      </div>
+
+      <button class="nav-button next" (click)="scrollRight()" *ngIf="showControls && !isAtEnd">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="arrow-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+    </div>
+
